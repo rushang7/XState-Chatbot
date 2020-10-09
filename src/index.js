@@ -154,7 +154,7 @@ service.start();
 printMessageFromChatbot();
 
 
-var flowToExecute = "track";
+var flowToExecute = "file";
 
 if(flowToExecute == "file") {
   service.send("RECEIVE_MESSAGE", { message: "fileComplaint" });
