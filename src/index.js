@@ -12,10 +12,10 @@ const chatbotMachine = Machine({
   id: "chatbot",
   initial: "start",
   context: {
-    "dummy": "asd"
   },
   states: {
     start: {
+      // TODO should we keep this?
       always: [{ target: "menu" }]
     },
     menu : {
@@ -29,11 +29,11 @@ const chatbotMachine = Machine({
         question: {
           on: {
             RECEIVE_MESSAGE: [{
-              target: "evaluateAnswer"
+              target: "processUserRespone"
             }]
           }
         },
-        evaluateAnswer: {
+        processUserRespone: {
           onEntry: assign((context, event) => {
             console.log("onExit");
             console.log(event);
@@ -74,17 +74,17 @@ const chatbotMachine = Machine({
       id: "city",
       initial: "question",
       meta: {
-        message: "Please enter name of your city"
+        message: "Please enter name of the city"
       },
       states: {
         question: {
           on: {
             RECEIVE_MESSAGE: [{
-              target: "evaluateAnswer"
+              target: "processUserRespone"
             }]
           }
         },
-        evaluateAnswer: {
+        processUserRespone: {
           onEntry:  assign((context, event) => {
             // console.log("onEntry");
             context.message = {
@@ -140,9 +140,8 @@ const chatbotMachine = Machine({
   }
 });
 
-// Edit your service(s) here
-const service = interpret(chatbotMachine);
-service.onTransition((state) => {
+
+const service = interpret(chatbotMachine).onTransition((state) => {
   console.log(state.value);
 });
 
