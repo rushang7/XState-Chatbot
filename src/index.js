@@ -31,18 +31,19 @@ const chatbotMachine = Machine({
             RECEIVE_MESSAGE: [{
               target: "evaluateAnswer"
             }]
-          }    
+          }
         },
         evaluateAnswer: {
-          onEntry: (context, event) => {
-            // console.log("onEntry");
+          onEntry: assign((context, event) => {
+            console.log("onExit");
+            console.log(event);
             context.message = {
               isValid: true,
               messageContent: event.message
             }
-          },
+          }),
           on: {
-            TRAVERSE : [
+            '' : [
               {
                 target: "question",
                 cond: (context, event) => {
@@ -84,15 +85,15 @@ const chatbotMachine = Machine({
           }
         },
         evaluateAnswer: {
-          onEntry: (context, event) => {
+          onEntry:  assign((context, event) => {
             // console.log("onEntry");
             context.message = {
               isValid: true,
               messageContent: event.message
             }
-          },
+          }),
           on : {
-            TRAVERSE : [
+            '' : [
               {
                 target: "question",
                 cond: (context, event) => {
@@ -140,7 +141,8 @@ const chatbotMachine = Machine({
 });
 
 // Edit your service(s) here
-const service = interpret(chatbotMachine).onTransition((state) => {
+const service = interpret(chatbotMachine);
+service.onTransition((state) => {
   console.log(state.value);
 });
 
@@ -158,17 +160,14 @@ var flowToExecute = "file";
 
 if(flowToExecute == "file") {
   service.send("RECEIVE_MESSAGE", { message: "fileComplaint" });
-  service.send("TRAVERSE");
   printMessageFromChatbot();
 
   service.send("RECEIVE_MESSAGE", { message: "Bangalore" });
-  service.send("TRAVERSE");
   printMessageFromChatbot();
   console.log(service.state.context.messageParams);
 
 } else {
   service.send("RECEIVE_MESSAGE", { message: "trackComplaint" });
-  service.send("TRAVERSE");
   printMessageFromChatbot();
   console.log(service.state.context.messageParams);
 }
