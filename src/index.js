@@ -10,23 +10,19 @@ document.getElementById("app").innerHTML = `
 
 const chatbotMachine = Machine({
   id: "chatbot",
-  initial: "start",
+  initial: "menu",
   context: {
   },
   states: {
-    start: {
-      // TODO should we keep this?
-      always: [{ target: "menu" }]
-    },
     menu : {
       id: "menu",
       initial: "question",
-      meta: {
-        message:
-          "Hi! \n What would you like to do?\n1. File Complaint\n2. Track Complaint"
-      },
       states: {
         question: {
+          onEntry: assign( (context, event) => {
+            let message = "Hi! \n What would you like to do?\n1. File Complaint\n2. Track Complaint";
+            console.log(message);
+          }),
           on: {
             RECEIVE_MESSAGE: [{
               target: "processUserRespone"
@@ -35,8 +31,7 @@ const chatbotMachine = Machine({
         },
         processUserRespone: {
           onEntry: assign((context, event) => {
-            console.log("onExit");
-            console.log(event);
+            // console.log(event);
             context.message = {
               isValid: true,
               messageContent: event.message
@@ -73,11 +68,12 @@ const chatbotMachine = Machine({
     city: {
       id: "city",
       initial: "question",
-      meta: {
-        message: "Please enter name of the city"
-      },
       states: {
         question: {
+          onEntry: assign( (context, event) => {
+            let message = "Please enter name of the city";
+            console.log(message);
+          }),
           on: {
             RECEIVE_MESSAGE: [{
               target: "processUserRespone"
@@ -112,61 +108,43 @@ const chatbotMachine = Machine({
     trackComplaint: {
       id: "trackComplaint",
       type: "final",
-      meta: {
-        message: "Here are your recent complaints {{details}}"
-      },
       onEntry: (context, event) => {
         //make api call
-        console.log("Make api call to PGR Service");
-        context.messageParams = {
-          details: "Complaint Details: No. - 123, ..."
-        }
+        console.log("Making an api call to PGR Service");
+        let message = "Here are your recent complaints {{details}}";
+        let details = "No. - 123, ...";
+        message = message.replace("{{details}}", details);
+        console.log(message);
       }
     },
     filedSuccessfully: {
       type: "final",
       id: "filedSuccessfully",
-      meta: {
-        message: "Complaint has been filed successfully {{number}}"
-      },
       onEntry: (context, event) => {
         //make api call
-        console.log("Make api call to PGR Service");
-        context.messageParams = {
-          number: "123"
-        }
+        console.log("Making api call to PGR Service");
+        let message = "Complaint has been filed successfully {{number}}";
+        let number = "123";
+        message = message.replace("{{number}}", number);
+        console.log(message);
       }
     }
   }
 });
 
 
-const service = interpret(chatbotMachine).onTransition((state) => {
-  console.log(state.value);
-});
-
-function printMessageFromChatbot() {
-  let nodeName = service.state.toStrings()[0];
-  let question = service.state.meta[nodeName].message;
-  console.log(question);
-}
+const service = interpret(chatbotMachine);
+// service.onTransition((state) => {
+//   console.log(state.value);
+// });
 
 service.start();
-printMessageFromChatbot();
-
 
 var flowToExecute = "file";
 
 if(flowToExecute == "file") {
   service.send("RECEIVE_MESSAGE", { message: "fileComplaint" });
-  printMessageFromChatbot();
-
   service.send("RECEIVE_MESSAGE", { message: "Bangalore" });
-  printMessageFromChatbot();
-  console.log(service.state.context.messageParams);
-
 } else {
   service.send("RECEIVE_MESSAGE", { message: "trackComplaint" });
-  printMessageFromChatbot();
-  console.log(service.state.context.messageParams);
 }
