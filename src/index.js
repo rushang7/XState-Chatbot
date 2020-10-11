@@ -37,31 +37,29 @@ const chatbotMachine = Machine({
               messageContent: event.message
             }
           }),
-          on: {
-            '' : [
-              {
-                target: "question",
-                cond: (context, event) => {
-                  // console.log(context);
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target: "#city",
-                cond: (context, event) => {
-                  // console.log(context);
-                  return context.message.messageContent == "fileComplaint";
-                }
-              },
-              {
-                target: "#trackComplaint",
-                cond: (context, event) => { 
-                  // console.log(context.lastAnswer); 
-                  return  context.message.messageContent == "trackComplaint"; 
-                }
+          always : [
+            {
+              target: "question",
+              cond: (context, event) => {
+                // console.log(context);
+                return ! context.message.isValid;
               }
-            ]
-          }
+            },
+            {
+              target: "#city",
+              cond: (context, event) => {
+                // console.log(context);
+                return context.message.messageContent == "fileComplaint";
+              }
+            },
+            {
+              target: "#trackComplaint",
+              cond: (context, event) => { 
+                // console.log(context.lastAnswer); 
+                return  context.message.messageContent == "trackComplaint"; 
+              }
+            }
+          ]
         } 
       }
     },
@@ -88,55 +86,53 @@ const chatbotMachine = Machine({
               messageContent: event.message
             }
           }),
-          on : {
-            '' : [
-              {
-                target: "question",
-                cond: (context, event) => {
-                  // console.log(context);
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target: "#filedSuccessfully"
+          always : [
+            {
+              target: "question",
+              cond: (context, event) => {
+                // console.log(context);
+                return ! context.message.isValid;
               }
-            ]
-          }
+            },
+            {
+              target: "#filedSuccessfully"
+            }
+          ]
         }
       }
     },
     trackComplaint: {
       id: "trackComplaint",
       type: "final",
-      onEntry: (context, event) => {
+      onEntry: assign( (context, event) => {
         //make api call
         console.log("Making an api call to PGR Service");
         let message = "Here are your recent complaints {{details}}";
         let details = "No. - 123, ...";
         message = message.replace("{{details}}", details);
         console.log(message);
-      }
+      })
     },
     filedSuccessfully: {
       type: "final",
       id: "filedSuccessfully",
-      onEntry: (context, event) => {
+      onEntry: assign((context, event) => {
         //make api call
         console.log("Making api call to PGR Service");
         let message = "Complaint has been filed successfully {{number}}";
         let number = "123";
         message = message.replace("{{number}}", number);
         console.log(message);
-      }
+      })
     }
   }
 });
 
 
 const service = interpret(chatbotMachine);
-// service.onTransition((state) => {
-//   console.log(state.value);
-// });
+service.onTransition((state) => {
+  console.log(state.value);
+});
 
 service.start();
 
