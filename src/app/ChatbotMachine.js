@@ -1,4 +1,5 @@
 import { Machine, assign } from "xstate";
+import fetchCities from './egovutils'
 
 const chatbotMachine = Machine({
   id: "chatbot",
@@ -68,8 +69,14 @@ const chatbotMachine = Machine({
       states: {
         question: {
           onEntry: assign( (context, event) => {
-            let message = "Please enter name of the city";
-            context.chatInterface.sendMessageToUser(message);
+            fetchCities().then((cityNames) => {
+              var message = "Please enter name of the city";
+              for(var i = 0; i < cityNames.length; i++) {
+                message += "\n" + (i+1) + ". " + cityNames[i];
+              }
+              context.validValues = cityNames;
+              context.chatInterface.sendMessageToUser(message);
+            });
           }),
           on: {
             RECEIVE_MESSAGE: [{
