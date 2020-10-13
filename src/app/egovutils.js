@@ -1,5 +1,5 @@
 async function fetchCities(){
-    var url = 'https://egov-micro-dev.egovernments.org/egov-mdms-service/v1/_search';
+    var url = '/egov-mdms-service/v1/_search';
 
     var request = {
       "RequestInfo": {},
