@@ -17,11 +17,14 @@ class App extends React.Component {
             messages: [
             ]
         };
-        this.chatbotService = interpret(chatbotMachine);
+        this.chatbotService = interpret(chatbotMachine.withContext ({  
+            chatInterface: this
+        }));
         this.chatbotService.start();
     }
 
-    sendMessageToUser(message) {
+    sendMessageToUser = (message) => {
+        debugger
         let botMessage = {
             author: {
                 id: 0
@@ -44,7 +47,7 @@ class App extends React.Component {
             ]
         }));
         let message = event.message.text;
-        this.chatbotService.send("USER_MESSAGE", { message: message, chatInterface: this });
+        this.chatbotService.send("USER_MESSAGE", { message: message });
     }
 
     // addNewMessage = (event) => {

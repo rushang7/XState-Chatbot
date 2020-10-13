@@ -8,16 +8,12 @@ const chatbotMachine = Machine({
   },
   states: {
     start: {
-      // TODO A find a way to initialize context with the chatInterface.sendMessageToUser
-      // onEntry: assign( (context, event) => {
-      //     context.chatInterface.sendMessageToUser("Hello. Welcome to the State of Punjab's Complaint Chatline") // TODO use the person's name if it is in the database
-      // }),
+      onEntry: assign( (context, event) => {
+        context.chatInterface.sendMessageToUser("Hello. Welcome to the State of Punjab's Complaint Chatline") // TODO use the person's name if it is in the database
+      }),
       on: {
         USER_MESSAGE: [{
-          target: "menu",
-          actions: [
-            assign((context, event) => { context.chatInterface = event.chatInterface; })
-          ]
+          target: "menu"
         }]
       }
     },
@@ -38,7 +34,6 @@ const chatbotMachine = Machine({
         },
         process: {
           onEntry: assign((context, event) => {
-            context.chatInterface = event.chatInterface; // See TODO A above. Get rid of this when possible 
             context.message = {
               isValid: event.message == "fileComplaint" || event.message == "trackComplaint",
               messageContent: event.message
