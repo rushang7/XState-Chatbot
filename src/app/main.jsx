@@ -44,37 +44,37 @@ class App extends React.Component {
             ]
         }));
         let message = event.message.text;
-        this.chatbotService.send("RECEIVE_MESSAGE", { message: message, chatInterface: this });
+        this.chatbotService.send("USER_MESSAGE", { message: message, chatInterface: this });
     }
 
-    addNewMessage = (event) => {
-        console.log(event.message);
-        let botResponce = Object.assign({}, event.message);
-        console.log(botResponce);
-        botResponce.text = this.countReplayLength(event.message.text);
-        botResponce.author = this.bot;
-        this.setState((prevState) => ({
-            messages: [
-                ...prevState.messages,
-                event.message
-            ]
-        }));
-        console.log(botResponce);
-        setTimeout(() => {
-            this.setState(prevState => ({
-                messages: [
-                    ...prevState.messages,
-                    botResponce
-                ]
-            }));
-        }, 1000);
-    };
+    // addNewMessage = (event) => {
+    //     console.log(event.message);
+    //     let botResponce = Object.assign({}, event.message);
+    //     console.log(botResponce);
+    //     botResponce.text = this.countReplayLength(event.message.text);
+    //     botResponce.author = this.bot;
+    //     this.setState((prevState) => ({
+    //         messages: [
+    //             ...prevState.messages,
+    //             event.message
+    //         ]
+    //     }));
+    //     console.log(botResponce);
+    //     setTimeout(() => {
+    //         this.setState(prevState => ({
+    //             messages: [
+    //                 ...prevState.messages,
+    //                 botResponce
+    //             ]
+    //         }));
+    //     }, 1000);
+    // };
 
-    countReplayLength = (question) => {
-        let length = question.length;
-        let answer = question + " contains exactly " + length + " symbols.";
-        return answer;
-    }
+    // countReplayLength = (question) => {
+    //     let length = question.length;
+    //     let answer = question + " contains exactly " + length + " symbols.";
+    //     return answer;
+    // }
 
     render() {
         return (

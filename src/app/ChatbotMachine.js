@@ -8,8 +8,12 @@ const chatbotMachine = Machine({
   },
   states: {
     start: {
+      // TODO A find a way to initialize context with the chatInterface.sendMessageToUser
+      // onEntry: assign( (context, event) => {
+      //     context.chatInterface.sendMessageToUser("Hello. Welcome to the State of Punjab's Complaint Chatline") // TODO use the person's name if it is in the database
+      // }),
       on: {
-        RECEIVE_MESSAGE: [{
+        USER_MESSAGE: [{
           target: "menu",
           actions: [
             assign((context, event) => { context.chatInterface = event.chatInterface; })
@@ -27,14 +31,14 @@ const chatbotMachine = Machine({
             context.chatInterface.sendMessageToUser(message);
           }),
           on: {
-            RECEIVE_MESSAGE: [{
-              target: "processUserRespone"
+            USER_MESSAGE: [{
+              target: "process"
             }]
           }
         },
-        processUserRespone: {
+        process: {
           onEntry: assign((context, event) => {
-            context.chatInterface = event.chatInterface;
+            context.chatInterface = event.chatInterface; // See TODO A above. Get rid of this when possible 
             context.message = {
               isValid: event.message == "fileComplaint" || event.message == "trackComplaint",
               messageContent: event.message
@@ -42,7 +46,7 @@ const chatbotMachine = Machine({
           }),
           always : [
             {
-              target: "question",
+              target: "error",
               cond: (context, event) => {
                 return ! context.message.isValid;
               }
@@ -58,6 +62,17 @@ const chatbotMachine = Machine({
               cond: (context, event) => { 
                 return  context.message.messageContent == "trackComplaint"; 
               }
+            }
+          ]
+        },
+        error: {
+          onEntry: assign( (context, event) => {
+            let message = "Invalid entry";
+            context.chatInterface.sendMessageToUser(message);
+          }),
+          always : [
+            {
+              target: "question"
             }
           ]
         } 
@@ -79,12 +94,12 @@ const chatbotMachine = Machine({
             });
           }),
           on: {
-            RECEIVE_MESSAGE: [{
-              target: "processUserRespone"
+            USER_MESSAGE: [{
+              target: "process"
             }]
           }
         },
-        processUserRespone: {
+        process: {
           onEntry:  assign((context, event) => {
             context.message = {
               isValid: true,
