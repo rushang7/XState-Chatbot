@@ -1,40 +1,41 @@
-async function fetchCities(){
-    var url = '/egov-mdms-service/v1/_search';
-
-    var request = {
-      "RequestInfo": {},
-      "MdmsCriteria": {
-        "tenantId": "pb",
-        "moduleDetails": [
-          {
-            "moduleName": "tenant",
-            "masterDetails": [
-              {
-                "name": "citymodule",
-                "filter": "$.[?(@.module=='PGR.WHATSAPP')].tenants.*"
-              }
-            ]
-          }
-        ]
-      }
-    };
-    var options = {
-        method: 'POST',
-        body: JSON.stringify(request),
-        headers: {
-            'Content-Type': 'application/json'
+async function fetchMdmsData(moduleName, masterName, filter) {
+  var url = '/egov-mdms-service/v1/_search';
+  var request = {
+    "RequestInfo": {},
+    "MdmsCriteria": {
+      "tenantId": "pb",
+      "moduleDetails": [
+        {
+          "moduleName": moduleName,
+          "masterDetails": [
+            {
+              "name": masterName,
+              "filter": filter
+            }
+          ]
         }
+      ]
     }
+  };
 
-    let response = await fetch(url, options);
-    let data = await response.json()
+  var options = {
+    method: 'POST',
+    body: JSON.stringify(request),
+    headers: {
+        'Content-Type': 'application/json'
+    }
+  }
 
-    let cities = data["MdmsRes"]["tenant"]["citymodule"];
+  let response = await fetch(url, options);
+  let data = await response.json()
 
-    let cityNames = cities.map(element => element.name);
+  return data["MdmsRes"][moduleName][masterName];
+}
 
-    return cityNames;
-
+async function fetchCities(){
+  let cities = await fetchMdmsData("tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*");
+  let cityNames = cities.map(element => element.name);
+  return cityNames;
 };
 
 export default fetchCities;
