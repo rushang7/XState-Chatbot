@@ -31,6 +31,9 @@ class App extends React.Component {
             messages: [
             ]
         };
+    }
+
+    componentDidMount() {
         this.chatbotService = interpret(chatbotMachine.withContext ({  
             chatInterface: this
         }));
