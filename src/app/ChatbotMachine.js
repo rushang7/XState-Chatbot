@@ -52,13 +52,13 @@ const chatbotMachine = Machine({
         },
         process: {
           onEntry: assign((context, event) => {
-            let isValid = event.message.localeCompare("1") === 0 || event.message.localeCompare("2") === 0;
+            let isValid = event.message.input.localeCompare("1") === 0 || event.message.input.localeCompare("2") === 0;
             context.message = {
               isValid: isValid,
-              messageContent: event.message
+              messageContent: event.message.input
             }
             if(isValid) {
-              context.slots.menu = event.message;
+              context.slots.menu = event.message.input;
             }
           }),
           always : [
@@ -121,10 +121,10 @@ const chatbotMachine = Machine({
             let isValid = true;
             context.message = {
               isValid: isValid,
-              messageContent: event.message
+              messageContent: event.message.input
             }
             if(isValid) {
-              context.slots.city = event.message;
+              context.slots.city = event.message.input;
             }
           }),
           always : [
@@ -135,9 +135,74 @@ const chatbotMachine = Machine({
               }
             },
             {
-              target: "#filedSuccessfully"
+              target: "#geoLocationSharingInfo"
             }
           ]
+        }
+      }
+    },
+    geoLocationSharingInfo: {
+      id: "geoLocationSharingInfo",
+      onEntry: assign( (context, event) => {
+        context.chatInterface.sendMessageToUser("<i>Informational Image</i>");
+      }),
+      always: [ { target: "geoLocation" } ]
+    },
+    geoLocation: {
+      id: "geoLocation",
+      initial: "question",
+      states : {
+        question: {
+          onEntry: assign( (context, event) => {
+            let message = "Please share your geo-location or type and send \"No\"";
+            context.chatInterface.sendMessageToUser(message);
+          }),
+          on: {
+            USER_MESSAGE: [ { target: "process" } ]
+          }
+        },
+        process: {
+          onEntry: assign( (context, event) => {
+            let message = event.message;
+            if(message.type === "location") {
+              context.slots.geoLocation = message.input;
+            } else {
+
+            }
+          }),
+          always: [
+            {
+              target: "#fileComplaint",
+              cond: (context, event) => {
+                if(context.slots.geoLocation)
+                  return true;
+              }
+            },
+            {
+              target: "#locality"
+            }
+          ]
+        }
+      }
+    },
+    locality: {
+      id: "locality",
+      initial: "question",
+      states: {
+        question: {
+          onEntry: assign( (context, event) => {
+            let message = "Please enter your locality"
+            context.chatInterface.sendMessageToUser(message);
+          }),
+          on: {
+            USER_MESSAGE: [{target: "process"}]
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            context.slots.locality = event.message.input;
+          }),
+          always: [{target: "#fileComplaint"}]
         }
       }
     },
@@ -153,9 +218,9 @@ const chatbotMachine = Machine({
         context.chatInterface.sendMessageToUser(message);
       })
     },
-    filedSuccessfully: {
+    fileComplaint: {
       type: "final",
-      id: "filedSuccessfully",
+      id: "fileComplaint",
       onEntry: assign((context, event) => {
         console.log(context.slots);
         //make api call

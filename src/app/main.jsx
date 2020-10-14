@@ -69,7 +69,18 @@ class App extends React.Component {
                 event.message
             ]
         }));
-        let message = event.message.text;
+        let message = {}
+        if(event.message.text.startsWith("(")) {
+            message = {
+                input: event.message.text,
+                type: "location"
+            }
+        } else {
+            message = {
+                input: event.message.text,
+                type: "text"
+            }
+        }
         this.chatbotService.send("USER_MESSAGE", { message: message });
     }
 
