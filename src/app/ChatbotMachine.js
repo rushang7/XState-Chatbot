@@ -9,7 +9,22 @@ const chatbotMachine = Machine({
   states: {
     start: {
       onEntry: assign( (context, event) => {
-        context.chatInterface.sendMessageToUser("Hello. Welcome to the State of Punjab's Complaint Chatline") // TODO use the person's name if it is in the database
+        let welcomeMessage = {
+          "en_IN": "Hello. Welcome to the State of Punjab's Complaint Chatline",
+          "hi_IN": "नमस्ते। पंजाब राज्य शिकायत पत्र में आपका स्वागत है"
+        };
+        let welcomeMessageWithName = {
+          "en_IN": "Hello {{name}}. Welcome to the State of Punjab's Complaint Chatline",
+          "hi_IN": "नमस्ते {{name}}। पंजाब राज्य शिकायत पत्र में आपका स्वागत है"
+        }
+        var message;
+        if(context.user.name) {
+          message = welcomeMessageWithName[context.user.locale];
+          message = message.replace("{{name}}", context.user.name);
+        } else {
+          message = welcomeMessage[context.user.locale];
+        }
+        context.chatInterface.sendMessageToUser(message)
       }),
       on: {
         USER_MESSAGE: [{
@@ -23,8 +38,11 @@ const chatbotMachine = Machine({
       states: {
         question: {
           onEntry: assign( (context, event) => {
-            let message = "Hi! \nWhat would you like to do?\n1. File Complaint\n2. Track Complaint";
-            context.chatInterface.sendMessageToUser(message);
+            let message = {
+              "en_IN" : "Hi! \nWhat would you like to do?\n1. File Complaint\n2. Track Complaint",
+              "hi_IN": "आप क्या करना पसंद करेंगे\n1. शिकायत दर्ज करें\n2. हाल की शिकायत दिखाएं"
+            };
+            context.chatInterface.sendMessageToUser(message[context.user.locale]);
           }),
           on: {
             USER_MESSAGE: [{
@@ -35,7 +53,7 @@ const chatbotMachine = Machine({
         process: {
           onEntry: assign((context, event) => {
             context.message = {
-              isValid: event.message.localeCompare("fileComplaint") === 0 || event.message.localeCompare("trackComplaint") === 0,
+              isValid: event.message.localeCompare("1") === 0 || event.message.localeCompare("2") === 0,
               messageContent: event.message
             }
           }),
@@ -49,13 +67,13 @@ const chatbotMachine = Machine({
             {
               target: "#city",
               cond: (context, event) => {
-                return context.message.messageContent.localeCompare("fileComplaint") === 0;
+                return context.message.messageContent.localeCompare("1") === 0;
               }
             },
             {
               target: "#trackComplaint",
               cond: (context, event) => { 
-                return  context.message.messageContent.localeCompare("trackComplaint") === 0; 
+                return  context.message.messageContent.localeCompare("2") === 0; 
               }
             }
           ]
