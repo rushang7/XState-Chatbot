@@ -52,9 +52,13 @@ const chatbotMachine = Machine({
         },
         process: {
           onEntry: assign((context, event) => {
+            let isValid = event.message.localeCompare("1") === 0 || event.message.localeCompare("2") === 0;
             context.message = {
-              isValid: event.message.localeCompare("1") === 0 || event.message.localeCompare("2") === 0,
+              isValid: isValid,
               messageContent: event.message
+            }
+            if(isValid) {
+              context.slots.menu = event.message;
             }
           }),
           always : [
@@ -114,9 +118,13 @@ const chatbotMachine = Machine({
         },
         process: {
           onEntry:  assign((context, event) => {
+            let isValid = true;
             context.message = {
-              isValid: true,
+              isValid: isValid,
               messageContent: event.message
+            }
+            if(isValid) {
+              context.slots.city = event.message;
             }
           }),
           always : [
@@ -149,6 +157,7 @@ const chatbotMachine = Machine({
       type: "final",
       id: "filedSuccessfully",
       onEntry: assign((context, event) => {
+        console.log(context.slots);
         //make api call
         console.log("Making api call to PGR Service");
         let message = "Complaint has been filed successfully {{number}}";
