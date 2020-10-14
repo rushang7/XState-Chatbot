@@ -35,7 +35,7 @@ const chatbotMachine = Machine({
         process: {
           onEntry: assign((context, event) => {
             context.message = {
-              isValid: event.message == "fileComplaint" || event.message == "trackComplaint",
+              isValid: event.message.localeCompare("fileComplaint") === 0 || event.message.localeCompare("trackComplaint") === 0,
               messageContent: event.message
             }
           }),
@@ -49,13 +49,13 @@ const chatbotMachine = Machine({
             {
               target: "#city",
               cond: (context, event) => {
-                return context.message.messageContent == "fileComplaint";
+                return context.message.messageContent.localeCompare("fileComplaint") === 0;
               }
             },
             {
               target: "#trackComplaint",
               cond: (context, event) => { 
-                return  context.message.messageContent == "trackComplaint"; 
+                return  context.message.messageContent.localeCompare("trackComplaint") === 0; 
               }
             }
           ]
