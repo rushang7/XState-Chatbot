@@ -5,6 +5,20 @@ import { Chat } from '@progress/kendo-react-conversational-ui';
 import { interpret } from 'xstate';
 import chatbotMachine from './ChatbotMachine';
 
+import * as marked from 'marked';
+
+function MessageTemplate(props) {
+    let message = props.item;
+    let parser = marked.setOptions({});
+    var parsedMessage = parser.parse(message.text);
+    let htmlToinsert = { __html: parsedMessage };
+    return (
+        <div className="k-bubble">
+            <div dangerouslySetInnerHTML={htmlToinsert} />
+        </div>
+    );
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -56,6 +70,7 @@ class App extends React.Component {
                     messages={this.state.messages}
                     onMessageSend={this.receiveMessageFromUser}
                     placeholder={"Type a message..."}
+                    messageTemplate={MessageTemplate}
                     width={400}>
                 </Chat>
             </div>
