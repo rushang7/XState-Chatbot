@@ -24,7 +24,6 @@ class App extends React.Component {
     }
 
     sendMessageToUser = (message) => {
-        debugger
         let botMessage = {
             author: {
                 id: 0
@@ -49,35 +48,6 @@ class App extends React.Component {
         let message = event.message.text;
         this.chatbotService.send("USER_MESSAGE", { message: message });
     }
-
-    // addNewMessage = (event) => {
-    //     console.log(event.message);
-    //     let botResponce = Object.assign({}, event.message);
-    //     console.log(botResponce);
-    //     botResponce.text = this.countReplayLength(event.message.text);
-    //     botResponce.author = this.bot;
-    //     this.setState((prevState) => ({
-    //         messages: [
-    //             ...prevState.messages,
-    //             event.message
-    //         ]
-    //     }));
-    //     console.log(botResponce);
-    //     setTimeout(() => {
-    //         this.setState(prevState => ({
-    //             messages: [
-    //                 ...prevState.messages,
-    //                 botResponce
-    //             ]
-    //         }));
-    //     }, 1000);
-    // };
-
-    // countReplayLength = (question) => {
-    //     let length = question.length;
-    //     let answer = question + " contains exactly " + length + " symbols.";
-    //     return answer;
-    // }
 
     render() {
         return (
