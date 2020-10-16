@@ -8,4 +8,8 @@ const pool = new Pool({
     port: 5432,
 });
 
+pool.on('error', (err, client) => {
+    console.error('Error:', err);
+});
+
 module.exports = pool;

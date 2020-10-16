@@ -7,35 +7,35 @@ const { State, interpret } = require('xstate');
 
 class ChatService {
 
-    receiveMessage(req, res) {
+    async receiveMessage(req, res) {
         let userId = req.body["userId"];
         let message = {
             type: req.body.type,
             input: req.body.input
         }
 
-        let chatState = chatStateRepository.getActiveStateForUserId(userId);
+        let chatState = await chatStateRepository.getActiveStateForUserId(userId);
         let service;
         if(!chatState) {
             service = this.createNewConversation(userId);
+            await chatStateRepository.insertNewState(userId, true, JSON.stringify(service.state));
         } else {
             service = this.getChatServiceFor(chatState);
         }
         
         service.send("USER_MESSAGE", { message: message });
 
-        chatStateRepository.saveState(userId, JSON.stringify(service.state));
+        let active = !service.state.done;
+        await chatStateRepository.updateState(userId, active, JSON.stringify(service.state));
 
         res.sendStatus(200);
     }
 
-    getChatServiceFor(chatState) {
-        const stateDefinition = JSON.parse(chatState);
-
-        const context = stateDefinition.context;
+    getChatServiceFor(chatStateJson) {
+        const context = chatStateJson.context;
         context.chatInterface = sendMessageProvider;
 
-        const state = State.create(stateDefinition);
+        const state = State.create(chatStateJson);
         const resolvedState = chatbotMachine.withContext(context).resolveState(state);
         const service = interpret(chatbotMachine).start(resolvedState);
 
