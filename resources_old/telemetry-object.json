@@ -1,0 +1,38 @@
+{
+  "tenantId": "pb",
+  "timestamp": 1602847593449,
+  "user": {
+      "userId": "81528b1a-5795-43a7-a6e2-8c64ff145c3d"
+  },
+  "conversationState": {
+      "conversationId": "3aba0bd0-2ad9-4987-8dc5-0a04251f2606",
+      "active": true,
+      "locale": "en_IN"
+  },
+  "nextConversationState": {
+      "conversationId": "3aba0bd0-2ad9-4987-8dc5-0a04251f2606",
+      "activeNodeId": "root",
+      "active": true,
+      "locale": "en_IN",
+      "lastModifiedTime": 1602847593643
+  },
+  "message": {
+      "messageId": "5dc8a4ad-1ca0-4c23-a7f3-1580f1946d16",
+      "conversationId": "3aba0bd0-2ad9-4987-8dc5-0a04251f2606",
+      "nodeId": "welcome",
+      "contentType": "text",
+      "valid": true
+  },
+  "response": {
+      "type": "text",
+      "nodeId": "root",
+      "timestamp": 1602847593643
+  },
+  "extraInfo": {
+      "recipient": "918744960111"
+  },
+  "askForNextBatch": false,
+  "addErrorMessage": false,
+  "resetConversation": true,
+  "@timestamp": "2020-10-16T11:26:33.449Z"
+}

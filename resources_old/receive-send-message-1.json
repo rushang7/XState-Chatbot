@@ -1,0 +1,158 @@
+{
+  "tenantId": "pb",
+  "timestamp": 1602847519263,
+  "user": {
+      "userId": "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
+      "mobileNumber": "9428010077",
+      "authToken": "e290dee8-0e90-4165-abeb-e49c58fbd713",
+      "refreshToken": "271b6394-1ef7-4300-99fa-98b2a42f8a96",
+      "userInfo": "{\"id\":24005,\"uuid\":\"81528b1a-5795-43a7-a6e2-8c64ff145c3d\",\"userName\":\"9428010077\",\"name\":\"Rushang Dhanesha\",\"mobileNumber\":\"9428010077\",\"emailId\":\"rushangdhanesha@gmail.com\",\"locale\":null,\"type\":\"CITIZEN\",\"roles\":[{\"name\":\"Citizen\",\"code\":\"CITIZEN\",\"tenantId\":\"pb\"}],\"active\":true,\"tenantId\":\"pb\"}",
+      "expiresAt": 1603451999385
+  },
+  "conversationState": {
+      "conversationId": "fe1c9f5f-e21f-408d-8246-06a86d6acd27",
+      "activeNodeId": null,
+      "userId": "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
+      "active": true,
+      "questionDetails": null,
+      "locale": "en_IN",
+      "lastModifiedTime": null
+  },
+  "nextConversationState": {
+      "conversationId": "fe1c9f5f-e21f-408d-8246-06a86d6acd27",
+      "activeNodeId": "root",
+      "userId": "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
+      "active": true,
+      "questionDetails": {
+          "batchSize": 2147483647,
+          "allValues": [
+              {
+                  "value": "File a Complaint"
+              },
+              {
+                  "value": "Track Complaint Status"
+              }
+          ],
+          "offset": 0,
+          "askedValues": [
+              {
+                  "index": 1,
+                  "value": {
+                      "value": "File a Complaint"
+                  }
+              },
+              {
+                  "index": 2,
+                  "value": {
+                      "value": "Track Complaint Status"
+                  }
+              }
+          ]
+      },
+      "locale": "en_IN",
+      "lastModifiedTime": 1602847519403
+  },
+  "message": {
+      "messageId": "1637f53e-571b-4569-8ab2-bbd5528662ce",
+      "conversationId": "fe1c9f5f-e21f-408d-8246-06a86d6acd27",
+      "nodeId": "welcome",
+      "rawInput": "mseva",
+      "messageContent": "mseva",
+      "contentType": "text",
+      "valid": true
+  },
+  "response": {
+      "type": "text",
+      "nodeId": "root",
+      "timestamp": 1602847519403,
+      "localizationCodes": [
+          {
+              "code": "chatbot.messages.rootMessage",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": null,
+              "tenantId": null,
+              "value": "\n",
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.message.numberPrefixLocalizationCode",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.numbers.numeric1",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.message.numberPostfixLocalizationCode",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": null,
+              "tenantId": null,
+              "value": "File a Complaint",
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": null,
+              "tenantId": null,
+              "value": "\n",
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.message.numberPrefixLocalizationCode",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.numbers.numeric2",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": "chatbot.message.numberPostfixLocalizationCode",
+              "tenantId": null,
+              "value": null,
+              "templateId": null,
+              "params": null
+          },
+          {
+              "code": null,
+              "tenantId": null,
+              "value": "Track Complaint Status",
+              "templateId": null,
+              "params": null
+          }
+      ],
+      "text": "Please type and send the number of your option.\n\n*1.* File a Complaint\n*2.* Track Complaint Status",
+      "fileStoreId": null,
+      "location": null,
+      "contactCard": null
+  },
+  "extraInfo": {
+      "recipient": "918744960111"
+  },
+  "askForNextBatch": false,
+  "addErrorMessage": false,
+  "resetConversation": true
+}
