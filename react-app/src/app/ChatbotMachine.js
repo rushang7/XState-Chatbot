@@ -102,18 +102,30 @@ const chatbotMachine = Machine({
       initial: "question",
       states: {
         question: {
-          onEntry: assign( (context, event) => {
-            fetchCities().then((cityNames) => {
-              var message = "File a new complaint:\n Please enter name of the city";
-              for(var i = 0; i < cityNames.length; i++) {
-                message += "\n" + (i+1) + ". " + cityNames[i];
-              }
-              message += "<br><br>Or 0 to start over."
-              context.maxValidEntry = cityNames.length;
-              debugger
-              context.chatInterface.sendMessageToUser(message);
-            });
-          }),
+          invoke: {
+            id: "fetchCities",
+            src: (context, event) => fetchCities(),
+            onDone: {
+              actions: assign((context, event) => {
+                var cityNames = event.data;
+                var message = "File a new complaint:\n Please enter name of the city";
+                for(var i = 0; i < cityNames.length; i++) {
+                  message += "\n" + (i+1) + ". " + cityNames[i];
+                }
+                message += "<br><br>Or 0 to start over."
+                context.maxValidEntry = cityNames.length;
+                debugger
+                context.chatInterface.sendMessageToUser(message);
+              })
+            },
+            onError: {
+              target: "error",
+              actions: assign((context, event) => {
+                let message = "Sorry. Some error occurred on server";
+                context.chatInterface.sendMessageToUser(message);
+              })
+            }
+          },
           on: {
             USER_MESSAGE: [{
               target: "process"
