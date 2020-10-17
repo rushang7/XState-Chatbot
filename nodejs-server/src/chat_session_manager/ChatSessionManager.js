@@ -1,13 +1,11 @@
-const JSONPath = require('JSONPath'),
-    config = require('../envVariables'),
-    chatbotMachine = require('../chat_machine/ChatbotMachine'),
+const pgrChatStateMachine = require('../chat_state_machine/PGRChatStateMachine'),
     channelProvider = require('../channel_provider'),
     chatStateRepository = require('../repository/ChatStateRepository');
 const { State, interpret } = require('xstate');
 
 class ChatService {
 
-    async receiveMessage(req, res) {
+    async receiveMessage(req) {
         let userId = req.body["userId"];
         let message = {
             type: req.body.type,
@@ -27,8 +25,6 @@ class ChatService {
 
         let active = !service.state.done;
         await chatStateRepository.updateState(userId, active, JSON.stringify(service.state));
-
-        res.sendStatus(200);
     }
 
     getChatServiceFor(chatStateJson) {
@@ -36,25 +32,22 @@ class ChatService {
         context.chatInterface = channelProvider;
 
         const state = State.create(chatStateJson);
-        const resolvedState = chatbotMachine.withContext(context).resolveState(state);
-        const service = interpret(chatbotMachine).start(resolvedState);
+        const resolvedState = pgrChatStateMachine.withContext(context).resolveState(state);
+        const service = interpret(pgrChatStateMachine).start(resolvedState);
 
         return service;
     }
 
     createNewConversation(userId) {
         console.log("New User");
-        let service = interpret(chatbotMachine.withContext ({  
+        let service = interpret(pgrChatStateMachine.withContext ({  
             chatInterface: channelProvider,
             user: {
                 uuid: userId,
                 locale: "en_IN"
             },
             slots: {}
-        }));
-        // service.onTransition((state) => {
-        //     console.log(JSON.stringify(state));
-        // });
+        }))
         service.start();
         return service;
     }

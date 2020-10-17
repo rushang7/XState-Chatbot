@@ -1,13 +1,16 @@
 const express = require('express'),
     router = express.Router(),
     config = require('../envVariables'),
-    chatService = require('../service/ChatService');
+    chatSessionManager = require('../chat_session_manager/ChatSessionManager');
 
 router.post(config.endPoint, (req, res) => { 
     chatService.dispatch(req, res); 
 });
 
-router.post('/message', (req, res) => chatService.receiveMessage(req, res));
+router.post('/message', (req, res) =>  {
+    chatSessionManager.receiveMessage(req);
+    res.sendStatus(200);
+});
 
 router.get('/health', (req, res) => res.sendStatus(200));
 

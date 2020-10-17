@@ -1,7 +1,7 @@
-const {Machine, assign} = require("xstate");
-const egovUtils = require("../utils/egovutils")
+const { Machine, assign } = require("xstate");
+const egovUtils = require("../app_service_provider/EgovPGRServiceProvider")
 
-const chatbotMachine = Machine({
+const PGRChatStateMachine = Machine({
   id: "chatbot",
   initial: "start",
   context: {
@@ -260,4 +260,4 @@ const chatbotMachine = Machine({
   }
 });
 
-module.exports = chatbotMachine;
+module.exports = PGRChatStateMachine;
