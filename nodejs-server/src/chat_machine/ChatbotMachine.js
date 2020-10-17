@@ -23,7 +23,7 @@ const chatbotMachine = Machine({
         } else {
           message = welcomeMessage[context.user.locale];
         }
-        context.chatInterface.sendMessageToUser(message)
+        context.chatInterface.sendMessageToUser({}, message)
       }),
       always: "menu"
     },
@@ -37,7 +37,7 @@ const chatbotMachine = Machine({
               "en_IN" : "Please type<br><br>  1 to File New Complaint.<br>  2 to Track Your Complaints",
               "hi_IN": "कृप्या टाइप करे<br><br>  1 यदि आप शिकायत दर्ज करना चाहते हैं<br>  2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं"
             };
-            context.chatInterface.sendMessageToUser(message[context.user.locale]);
+            context.chatInterface.sendMessageToUser({}, message[context.user.locale]);
           }),
           on: {
             USER_MESSAGE: [{
@@ -83,7 +83,7 @@ const chatbotMachine = Machine({
         error: {
           onEntry: assign( (context, event) => {
             let message = "Sorry, I didn't understand";
-            context.chatInterface.sendMessageToUser(message);
+            context.chatInterface.sendMessageToUser({}, message);
           }),
           always : [
             {
@@ -107,7 +107,7 @@ const chatbotMachine = Machine({
               message += "<br><br>Or 0 to start over."
               context.maxValidEntry = cityNames.length;
               // debugger
-              context.chatInterface.sendMessageToUser(message);
+              context.chatInterface.sendMessageToUser({}, message);
             });
           }),
           on: {
@@ -150,7 +150,7 @@ const chatbotMachine = Machine({
         error: {
           onEntry: assign( (context, event) => {
             let message = "Sorry, I didn't understand";
-            context.chatInterface.sendMessageToUser(message);
+            context.chatInterface.sendMessageToUser({}, message);
           }),
           always : [
             {
@@ -163,7 +163,7 @@ const chatbotMachine = Machine({
     geoLocationSharingInfo: {
       id: "geoLocationSharingInfo",
       onEntry: assign( (context, event) => {
-        context.chatInterface.sendMessageToUser("<i>Informational Image</i>");
+        context.chatInterface.sendMessageToUser({}, "<i>Informational Image</i>");
       }),
       always: [ { target: "geoLocation" } ]
     },
@@ -174,7 +174,7 @@ const chatbotMachine = Machine({
         question: {
           onEntry: assign( (context, event) => {
             let message = "File a new complaint:\n Please share your geo-location or type and send \"No\"";
-            context.chatInterface.sendMessageToUser(message);
+            context.chatInterface.sendMessageToUser({}, message);
           }),
           on: {
             USER_MESSAGE: [ { target: "process" } ]
@@ -211,7 +211,7 @@ const chatbotMachine = Machine({
         question: {
           onEntry: assign( (context, event) => {
             let message = "File a new complaint:\n Please enter your locality"
-            context.chatInterface.sendMessageToUser(message);
+            context.chatInterface.sendMessageToUser({}, message);
           }),
           on: {
             USER_MESSAGE: [{target: "process"}]
@@ -234,7 +234,7 @@ const chatbotMachine = Machine({
         let message = "Here are your recent complaints {{details}}";
         let details = "No. - 123, ...";
         message = message.replace("{{details}}", details);
-        context.chatInterface.sendMessageToUser(message);
+        context.chatInterface.sendMessageToUser({}, message);
       })
     },
     fileComplaint: {
@@ -247,13 +247,13 @@ const chatbotMachine = Machine({
         let message = "File a new complaint:\n Complaint has been filed successfully {{number}}";
         let number = "123";
         message = message.replace("{{number}}", number);
-        context.chatInterface.sendMessageToUser(message);
+        context.chatInterface.sendMessageToUser({}, message);
       })
     },
     start_over: {
       id: "start_over",
       onEntry: assign((context, event) => {
-        context.chatInterface.sendMessageToUser("Ok. Let's start over");
+        context.chatInterface.sendMessageToUser({}, "Ok. Let's start over");
       }),
       always: "menu"
     }

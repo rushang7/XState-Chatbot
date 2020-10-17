@@ -1,7 +1,7 @@
 const JSONPath = require('JSONPath'),
     config = require('../envVariables'),
     chatbotMachine = require('../chat_machine/ChatbotMachine'),
-    sendMessageProvider = require('../channel_provider/SendMessage'),
+    channelProvider = require('../channel_provider'),
     chatStateRepository = require('../repository/ChatStateRepository');
 const { State, interpret } = require('xstate');
 
@@ -33,7 +33,7 @@ class ChatService {
 
     getChatServiceFor(chatStateJson) {
         const context = chatStateJson.context;
-        context.chatInterface = sendMessageProvider;
+        context.chatInterface = channelProvider;
 
         const state = State.create(chatStateJson);
         const resolvedState = chatbotMachine.withContext(context).resolveState(state);
@@ -45,7 +45,7 @@ class ChatService {
     createNewConversation(userId) {
         console.log("New User");
         let service = interpret(chatbotMachine.withContext ({  
-            chatInterface: sendMessageProvider,
+            chatInterface: channelProvider,
             user: {
                 uuid: userId,
                 locale: "en_IN"
