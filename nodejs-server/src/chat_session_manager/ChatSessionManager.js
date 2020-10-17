@@ -3,14 +3,11 @@ const pgrChatStateMachine = require('../chat_state_machine/PGRChatStateMachine')
     chatStateRepository = require('../repository/ChatStateRepository');
 const { State, interpret } = require('xstate');
 
-class ChatService {
+class ChatSessionManager {
 
-    async receiveMessage(req) {
-        let userId = req.body["userId"];
-        let message = {
-            type: req.body.type,
-            input: req.body.input
-        }
+    async fromUser(reformattedMessage) {
+        let userId = reformattedMessage.userId;
+        let message = reformattedMessage.message;
 
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
         let service;
@@ -27,9 +24,13 @@ class ChatService {
         await chatStateRepository.updateState(userId, active, JSON.stringify(service.state));
     }
 
+    async toUser(user, message) {
+        channelProvider.sendMessageToUser(user, message);
+    }
+
     getChatServiceFor(chatStateJson) {
         const context = chatStateJson.context;
-        context.chatInterface = channelProvider;
+        context.chatInterface = this;
 
         const state = State.create(chatStateJson);
         const resolvedState = pgrChatStateMachine.withContext(context).resolveState(state);
@@ -39,9 +40,8 @@ class ChatService {
     }
 
     createNewConversation(userId) {
-        console.log("New User");
-        let service = interpret(pgrChatStateMachine.withContext ({  
-            chatInterface: channelProvider,
+        let service = interpret(pgrChatStateMachine.withContext ({
+            chatInterface: this,
             user: {
                 uuid: userId,
                 locale: "en_IN"
@@ -54,4 +54,4 @@ class ChatService {
 
 }
 
-module.exports = new ChatService();
+module.exports = new ChatSessionManager();
