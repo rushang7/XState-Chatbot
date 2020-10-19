@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-class EgovUtils {
+class PGRService {
   async fetchMdmsData(moduleName, masterName, filter) {
     var url = 'https://egov-micro-dev.egovernments.org/egov-mdms-service/v1/_search';
     var request = {
@@ -42,4 +42,4 @@ class EgovUtils {
   }
 }
 
-module.exports = new EgovUtils();
+module.exports = new PGRService();

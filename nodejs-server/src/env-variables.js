@@ -7,7 +7,9 @@ const envVariables = {
     port: process.env.service_port || 8080,
     endPoint : process.env.endPoint || '/whatsapp-webhook/messages',
 
-    whatsAppProvider: process.env.whatsAppProvider || 'console'
+    whatsAppProvider: process.env.whatsAppProvider || 'console',
+
+    pgrServiceProvider: process.env.pgrServiceProvider || 'dummy'
 }
 
 module.exports = envVariables;
