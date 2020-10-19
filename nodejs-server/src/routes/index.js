@@ -1,7 +1,7 @@
 const express = require('express'),
     router = express.Router(),
-    config = require('../envVariables'),
-    chatSessionManager = require('../chat-session-manager/ChatSessionManager'),
+    config = require('../env-variables'),
+    chatSessionManager = require('../chat-session-manager/chat-session-manager'),
     channelProvider = require('../channel-provider');
 
 router.post(config.endPoint, (req, res) => { 

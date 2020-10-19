@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-var urlSearchParams = require('form-data');
 require('url-search-params-polyfill');
 
 class GupShupWhatsAppProvider {

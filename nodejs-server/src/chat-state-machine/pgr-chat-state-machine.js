@@ -1,5 +1,5 @@
 const { Machine, assign } = require("xstate");
-const egovUtils = require("../app-service-provider/EgovPGRServiceProvider")
+const egovUtils = require("../app-service-provider/egov-pgr-service-provider")
 
 const PGRChatStateMachine = Machine({
   id: "chatbot",

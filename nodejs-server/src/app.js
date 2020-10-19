@@ -1,7 +1,7 @@
 const express = require('express'),
   cluster = require('express-cluster'),
   bodyParser = require('body-parser'),
-  envVariables = require('./envVariables'),
+  envVariables = require('./env-variables'),
   port = envVariables.port;
 
 const createAppServer = () => {
