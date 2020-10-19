@@ -18,7 +18,7 @@ class ChatSessionManager {
             service = this.getChatServiceFor(chatState);
         }
         
-        service.send("USER_MESSAGE", { message: message });
+        service.send('USER_MESSAGE', { message: message });
 
         let active = !service.state.done;
         await chatStateRepository.updateState(userId, active, JSON.stringify(service.state));
@@ -44,7 +44,7 @@ class ChatSessionManager {
             chatInterface: this,
             user: {
                 uuid: userId,
-                locale: "en_IN"
+                locale: 'en_IN'
             },
             slots: {}
         }))
