@@ -6,9 +6,18 @@ class GupShupWhatsAppProvider {
     reformatIncomingMessage(req) {
         let reformattedMessage = {}
         let requestBody = req.body;
+        
+        let type = requestBody.payload.type;
+        let input;
+        if(type == "location") {
+            input = requestBody.payload.payload;
+        } else {
+            input = requestBody.payload.payload.text;
+        }
+
         reformattedMessage.message = {
-            input: requestBody.payload.payload.text,
-            type: "text"
+            input: input,
+            type: type
         }
         reformattedMessage.userId = requestBody.payload.sender.phone;
 
