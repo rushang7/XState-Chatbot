@@ -1,5 +1,5 @@
-const pgrChatStateMachine = require('../chat_state_machine/PGRChatStateMachine'),
-    channelProvider = require('../channel_provider'),
+const pgrChatStateMachine = require('../chat-state-machine/PGRChatStateMachine'),
+    channelProvider = require('../channel-provider'),
     chatStateRepository = require('../repository/ChatStateRepository');
 const { State, interpret } = require('xstate');
 
