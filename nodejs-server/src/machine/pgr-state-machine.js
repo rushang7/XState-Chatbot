@@ -1,5 +1,5 @@
 const { Machine, assign } = require('xstate');
-const pgrService = require('./service/pgr-service')
+const pgrService = require('./service/service-loader')
 
 const PGRStateMachine = Machine({
   id: 'chatbot',
