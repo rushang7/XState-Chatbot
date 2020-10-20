@@ -1,6 +1,6 @@
-const pgrChatStateMachine = require('../chat-state-machine/pgr-chat-state-machine'),
-    channelProvider = require('../channel-provider'),
-    chatStateRepository = require('../repository/chat-state-repository');
+const pgrChatStateMachine = require('../machine/pgr-chat-state-machine'),
+    channelProvider = require('../channel'),
+    chatStateRepository = require('./repository/chat-state-repository');
 const { State, interpret } = require('xstate');
 
 class ChatSessionManager {

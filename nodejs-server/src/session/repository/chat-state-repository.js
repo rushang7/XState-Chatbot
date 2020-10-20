@@ -1,4 +1,4 @@
-const pool = require('./db-config');
+const pool = require('./pg-db-config');
 
 class ChatStateRepository {
 

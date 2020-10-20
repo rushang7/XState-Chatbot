@@ -25,11 +25,7 @@ const chatbotMachine = Machine({
         }
         context.chatInterface.sendMessageToUser(message)
       }),
-      on: {
-        '': [{
-          target: "menu"
-        }]
-      }
+      always: "menu"
     },
     menu : {
       id: "menu",
@@ -271,11 +267,7 @@ const chatbotMachine = Machine({
       onEntry: assign((context, event) => {
         context.chatInterface.sendMessageToUser("Ok. Let's start over");
       }),
-      on: {
-        '': [{
-          target: "menu"
-        }]
-      }
+      always: "menu"
     }
   }
 });

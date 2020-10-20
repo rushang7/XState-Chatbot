@@ -1,5 +1,5 @@
 const { Machine, assign } = require('xstate');
-const pgrService = require('../app-service-provider/pgr-service')
+const pgrService = require('./service/pgr-service')
 
 const PGRChatStateMachine = Machine({
   id: 'chatbot',
@@ -29,8 +29,6 @@ const PGRChatStateMachine = Machine({
           onEntry: assign((context, event) => {
             context.message = {};
             let choice = event.message.input.trim();
-            console.log("Choice : " + choice)
-            console.log(choice == 1)
             if(choice == 1) {
               context.user.locale = "en_IN";
               context.message.isValid = true;
