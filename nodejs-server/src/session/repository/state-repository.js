@@ -1,6 +1,6 @@
 const pool = require('./pg-db-config');
 
-class ChatStateRepository {
+class StateRepository {
 
     async insertNewState(userId, active, state) {
         const query = 'INSERT INTO chat_state (user_id, active, state) VALUES ($1, $2, $3)';
@@ -25,4 +25,4 @@ class ChatStateRepository {
 
 }
 
-module.exports = new ChatStateRepository();
+module.exports = new StateRepository();

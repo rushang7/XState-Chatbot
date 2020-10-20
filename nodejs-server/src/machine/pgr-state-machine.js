@@ -1,7 +1,7 @@
 const { Machine, assign } = require('xstate');
 const pgrService = require('./service/pgr-service')
 
-const PGRChatStateMachine = Machine({
+const PGRStateMachine = Machine({
   id: 'chatbot',
   initial: 'start',
   context: {
@@ -318,4 +318,4 @@ const PGRChatStateMachine = Machine({
   }
 });
 
-module.exports = PGRChatStateMachine;
+module.exports = PGRStateMachine;

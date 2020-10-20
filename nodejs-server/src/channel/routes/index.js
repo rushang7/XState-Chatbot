@@ -1,17 +1,13 @@
 const express = require('express'),
     router = express.Router(),
     config = require('../../env-variables'),
-    chatSessionManager = require('../../session/chat-session-manager'),
+    sessionManager = require('../../session/session-manager'),
     channelProvider = require('../');
-
-router.post(config.endPoint, (req, res) => { 
-    chatService.dispatch(req, res); 
-});
 
 router.post('/message', (req, res) =>  {
     try {
         let reformattedMessage = channelProvider.reformatIncomingMessage(req);
-        chatSessionManager.fromUser(reformattedMessage);
+        sessionManager.fromUser(reformattedMessage);
     } catch(e) {
         console.log(e);
     }
