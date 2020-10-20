@@ -1,6 +1,6 @@
 const config = require('../env-variables');
-const consoleProvider = require('./console-provider');
-const gupShupWhatsAppProvider = require('./gupshup-whatsapp-provider');
+const consoleProvider = require('./console');
+const gupShupWhatsAppProvider = require('./gupshup');
 
 if(config.whatsAppProvider == 'GupShup')
     module.exports = gupShupWhatsAppProvider;

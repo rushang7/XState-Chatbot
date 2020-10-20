@@ -1,4 +1,4 @@
-const pool = require('./pg-db-config');
+const pool = require('./postgres-config');
 
 class StateRepository {
 

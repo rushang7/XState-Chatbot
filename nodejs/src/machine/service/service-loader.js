@@ -1,6 +1,6 @@
 const config = require('../../env-variables');
-const dummyPGRService = require('./dummy-pgr-service');
-const egovPGRService = require('./egov-pgr-service');
+const dummyPGRService = require('./dummy-pgr');
+const egovPGRService = require('./egov-pgr');
 
 if(config.pgrServiceProvider === 'eGovPGR') {
     console.log("eGovPGR");

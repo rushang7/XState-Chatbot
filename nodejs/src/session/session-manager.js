@@ -1,6 +1,6 @@
-const pgrStateMachine = require('../machine/pgr-state-machine'),
+const pgrStateMachine =  require('../machine/pgr'),
     channelProvider = require('../channel'),
-    chatStateRepository = require('./repository/state-repository');
+    chatStateRepository = require('./repo/postgres-repo');
 const { State, interpret } = require('xstate');
 
 class SessionManager {
