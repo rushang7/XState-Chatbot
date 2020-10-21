@@ -9,7 +9,9 @@ const envVariables = {
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
-    pgrServiceProvider: process.env.pgrServiceProvider || 'dummy'
+    pgrServiceProvider: process.env.pgrServiceProvider || 'eGovPGR',
+
+    mdmsHost: process.env.mdmsHost || ''
 }
 
 module.exports = envVariables;

@@ -14,12 +14,13 @@
     "xstate": "^4.13.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
+    "react-app-rewired": "^2.1.6",
     "react-scripts": "latest"
   },
   "browserslist": {

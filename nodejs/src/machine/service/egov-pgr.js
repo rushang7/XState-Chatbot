@@ -1,8 +1,11 @@
 const fetch = require("node-fetch");
+const config = require('../../env-variables');
 
 class PGRService {
+
   async fetchMdmsData(moduleName, masterName, filter) {
-    var url = 'https://egov-micro-dev.egovernments.org/egov-mdms-service/v1/_search';
+    var mdmsHost = config.mdmsHost;
+    var url = mdmsHost + 'egov-mdms-service/v1/_search';
     var request = {
       "RequestInfo": {},
       "MdmsCriteria": {

@@ -161,7 +161,6 @@ const PGRStateMachine = Machine({
               })
             },
             onError: {
-              target: 'error',
               actions: assign((context, event) => {
                 let message = 'Sorry. Some error occurred on server';
                 context.chatInterface.toUser(context.user, message);

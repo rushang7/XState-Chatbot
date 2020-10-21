@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { Chat } from '@progress/kendo-react-conversational-ui';
 
 import { interpret } from 'xstate';
-import chatbotMachine from './ChatbotMachine';
+import chatbotMachine from '../../nodejs/src/machine/pgr';
 
 import * as marked from 'marked';
 
@@ -47,7 +47,7 @@ class App extends React.Component {
         this.chatbotService.start();
     }
 
-    sendMessageToUser = (message) => {
+    toUser = (user, message) => {
         let botMessage = {
             author: {
                 id: 0
@@ -62,7 +62,7 @@ class App extends React.Component {
         }));
     }
 
-    receiveMessageFromUser = (event) => {
+    fromUser = (event) => {
         this.setState((prevState) => ({
             messages: [
                 ...prevState.messages,
@@ -89,7 +89,7 @@ class App extends React.Component {
             <div>
                 <Chat user={this.user}
                     messages={this.state.messages}
-                    onMessageSend={this.receiveMessageFromUser}
+                    onMessageSend={this.fromUser}
                     placeholder={"Type a message..."}
                     messageTemplate={MessageTemplate}
                     width={400}>
