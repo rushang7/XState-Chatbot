@@ -18,10 +18,14 @@ class SessionManager {
             service = this.getChatServiceFor(chatState);
         }
         
+        service.onTransition( state => {
+            if(state.changed) {
+                let active = !state.done;
+                chatStateRepository.updateState(userId, active, JSON.stringify(state));
+            }
+        });
+        
         service.send('USER_MESSAGE', { message: message });
-
-        let active = !service.state.done;
-        await chatStateRepository.updateState(userId, active, JSON.stringify(service.state));
     }
 
     async toUser(user, message) {
