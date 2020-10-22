@@ -11,7 +11,7 @@ const envVariables = {
 
     pgrServiceProvider: process.env.pgrServiceProvider || 'eGovPGR',
 
-    mdmsHost: process.env.mdmsHost || ''
+    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/'
 }
 
 module.exports = envVariables;

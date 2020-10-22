@@ -12,18 +12,11 @@ class SessionManager {
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
         let service;
         if(!chatState) {
-            service = this.createNewConversation(userId);
+            service = this.createChatServiceFor(userId);
             await chatStateRepository.insertNewState(userId, true, JSON.stringify(service.state));
         } else {
             service = this.getChatServiceFor(chatState);
         }
-        
-        service.onTransition( state => {
-            if(state.changed) {
-                let active = !state.done;
-                chatStateRepository.updateState(userId, active, JSON.stringify(state));
-            }
-        });
         
         service.send('USER_MESSAGE', { message: message });
     }
@@ -40,10 +33,18 @@ class SessionManager {
         const resolvedState = pgrStateMachine.withContext(context).resolveState(state);
         const service = interpret(pgrStateMachine).start(resolvedState);
 
+        service.onTransition( state => {
+            let userId = state.context.user.uuid;
+            if(state.changed) {
+                let active = !state.done;
+                chatStateRepository.updateState(userId, active, JSON.stringify(state));
+            }
+        });
+
         return service;
     }
 
-    createNewConversation(userId) {
+    createChatServiceFor(userId) {
         let service = interpret(pgrStateMachine.withContext ({
             chatInterface: this,
             user: {
@@ -53,6 +54,14 @@ class SessionManager {
             slots: {}
         }))
         service.start();
+
+        service.onTransition( state => {
+            if(state.changed) {
+                let active = !state.done;
+                chatStateRepository.updateState(userId, active, JSON.stringify(state));
+            }
+        });
+
         return service;
     }
 
