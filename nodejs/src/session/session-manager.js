@@ -1,4 +1,4 @@
-const pgrStateMachine =  require('../machine/pgr'),
+const sevaStateMachine =  require('../machine/seva'),
     channelProvider = require('../channel'),
     chatStateRepository = require('./repo/postgres-repo');
 const { State, interpret } = require('xstate');
@@ -30,8 +30,8 @@ class SessionManager {
         context.chatInterface = this;
 
         const state = State.create(chatStateJson);
-        const resolvedState = pgrStateMachine.withContext(context).resolveState(state);
-        const service = interpret(pgrStateMachine).start(resolvedState);
+        const resolvedState = sevaStateMachine.withContext(context).resolveState(state);
+        const service = interpret(sevaStateMachine).start(resolvedState);
 
         service.onTransition( state => {
             let userId = state.context.user.uuid;
@@ -45,7 +45,7 @@ class SessionManager {
     }
 
     createChatServiceFor(userId) {
-        let service = interpret(pgrStateMachine.withContext ({
+        let service = interpret(sevaStateMachine.withContext ({
             chatInterface: this,
             user: {
                 uuid: userId,
