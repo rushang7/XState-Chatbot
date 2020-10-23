@@ -1,5 +1,7 @@
 const { Machine, assign } = require('xstate');
 const pgr = require('./pgr');
+const bills = require('./bills');
+const receipts = require('./receipts');
 
 const sevaMachine = Machine({
     id: 'mseva',
@@ -55,12 +57,12 @@ const sevaMachine = Machine({
             id: 'welcome',
             onEntry: assign( (context, event) => {
               let welcomeMessage = {
-                'en_IN': 'Hello. Welcome to the State of Punjab\'s Complaint Chatline',
-                'hi_IN': 'नमस्ते। पंजाब राज्य शिकायत पत्र में आपका स्वागत है'
+                'en_IN': 'Hello. Welcome to the State of Punjab\'s Seva Chatline',
+                'hi_IN': 'नमस्ते। पंजाब राज्य सेवा चैट लाइन में आपका स्वागत है'
               };
               let welcomeMessageWithName = {
-                'en_IN': 'Hello {{name}}. Welcome to the State of Punjab\'s Complaint Chatline',
-                'hi_IN': 'नमस्ते {{name}}। पंजाब राज्य शिकायत पत्र में आपका स्वागत है'
+                'en_IN': 'Hello {{name}}. Welcome to the State of Punjab\'s Seva Chatline',
+                'hi_IN': 'नमस्ते {{name}}। पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है'
               }
               var message;
               if(context.user.name) {
@@ -70,10 +72,84 @@ const sevaMachine = Machine({
               }
               context.chatInterface.toUser(context.user, message)
             }),
-            always: '#pgr'
+            always: '#sevamenu'
           },
-        pgr: pgr
-    }
-});
+          sevamenu : {
+            id: 'sevamenu',
+            initial: 'question',
+            states: {
+              question: {
+                onEntry: assign( (context, event) => {
+                    debugger;
+                    let message = {
+                    'en_IN' : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts',
+                    'hi_IN': 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए'
+                    };
+                    context.chatInterface.toUser(context.user, message[context.user.locale]);
+                }),
+                on: {
+                    USER_MESSAGE: [{
+                      target: 'process'
+                    }]
+                }
+              },
+              process: {
+                onEntry: assign((context, event) => {
+                  // TODO clean this code
+                  let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0 ; 
+      
+                  context.message = {
+                    isValid: isValid,
+                    messageContent: event.message.input.trim()
+                  }
+                  if(isValid) {
+                    context.slots.sevamenu = event.message.input.trim();
+                  }
+                }),
+                always : [
+                  {
+                    target: 'error',
+                    cond: (context, event) => {
+                      return ! context.message.isValid;
+                    }
+                  },
+                  {
+                    target: '#pgr',
+                    cond: (context, event) => {
+                      return context.message.messageContent.localeCompare('1') === 0;
+                    }
+                  },
+                  {
+                    target: '#bills', 
+                    cond: (context, event) => { 
+                      return  context.message.messageContent.localeCompare('2') === 0; 
+                    }
+                  },
+                  {
+                    target: '#receipts', 
+                    cond: (context, event) => { 
+                      return  context.message.messageContent.localeCompare('3') === 0; 
+                    }
+                  }
+                ]
+              }, // sevamenu.process
+              error: {
+                onEntry: assign( (context, event) => {
+                  let message = 'Sorry, I didn\'t understand';
+                  context.chatInterface.toUser(context.user, message);
+                }),
+                always : [
+                  {
+                    target: 'question'
+                  }
+                ]
+              }, // sevamenu.error 
+              pgr: pgr,
+              bills: bills,
+              receipts: receipts
+        } // sevamenu.states
+      } // sevamenu
+    } // states
+}); // Machine
 
 module.exports = sevaMachine;

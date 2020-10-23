@@ -10,22 +10,22 @@ const pgr =  {
         initial: 'question',
         states: {
             question: {
-            onEntry: assign( (context, event) => {
-                let message = {
-                'en_IN' : 'Please type\n\n  1 to File New Complaint.\n  2 to Track Your Complaints',
-                'hi_IN': 'कृप्या टाइप करे\n\n  1 यदि आप शिकायत दर्ज करना चाहते हैं\n  2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
-                };
-                context.chatInterface.toUser(context.user, message[context.user.locale]);
-            }),
-            on: {
-                USER_MESSAGE: [{
-                target: 'process'
-                }]
-            }
+              onEntry: assign( (context, event) => {
+                  let message = {
+                  'en_IN' : 'Please type\n\n  1 to File New Complaint.\n  2 to Track Your Complaints',
+                  'hi_IN': 'कृप्या टाइप करे\n\n  1 यदि आप शिकायत दर्ज करना चाहते हैं\n  2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
+                  };
+                  context.chatInterface.toUser(context.user, message[context.user.locale]);
+                  context.pgr = {slots: {}}; // TODO is this the right pattern? Seems wrong
+              }),
+              on: {
+                  USER_MESSAGE: [{
+                  target: 'process'
+                  }]
+              }
         },
         process: {
           onEntry: assign((context, event) => {
-            // TODO how to handle reset or start over.
             // TODO make more robust. Handle extra characters. Handle case where user types 'file complaint' or 'file'
             let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0; 
 
@@ -34,7 +34,7 @@ const pgr =  {
               messageContent: event.message.input
             }
             if(isValid) {
-              context.slots.menu = event.message.input;
+              context.pgr.slots.menu = event.message.input;
             }
           }),
           always : [
@@ -57,7 +57,7 @@ const pgr =  {
               }
             }
           ]
-        },
+        }, // menu.process
         error: {
           onEntry: assign( (context, event) => {
             let message = 'Sorry, I didn\'t understand';
@@ -68,9 +68,9 @@ const pgr =  {
               target: 'question'
             }
           ]
-        } 
-      }
-    },
+        } // menu.error
+      } // menu
+    }, // states
     city: {
       id: 'city',
       initial: 'question',
@@ -108,13 +108,13 @@ const pgr =  {
           onEntry:  assign((context, event) => {
             let parsed = parseInt(event.message.input.trim())
             // debugger
-            let isValid = !isNaN(parsed) && parsed >=0 && parsed <= context.maxValidEntry;// TODO for some reason this is not working. context no longer contain maxValidEntry
+            let isValid = !isNaN(parsed) && parsed >=0 && parsed <= context.maxValidEntry;
             context.message = {
               isValid: true,
               messageContent: event.message.input.trim()
             }
             if(isValid) { // TODO This does not seem to be the right place for this. It's too early here
-              context.slots.city = parsed;
+              context.pgr.slots.city = parsed;
             }
           }),
           always : [
@@ -172,7 +172,7 @@ const pgr =  {
           onEntry: assign( (context, event) => {
             let message = event.message;
             if(message.type === 'location') {
-              context.slots.geoLocation = message.input;
+              context.pgr.slots.geoLocation = message.input;
             } else {
 
             }
@@ -181,7 +181,7 @@ const pgr =  {
             {
               target: '#fileComplaint',
               cond: (context, event) => {
-                if(context.slots.geoLocation)
+                if(context.pgr.slots.geoLocation)
                   return true;
               }
             },
@@ -207,7 +207,7 @@ const pgr =  {
         },
         process: {
           onEntry: assign((context, event) => {
-            context.slots.locality = event.message.input;
+            context.pgr.slots.locality = event.message.input;
           }),
           always: [{target: '#fileComplaint'}]
         }
@@ -215,7 +215,6 @@ const pgr =  {
     },
     trackComplaint: {
       id: 'trackComplaint',
-      type: 'final',
       onEntry: assign( (context, event) => {
         //make api call
         console.log('Making an api call to PGR Service');
@@ -223,25 +222,29 @@ const pgr =  {
         let details = 'No. - 123, ...';
         message = message.replace('{{details}}', details);
         context.chatInterface.toUser(context.user, message);
-      })
+        context.pgr = {};
+      }),
+      always: 'menu'
     },
     fileComplaint: {
-      type: 'final',
       id: 'fileComplaint',
       onEntry: assign((context, event) => {
-        console.log(context.slots);
+        console.log(context.pgr.slots);
         //make api call
         console.log('Making api call to PGR Service');
         let message = 'File a new complaint:\n Complaint has been filed successfully {{number}}';
         let number = '123';
         message = message.replace('{{number}}', number);
         context.chatInterface.toUser(context.user, message);
-      })
+        context.pgr = {};
+      }),
+      always: 'menu'
     },
     start_over: {
       id: 'start_over',
       onEntry: assign((context, event) => {
         context.chatInterface.toUser(context.user, 'Ok. Let\'s start over');
+        context.pgr = {};
       }),
       always: 'menu'
     }
