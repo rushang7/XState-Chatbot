@@ -89,20 +89,20 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.message =  event.message.input.trim()
+                  context.message =  event.message.input.trim().toLowerCase();
                 }),
                 always : [
                   {
                     target: '#pgr',
-                    cond: (context, event) => grammer.menu.question.pgr.includes(context.message)
+                    cond: (context, event) => grammer.menu.question.pgr.find((element)=>context.message.includes(element))
                   },
                   {
                     target: '#bills', 
-                    cond: (context, event) => grammer.menu.question.bills.includes(context.message)   
+                    cond: (context, event) => grammer.menu.question.bills.find((element)=>context.message.includes(element)) 
                   },
                   {
                     target: '#receipts', 
-                    cond: (context, event) => grammer.menu.question.receipts.includes(context.message)  
+                    cond: (context, event) => grammer.menu.question.receipts.find((element)=>context.message.includes(element)) 
                   },
                   {
                     target: 'error'
@@ -144,9 +144,9 @@ let messages = { // TODO @Rushang - can you mnove this inside the Machine. Name 
 let grammer = {
   menu: {
     question: {
-      pgr: ['1','complaint','complaints'], 
-      bills: ['2', 'bill', 'bills'],
-      receipts: ['3','receipt', 'receipts']
+      pgr: ['1','complaint'], 
+      bills: ['2', 'bill'],
+      receipts: ['3','receipt']
     }
   }
 
