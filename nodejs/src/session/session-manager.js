@@ -17,9 +17,7 @@ class SessionManager {
         } else {
             service = this.getChatServiceFor(chatState);
         }
-        console.log(message);
         let event = (message.input == "seva")? 'USER_RESET' : 'USER_MESSAGE';
-        console.log(event);
         service.send(event, { message: message });
     }
 

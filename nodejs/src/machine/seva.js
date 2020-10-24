@@ -61,12 +61,19 @@ const sevaMachine = Machine({
           },
           welcome: {
             id: 'welcome',
-            onEntry: assign( (context, event) => {
+            onEntry: assign( (context, event, meta) => {
               let hello = messages.welcome.hello[context.user.locale](context.user.name); // TODO - @Rushang look at this, can you remove the []
-              let welcome = messages.welcome.welcome[context.user.locale]
+              // let welcome = messages.welcome.welcome[context.user.locale];
+              let welcome = get_message(messages.welcome.welcome, context.user.locale); // TODO @Rushang this is the pattern to use. Is there someway we can relieve this code from having to specify state "welcome"
               context.chatInterface.toUser(context.user, `${hello}, ${welcome}`);
+              console.log(meta); // TODO @Rushang, I  tried to use this to see if I could store message here but no luck - the state is the previous state 
+              console.log(meta.message); // undefined
             }),
-            always: '#sevamenu'
+            always: '#sevamenu',
+            meta: {
+              message: "hello world"  
+            }
+
           },
           sevamenu : {
             id: 'sevamenu',
@@ -128,7 +135,7 @@ const sevaMachine = Machine({
     }, // states
 }); // Machine
 
-let messages = { // TODO @Rushang - can you mnove this inside the Machine. Name clash
+let messages = { // TODO @Rushang - can you mnove this inside the Machine to avoid name clash (maybe meta)? Is this the right pattern
   welcome: {
     hello: {
       en_IN: (name)=>name? `Hello ${name}`: `Hello`,
@@ -149,7 +156,10 @@ let grammer = {
       receipts: ['3','receipt']
     }
   }
+}
 
+function get_message(bundle, locale) {
+  return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
 }
 
 module.exports = sevaMachine;
