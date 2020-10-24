@@ -9,7 +9,7 @@ const sevaMachine = Machine({
     on: {
       USER_RESET: {
         target: 'sevamenu',
-        actions: (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over.") // TODO This is getting printed too late
+        actions: (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over.") // TODO @Rushang This is getting printed too late
       }
     },
     states: {
@@ -102,15 +102,9 @@ const sevaMachine = Machine({
                 }),
                 always : [
                   {
-                    target: 'error',
-                    cond: (context, event) => {
-                      return ! context.message.isValid;
-                    }
-                  },
-                  {
                     target: '#pgr',
                     cond: (context, event) => {
-                      return context.message.messageContent.localeCompare('1') === 0;
+                      return context.message.messageContent.localeCompare('1') === 0 || grammer.menu.question.pgr.includes(context.message.messageContent);
                     }
                   },
                   {
@@ -124,6 +118,9 @@ const sevaMachine = Machine({
                     cond: (context, event) => { 
                       return  context.message.messageContent.localeCompare('3') === 0; 
                     }
+                  },
+                  {
+                    target: 'error'
                   }
                 ]
               }, // sevamenu.process
@@ -146,7 +143,7 @@ const sevaMachine = Machine({
     }, // states
 }); // Machine
 
-let messages = {
+let messages = { // TODO @Rushang - can you mnove this inside the Machine. Name clash
   welcome: {
     hello: {
       en_IN: (name)=>name? `Hello ${name}`: `Hello`,
@@ -157,6 +154,17 @@ let messages = {
       hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है.',
     }
   }
+}
+
+let grammer = {
+  menu: {
+    question: {
+      pgr: ['complaint','complaints'], 
+      bills: ['bill', 'bills'],
+      receipts: ['receipt', 'receipts']
+    }
+  }
+
 }
 
 module.exports = sevaMachine;
