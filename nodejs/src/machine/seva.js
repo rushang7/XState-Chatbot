@@ -56,21 +56,9 @@ const sevaMachine = Machine({
           welcome: {
             id: 'welcome',
             onEntry: assign( (context, event) => {
-              let welcomeMessage = {
-                'en_IN': 'Hello. Welcome to the State of Punjab\'s Seva Chatline',
-                'hi_IN': 'नमस्ते। पंजाब राज्य सेवा चैट लाइन में आपका स्वागत है'
-              };
-              let welcomeMessageWithName = {
-                'en_IN': 'Hello {{name}}. Welcome to the State of Punjab\'s Seva Chatline',
-                'hi_IN': 'नमस्ते {{name}}। पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है'
-              }
-              var message;
-              if(context.user.name) {
-                message = welcomeMessageWithName[context.user.locale].replace('{{name}}', context.user.name);
-              } else {
-                message = welcomeMessage[context.user.locale];
-              }
-              context.chatInterface.toUser(context.user, message)
+              let hello = messages.welcome.hello[context.user.locale](context.user.name); // TODO - @Rushang look at this, can you remove the []
+              let welcome = messages.welcome.welcome[context.user.locale]
+              context.chatInterface.toUser(context.user, `${hello}, ${welcome}`);
             }),
             always: '#sevamenu'
           },
@@ -148,8 +136,29 @@ const sevaMachine = Machine({
               bills: bills,
               receipts: receipts
         } // sevamenu.states
-      } // sevamenu
+      }, // sevamenu
+      sreset: {
+        id: 'reset',
+        onEntry: assign((context, event) => {
+          context.chatInterface.toUser(context.user, 'Ok. Let\'s start over');
+          context.app= { pgr: {}, bills: {}, receipts: {}};
+        }),
+        always: 'welcome'
+      }
     } // states
 }); // Machine
+
+let messages = {
+  welcome: {
+    hello: {
+      en_IN: (name)=>name? `Hello ${name}`: `Hello`,
+      hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते`
+    },
+    welcome: {
+      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.',
+      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है.',
+    }
+  }
+}
 
 module.exports = sevaMachine;
