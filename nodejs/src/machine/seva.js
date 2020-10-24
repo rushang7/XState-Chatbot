@@ -89,35 +89,20 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  // TODO clean this code
-                  let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0 ; 
-      
-                  context.message = {
-                    isValid: isValid,
-                    messageContent: event.message.input.trim()
-                  }
-                  if(isValid) {
-                    context.slots.sevamenu = event.message.input.trim();
-                  }
+                  context.message =  event.message.input.trim()
                 }),
                 always : [
                   {
                     target: '#pgr',
-                    cond: (context, event) => {
-                      return context.message.messageContent.localeCompare('1') === 0 || grammer.menu.question.pgr.includes(context.message.messageContent);
-                    }
+                    cond: (context, event) => grammer.menu.question.pgr.includes(context.message)
                   },
                   {
                     target: '#bills', 
-                    cond: (context, event) => { 
-                      return  context.message.messageContent.localeCompare('2') === 0; 
-                    }
+                    cond: (context, event) => grammer.menu.question.bills.includes(context.message)   
                   },
                   {
                     target: '#receipts', 
-                    cond: (context, event) => { 
-                      return  context.message.messageContent.localeCompare('3') === 0; 
-                    }
+                    cond: (context, event) => grammer.menu.question.receipts.includes(context.message)  
                   },
                   {
                     target: 'error'
@@ -159,9 +144,9 @@ let messages = { // TODO @Rushang - can you mnove this inside the Machine. Name 
 let grammer = {
   menu: {
     question: {
-      pgr: ['complaint','complaints'], 
-      bills: ['bill', 'bills'],
-      receipts: ['receipt', 'receipts']
+      pgr: ['1','complaint','complaints'], 
+      bills: ['2', 'bill', 'bills'],
+      receipts: ['3','receipt', 'receipts']
     }
   }
 
