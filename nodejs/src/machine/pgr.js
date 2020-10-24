@@ -174,7 +174,7 @@ const pgr =  {
             if(message.type === 'location') {
               context.pgr.slots.geoLocation = message.input;
             } else {
-
+              console.error(`Expected location message type. Received ${message.type}. Unimplemented. Skipping ...`);
             }
           }),
           always: [

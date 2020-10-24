@@ -6,10 +6,16 @@ const receipts = require('./receipts');
 const sevaMachine = Machine({
     id: 'mseva',
     initial: 'start',
+    on: {
+      USER_RESET: {
+        target: 'sevamenu',
+        actions: (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over.") // TODO This is getting printed too late
+      }
+    },
     states: {
         start: {
             on: {
-              'USER_MESSAGE': 'locale'
+              USER_MESSAGE: 'locale'
             }
           },
           locale: {
@@ -136,16 +142,8 @@ const sevaMachine = Machine({
               bills: bills,
               receipts: receipts
         } // sevamenu.states
-      }, // sevamenu
-      sreset: {
-        id: 'reset',
-        onEntry: assign((context, event) => {
-          context.chatInterface.toUser(context.user, 'Ok. Let\'s start over');
-          context.app= { pgr: {}, bills: {}, receipts: {}};
-        }),
-        always: 'welcome'
-      }
-    } // states
+      } // sevamenu
+    }, // states
 }); // Machine
 
 let messages = {
