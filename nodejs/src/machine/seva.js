@@ -24,8 +24,7 @@ const sevaMachine = Machine({
             states: {
               question: {
                 onEntry: assign((context, event) => {
-                  let message = "Please choose your preferred language\n 1.English 2. हिंदी"
-                  context.chatInterface.toUser(context.user, message);
+                  context.chatInterface.toUser(context.user, "Please choose your preferred language\n 1.English 2. हिंदी");
                 }),
                 on: {
                   USER_MESSAGE: 'process'
@@ -62,26 +61,18 @@ const sevaMachine = Machine({
           welcome: {
             id: 'welcome',
             onEntry: assign( (context, event, meta) => {
-              let hello = messages.welcome.hello[context.user.locale](context.user.name); // TODO - @Rushang look at this, can you remove the []
-              // let welcome = messages.welcome.welcome[context.user.locale];
-              let welcome = get_message(messages.welcome.welcome, context.user.locale); // TODO @Rushang this is the pattern to use. Is there someway we can relieve this code from having to specify state "welcome"
-              context.chatInterface.toUser(context.user, `${hello}, ${welcome}`);
-              console.log(meta); // TODO @Rushang, I  tried to use this to see if I could store message here but no luck - the state is the previous state 
-              console.log(meta.message); // undefined
+              let hello = get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
+              let welcome = get_message(messages.welcome.welcome, context.user.locale); 
+              context.chatInterface.toUser(context.user, `${hello}. ${welcome}`);
             }),
-            always: '#sevamenu',
-            meta: {
-              message: "hello world"  
-            }
-
+            always: '#sevamenu'
           },
-          sevamenu : {
+          sevamenu : { // rename to menu if you can figure out how to avoid name clash with seva's menu
             id: 'sevamenu',
             initial: 'question',
             states: {
               question: {
                 onEntry: assign( (context, event) => {
-                    debugger;
                     let message = {
                     'en_IN' : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts',
                     'hi_IN': 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए'
@@ -135,7 +126,7 @@ const sevaMachine = Machine({
     }, // states
 }); // Machine
 
-let messages = { // TODO @Rushang - can you mnove this inside the Machine to avoid name clash (maybe meta)? Is this the right pattern
+let messages = { 
   welcome: {
     hello: {
       en_IN: (name)=>name? `Hello ${name}`: `Hello`,
