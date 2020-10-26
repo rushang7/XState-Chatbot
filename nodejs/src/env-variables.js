@@ -11,7 +11,9 @@ const envVariables = {
 
     pgrServiceProvider: process.env.pgrServiceProvider || 'DummyPGR',
 
-    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/'
+    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
+
+    googleAPIKey: process.env.googleAPIKey || ''
 }
 
 module.exports = envVariables;
