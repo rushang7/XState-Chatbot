@@ -20,11 +20,11 @@ const sevaMachine = Machine({
           },
           locale: {
             id: 'locale',
-            'initial': 'question',
+            initial: 'question',
             states: {
               question: {
                 onEntry: assign((context, event) => {
-                  context.chatInterface.toUser(context.user, "Please choose your preferred language\n 1.English 2. हिंदी");
+                  context.chatInterface.toUser(context.user, get_message(messages.locale.question));
                 }),
                 on: {
                   USER_MESSAGE: 'process'
@@ -32,29 +32,24 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.message = {};
-                  let choice = event.message.input.trim();
-                  if(choice == 1) {
-                    context.user.locale = "en_IN";
-                    context.message.isValid = true;
-                  }
-                  else if(choice == 2) {
-                    context.user.locale = "hi_IN";
-                    context.message.isValid = true;
-                  }
-                  else {
-                    context.message.isValid = false;
+                  context.message = get_input(event);
+                  // if (exact(grammer.locale.question.english, context.message)) {
+                  //   context.user.locale = "en_IN"
+                  // } else if (exact(grammer.locale.question.hindi, context.message)) {
+                  //   context.user.locale = "hi_IN";
+                  // } else {
+                  //   context.chatInterface.toUser(context.user, 'Sorry, I didn\'t understand');
+                  //   context.chatInterface.toUser(context.user, 'Proceeding in English');
+                  //   context.user.locale = "en_IN"
+                  // }
+                  context.user.locale  = get_intention(grammer.locale.question, context.message, true);
+                  if (context.user.locale === INTENTION_UNKOWN) {
+                    context.chatInterface.toUser(context.user, 'Sorry, I didn\'t understand');
+                    context.chatInterface.toUser(context.user, 'Proceeding in English');
+                    context.user.locale = "en_IN"
                   }
                 }),
-                always: [
-                  {
-                    target: 'question',
-                    cond: (context, event) => !context.message.isValid
-                  },
-                  {
-                    target: '#welcome'
-                  }
-                ]
+                always: [{ target: '#welcome'}]
               }
             }
           },
@@ -87,20 +82,23 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.message =  event.message.input.trim().toLowerCase();
+                  context.message =  get_input(event);
                 }),
                 always : [
                   {
                     target: '#pgr',
-                    cond: (context, event) => grammer.menu.question.pgr.find((element)=>context.message.includes(element))
+                    // cond: (context, event) => contains(grammer.menu.question.pgr, context.message)
+                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'pgr'
                   },
                   {
                     target: '#bills', 
-                    cond: (context, event) => grammer.menu.question.bills.find((element)=>context.message.includes(element)) 
+                    //cond: (context, event) => contains(grammer.menu.question.bills,context.message)
+                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'bills'
                   },
                   {
                     target: '#receipts', 
-                    cond: (context, event) => grammer.menu.question.receipts.find((element)=>context.message.includes(element)) 
+                    // cond: (context, event) => contains(grammer.menu.question.receipts,context.message) 
+                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'receipts'
                   },
                   {
                     target: 'error'
@@ -126,7 +124,23 @@ const sevaMachine = Machine({
     }, // states
 }); // Machine
 
-let messages = { 
+let messages = {
+  error: {
+    generic: {
+      en_IN: 'I am sorry, I didn\'t understand. Let\'s try again.',
+      hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर से कोशिश करें।'
+    },
+    proceeding: {
+      en_IN: 'I am sorry, I didn\'t understand. Proceeding',
+      hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर भी आगे बढ़ें।'
+    }
+  },
+  locale : {
+    question: {
+      en_IN: "Please choose your preferred language\n 1.English 2. हिंदी",
+      hi_IN: "कृपया अपनी पसंदीदा भाषा चुनें\n 1.English 2. हिंदी"
+    }
+  },
   welcome: {
     hello: {
       en_IN: (name)=>name? `Hello ${name}`: `Hello`,
@@ -140,17 +154,50 @@ let messages = {
 }
 
 let grammer = {
+  locale: {
+    question: [
+      {intention: 'en_IN', recognize: ['1', 'english']},
+      {intention: 'hi_IN', recognize: ['2', 'hindi']}
+    ]
+  },
   menu: {
-    question: {
-      pgr: ['1','complaint'], 
-      bills: ['2', 'bill'],
-      receipts: ['3','receipt']
-    }
+    question: [
+      {intention: 'pgr', recognize: ['1','complaint']}, 
+      {intention: 'bills', recognize: ['2', 'bill']},
+      {intention: 'receipts', recognize: ['3','receipt']}
+    ]
   }
 }
-
-function get_message(bundle, locale) {
+const INTENTION_UNKOWN = 'INTENTION_UKNOWN';
+function get_input(event) {
+  return event.message.input.trim().toLowerCase();
+}
+function get_message(bundle, locale = 'en_IN') {
   return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
 }
+function get_intention(g, utterance, strict = false) {
+  // let utterance = get_input(event);
+  //console.log(g);
+  console.log(`looking for ${utterance} with strict set of ${strict}`);
 
+  g.forEach(element => {
+    console.log(element.recognize);
+    //console.log(element.recognize.includes(utterance));
+    console.log("---");
+  });
+  function exact(e) {return e.recognize.includes(utterance)}
+  function contains(e) {return e.recognize.find(r=>utterance.includes(r))}
+  //let index = strict? g.findIndex(e=>{e.recognize.includes(utterance)}) : g.findIndex(e=>{e.recognize.find(r=>utterance.includes(r))});
+  let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
+
+  console.log(`found ${index}`)
+  return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
+}
+
+// function contains(grammer, s) {
+//   return grammer.find((element)=>s.includes(element))
+// }
+// function exact(grammer, s) {
+//   return grammer.includes(s)
+// }
 module.exports = sevaMachine;
