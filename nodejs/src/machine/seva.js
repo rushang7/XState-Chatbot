@@ -10,7 +10,7 @@ const sevaMachine = Machine({
     on: {
       USER_RESET: {
         target: 'sevamenu',
-        actions: (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over.") // TODO @Rushang This is getting printed too late
+        actions: assign( (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over."))
       }
     },
     states: {
