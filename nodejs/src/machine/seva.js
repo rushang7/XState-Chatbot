@@ -16,7 +16,8 @@ const sevaMachine = Machine({
     states: {
         start: {
             on: {
-              USER_MESSAGE: 'locale'
+              // USER_MESSAGE: 'locale'
+              USER_MESSAGE: 'welcome'
             }
           },
           locale: {
@@ -82,6 +83,10 @@ const sevaMachine = Machine({
                     cond: (context) => context.intention == 'receipts'
                   },
                   {
+                    target: '#locale', 
+                    cond: (context) => context.intention == 'locale'
+                  },
+                  {
                     target: 'error'
                   }
                 ]
@@ -129,8 +134,8 @@ let messages = {
   },
   sevamenu: {
     question: {
-      en_IN : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts',
-      hi_IN: 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए'
+      en_IN : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts.\n\n  5 to Change Language',
+      hi_IN: 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए\n\n  5 भाषा बदलने के लिए'
     }
   }
 }
@@ -146,7 +151,8 @@ let grammer = {
     question: [
       {intention: 'pgr', recognize: ['1','complaint']}, 
       {intention: 'bills', recognize: ['2', 'bill']},
-      {intention: 'receipts', recognize: ['3','receipt']}
+      {intention: 'receipts', recognize: ['3','receipt']},
+      {intention: 'locale', recognize: ['5','language', 'english', 'hindi']}
     ]
   }
 }
