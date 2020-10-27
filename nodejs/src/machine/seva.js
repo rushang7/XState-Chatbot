@@ -10,7 +10,7 @@ const sevaMachine = Machine({
     on: {
       USER_RESET: {
         target: 'sevamenu',
-        actions: assign( (context, event) => context.chatInterface.toUser(context.user, "BIG RESET. Let us start over."))
+        actions: assign( (context, event) => context.chatInterface.toUser(context.user, get_message(messages.reset, context.user.locale)))
       }
     },
     states: {
@@ -26,7 +26,7 @@ const sevaMachine = Machine({
             states: {
               question: {
                 onEntry: assign((context, event) => {
-                  context.chatInterface.toUser(context.user, get_message(messages.locale.question));
+                  context.chatInterface.toUser(context.user, get_message(messages.locale.question, context.user.locale));
                 }),
                 on: {
                   USER_MESSAGE: 'process'
@@ -106,6 +106,10 @@ const sevaMachine = Machine({
 }); // Machine
 
 let messages = {
+  reset: {
+    en_IN: 'Ok. Let\'s start over.',
+    hi_IN: 'ठीक। फिर से शुरू करते हैं।'
+  },
   error: {
     retry: {
       en_IN: 'I am sorry, I didn\'t understand. Let\'s try again.',
@@ -128,8 +132,8 @@ let messages = {
       hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते।`
     },
     welcome: {
-      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.',
-      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।',
+      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.\n At any state, you may <em>seva</em> to come back to this main menu',
+      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।\n किसी भी अवस्था में, आप इस मुख्य मेनू पर वापस आने के लिए <em>सेवा</em> टाइप कर सकते हैं।',
     }
   },
   sevamenu: {

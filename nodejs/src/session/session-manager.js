@@ -2,12 +2,12 @@ const sevaStateMachine =  require('../machine/seva'),
     channelProvider = require('../channel'),
     chatStateRepository = require('./repo/postgres-repo');
 const { State, interpret } = require('xstate');
+const {get_message, get_intention, INTENTION_UNKOWN} = require('../machine/util/dialog.js');
 
 class SessionManager {
 
     async fromUser(reformattedMessage) {
         let userId = reformattedMessage.userId;
-        let message = reformattedMessage.message;
 
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
         let service;
@@ -17,8 +17,9 @@ class SessionManager {
         } else {
             service = this.getChatServiceFor(chatState);
         }
-        let event = (message.input == "seva")? 'USER_RESET' : 'USER_MESSAGE';
-        service.send(event, { message: message });
+        let intention = get_intention(grammer.reset, reformattedMessage, true);
+        let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';
+        service.send(event, { message: reformattedMessage.message });
     }
 
     async toUser(user, message) {
@@ -65,6 +66,12 @@ class SessionManager {
         return service;
     }
 
+}
+
+let grammer = {
+    reset: [
+        {intention: 'reset', recognize: ['seva', 'सेवा']},
+      ]
 }
 
 module.exports = new SessionManager();
