@@ -32,7 +32,7 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-al                  context.user.locale  = get_intention(grammer.locale.question, event, true);
+                  context.user.locale  = get_intention(grammer.locale.question, event, true);
                   if (context.user.locale === INTENTION_UNKOWN) {
                     context.user.locale = 'en_IN';
                     context.chatInterface.toUser(context.user, get_message(messages.error.proceeding, context.user.locale));      
