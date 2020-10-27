@@ -32,21 +32,10 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.message = get_input(event);
-                  // if (exact(grammer.locale.question.english, context.message)) {
-                  //   context.user.locale = "en_IN"
-                  // } else if (exact(grammer.locale.question.hindi, context.message)) {
-                  //   context.user.locale = "hi_IN";
-                  // } else {
-                  //   context.chatInterface.toUser(context.user, 'Sorry, I didn\'t understand');
-                  //   context.chatInterface.toUser(context.user, 'Proceeding in English');
-                  //   context.user.locale = "en_IN"
-                  // }
-                  context.user.locale  = get_intention(grammer.locale.question, context.message, true);
+al                  context.user.locale  = get_intention(grammer.locale.question, event, true);
                   if (context.user.locale === INTENTION_UNKOWN) {
-                    context.chatInterface.toUser(context.user, 'Sorry, I didn\'t understand');
-                    context.chatInterface.toUser(context.user, 'Proceeding in English');
-                    context.user.locale = "en_IN"
+                    context.user.locale = 'en_IN';
+                    context.chatInterface.toUser(context.user, get_message(messages.error.proceeding, context.user.locale));      
                   }
                 }),
                 always: [{ target: '#welcome'}]
@@ -58,47 +47,38 @@ const sevaMachine = Machine({
             onEntry: assign( (context, event, meta) => {
               let hello = get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
               let welcome = get_message(messages.welcome.welcome, context.user.locale); 
-              context.chatInterface.toUser(context.user, `${hello}. ${welcome}`);
+              context.chatInterface.toUser(context.user, `${hello} ${welcome}`);
             }),
             always: '#sevamenu'
           },
-          sevamenu : { // rename to menu if you can figure out how to avoid name clash with seva's menu
+          sevamenu : { // TODO rename to menu if you can figure out how to avoid name clash with seva's menu
             id: 'sevamenu',
             initial: 'question',
             states: {
               question: {
                 onEntry: assign( (context, event) => {
-                    let message = {
-                    'en_IN' : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts',
-                    'hi_IN': 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए'
-                    };
-                    context.chatInterface.toUser(context.user, message[context.user.locale]);
+                    context.chatInterface.toUser(context.user, get_message(messages.sevamenu.question, context.user.locale));
                 }),
                 on: {
-                    USER_MESSAGE: [{
-                      target: 'process'
-                    }]
+                    USER_MESSAGE: [{ target: 'process'}]
                 }
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.message =  get_input(event);
+                  context.intention = get_intention(grammer.menu.question, event)
                 }),
                 always : [
                   {
                     target: '#pgr',
-                    // cond: (context, event) => contains(grammer.menu.question.pgr, context.message)
-                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'pgr'
+                    cond: (context) => context.intention == 'pgr'
                   },
                   {
                     target: '#bills', 
-                    //cond: (context, event) => contains(grammer.menu.question.bills,context.message)
-                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'bills'
+                    cond: (context) => context.intention == 'bills'
                   },
                   {
                     target: '#receipts', 
-                    // cond: (context, event) => contains(grammer.menu.question.receipts,context.message) 
-                    cond: (context, event) => get_intention(grammer.menu.question, context.message) == 'receipts'
+                    cond: (context) => context.intention == 'receipts'
                   },
                   {
                     target: 'error'
@@ -107,14 +87,9 @@ const sevaMachine = Machine({
               }, // sevamenu.process
               error: {
                 onEntry: assign( (context, event) => {
-                  let message = 'Sorry, I didn\'t understand';
-                  context.chatInterface.toUser(context.user, message);
+                  context.chatInterface.toUser(context.user, get_message(messages.error.retry, context.user.locale));
                 }),
-                always : [
-                  {
-                    target: 'question'
-                  }
-                ]
+                always : [{ target: 'question' }]
               }, // sevamenu.error 
               pgr: pgr,
               bills: bills,
@@ -126,12 +101,12 @@ const sevaMachine = Machine({
 
 let messages = {
   error: {
-    generic: {
+    retry: {
       en_IN: 'I am sorry, I didn\'t understand. Let\'s try again.',
       hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर से कोशिश करें।'
     },
     proceeding: {
-      en_IN: 'I am sorry, I didn\'t understand. Proceeding',
+      en_IN: 'I am sorry, I didn\'t understand. But proceeding nonetheless',
       hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर भी आगे बढ़ें।'
     }
   },
@@ -143,12 +118,18 @@ let messages = {
   },
   welcome: {
     hello: {
-      en_IN: (name)=>name? `Hello ${name}`: `Hello`,
-      hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते`
+      en_IN: (name)=>name? `Hello ${name}.`: ``,
+      hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते।`
     },
     welcome: {
       en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.',
-      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है.',
+      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।',
+    }
+  },
+  sevamenu: {
+    question: {
+      en_IN : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts',
+      hi_IN: 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए'
     }
   }
 }
@@ -175,29 +156,12 @@ function get_input(event) {
 function get_message(bundle, locale = 'en_IN') {
   return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
 }
-function get_intention(g, utterance, strict = false) {
-  // let utterance = get_input(event);
-  //console.log(g);
-  console.log(`looking for ${utterance} with strict set of ${strict}`);
-
-  g.forEach(element => {
-    console.log(element.recognize);
-    //console.log(element.recognize.includes(utterance));
-    console.log("---");
-  });
+function get_intention(g, event, strict = false) {
+  let utterance = get_input(event);
   function exact(e) {return e.recognize.includes(utterance)}
   function contains(e) {return e.recognize.find(r=>utterance.includes(r))}
-  //let index = strict? g.findIndex(e=>{e.recognize.includes(utterance)}) : g.findIndex(e=>{e.recognize.find(r=>utterance.includes(r))});
   let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
-
-  console.log(`found ${index}`)
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
 
-// function contains(grammer, s) {
-//   return grammer.find((element)=>s.includes(element))
-// }
-// function exact(grammer, s) {
-//   return grammer.includes(s)
-// }
 module.exports = sevaMachine;
