@@ -39,7 +39,7 @@ const sevaMachine = Machine({
                     context.chatInterface.toUser(context.user, get_message(messages.error.proceeding, context.user.locale));      
                   }
                 }),
-                always: [{ target: '#welcome'}]
+                always: '#welcome'
               }
             }
           },
@@ -61,7 +61,7 @@ const sevaMachine = Machine({
                     context.chatInterface.toUser(context.user, get_message(messages.sevamenu.question, context.user.locale));
                 }),
                 on: {
-                    USER_MESSAGE: [{ target: 'process'}]
+                    USER_MESSAGE: 'process'
                 }
               },
               process: {
@@ -90,7 +90,7 @@ const sevaMachine = Machine({
                 onEntry: assign( (context, event) => {
                   context.chatInterface.toUser(context.user, get_message(messages.error.retry, context.user.locale));
                 }),
-                always : [{ target: 'question' }]
+                always : 'question'
               }, // sevamenu.error 
               pgr: pgr,
               bills: bills,
