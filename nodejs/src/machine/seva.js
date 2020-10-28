@@ -132,8 +132,8 @@ let messages = {
       hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते।`
     },
     welcome: {
-      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.\n At any state, you may <em>seva</em> to come back to this main menu',
-      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।\n किसी भी अवस्था में, आप इस मुख्य मेनू पर वापस आने के लिए <em>सेवा</em> टाइप कर सकते हैं।',
+      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.\n You may type "seva" at any time to come back to this main menu',
+      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।\n किसी भी अवस्था में, आप इस मुख्य मेनू पर वापस आने के लिए "सेवा" टाइप कर सकते हैं।',
     }
   },
   sevamenu: {

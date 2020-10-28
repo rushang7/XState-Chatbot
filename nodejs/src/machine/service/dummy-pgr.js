@@ -5,6 +5,15 @@ class DummyPGRService {
     async fetchCities() {
         return ["Bangalore", "Boston"];
     }
+    async fetchFrequentComplaints() {
+        return [
+            'Streetlight not working',
+            'Sewage overflow / blocked',
+            'Garbage not cleared',
+            'Dirty Road - needs sweeping',
+            'Water Pipe broken / leaking'
+        ]
+    }
 
 }
 
