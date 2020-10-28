@@ -1,6 +1,6 @@
 const sevaStateMachine =  require('../machine/seva'),
     channelProvider = require('../channel'),
-    chatStateRepository = require('./repo/postgres-repo');
+    chatStateRepository = require('./repo');
 const { State, interpret } = require('xstate');
 const {get_message, get_intention, INTENTION_UNKOWN} = require('../machine/util/dialog.js');
 
