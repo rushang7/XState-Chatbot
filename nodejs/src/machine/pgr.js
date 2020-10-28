@@ -198,7 +198,7 @@ const pgr =  {
               }),
               always: [
                 {
-                  target: '#fileComplaint',
+                  target: '#persistComplaint',
                   cond: (context, event) => {
                     if(context.pgr.slots.geoLocation)
                       return true;
@@ -228,7 +228,7 @@ const pgr =  {
               onEntry: assign((context, event) => {
                 context.pgr.slots.locality = event.message.input;
               }),
-              always: [{target: '#persistComplaint'}]
+              always: '#persistComplaint'
             }
           }
         },
