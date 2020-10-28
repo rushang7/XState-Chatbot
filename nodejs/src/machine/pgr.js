@@ -234,7 +234,7 @@ const pgr =  {
         },
         persistComplaint: {
           id: 'persistComplaint',
-          type: 'final',
+          always: '#endstate',
           onEntry: assign((context, event) => {
             console.log(context.pgr.slots);
             //make api call
@@ -243,7 +243,6 @@ const pgr =  {
             let number = '123';
             message = message.replace('{{number}}', number);
             context.chatInterface.toUser(context.user, message);
-            context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another transaction (Unimplemented)");
             context.pgr = {};
           })
         },
@@ -251,7 +250,7 @@ const pgr =  {
     },  // fileComplaint
     trackComplaint: {
       id: 'trackComplaint',
-      type: 'final',
+      always: '#endstate',
       onEntry: assign( (context, event) => {
         //make api call
         console.log('Making an api call to PGR Service');
@@ -259,7 +258,6 @@ const pgr =  {
         let details = 'No. - 123, ...';
         message = message.replace('{{details}}', details);
         context.chatInterface.toUser(context.user, message);
-        context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another transaction (Unimplemented)");
         context.pgr = {};
       })
     } // trackComplaint

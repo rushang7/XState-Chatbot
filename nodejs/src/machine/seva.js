@@ -101,7 +101,15 @@ const sevaMachine = Machine({
               bills: bills,
               receipts: receipts
         } // sevamenu.states
-      } // sevamenu
+      }, // sevamenu
+      endstate: {
+        id: 'endstate',
+        // type: 'final', May want to make it a final state and kill the machine
+        always: 'start',  // Or restart the conversation with same machine by putting user to start state
+        onEntry: assign((context, event) => {
+          context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another conversation");
+        })
+      }
     }, // states
 }); // Machine
 
