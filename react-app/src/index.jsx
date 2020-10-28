@@ -8,10 +8,9 @@ import chatbotMachine from '../../nodejs/src/machine/seva';
 import * as marked from 'marked';
 
 function MessageTemplate(props) {
-    let message = props.item;
-    let parser = marked.setOptions({});
-    var parsedMessage = parser.parse(message.text);
-    let htmlToinsert = { __html: parsedMessage };
+    let message = props.item.text;
+    message = message.replaceAll('\n', '<br/>');
+    let htmlToinsert = { __html: message };
     return (
         <div className="k-bubble">
             <div dangerouslySetInnerHTML={htmlToinsert} />

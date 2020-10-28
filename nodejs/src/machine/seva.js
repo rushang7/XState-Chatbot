@@ -130,14 +130,14 @@ let messages = {
   },
   locale : {
     question: {
-      en_IN: "Please choose your preferred language\n 1.English 2. हिंदी",
-      hi_IN: "कृपया अपनी पसंदीदा भाषा चुनें\n 1.English 2. हिंदी"
+      en_IN: "Please choose your preferred language\n1.English\n2. हिंदी",
+      hi_IN: "कृपया अपनी पसंदीदा भाषा चुनें\n1.English\n2. हिंदी"
     }
   },
   welcome: {
     hello: {
-      en_IN: (name)=>name? `Hello ${name}.`: ``,
-      hi_IN: (name)=>name? `नमस्ते ${name}`: `नमस्ते।`
+      en_IN: (name)=>name? `Hello ${name}.\n`: `Hello,\n`,
+      hi_IN: (name)=>name? `नमस्ते ${name},\n`: `नमस्ते।\n`
     },
     welcome: {
       en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.\n You may type "seva" at any time to come back to this main menu',
@@ -146,8 +146,8 @@ let messages = {
   },
   sevamenu: {
     question: {
-      en_IN : 'Please type\n\n  1 for Complaints.\n  2 for Bills.\n  3 for Receipts.\n\n  5 to Change Language',
-      hi_IN: 'कृप्या टाइप करे\n\n  1 शिकायतों के लिए\n  2 बिलों के लिए\n  3 रसीदों के लिए\n\n  5 भाषा बदलने के लिए'
+      en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n5 to Change Language',
+      hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n5 भाषा बदलने के लिए'
     }
   }
 }
