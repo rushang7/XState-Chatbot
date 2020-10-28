@@ -1,5 +1,5 @@
 const { assign } = require('xstate');
-const pgrService = require('./service/service-loader')
+const { pgrService } = require('./service/service-loader')
 const {get_message, get_intention, INTENTION_UNKOWN} = require('./util/dialog.js');
 
 
