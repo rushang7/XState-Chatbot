@@ -5,19 +5,16 @@ class StateRepository {
     }
 
     async insertNewState(userId, active, state) {
-        this.states.userId = state;
-        // console.log(Object.keys(this.states).length);
+        this.states[userId] = state;
     }
 
     async updateState(userId, active, state) {
-        this.states.userId = state;
-        // console.log(Object.keys(this.states).length);
+        this.states[userId] = state;
     }
 
     async getActiveStateForUserId(userId) {
-        // console.log(this.states.userId);
-        if(this.states.userId) {
-            return JSON.parse(this.states.userId);
+        if(this.states[userId]) {
+            return JSON.parse(this.states[userId]);
         }
     }
 
