@@ -114,7 +114,7 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     var cityNames = event.data;
-                    var message = 'Please enter name of the city';
+                    var message = 'Please select your city';
                     for(var i = 0; i < cityNames.length; i++) {
                       message += '\n' + (i+1) + '. ' + cityNames[i];
                     }
@@ -267,8 +267,8 @@ const pgr =  {
 let messages = {
   menu: {
     question: {
-      en_IN : 'Please type\n\n  1 to File New Complaint.\n  2 to Track Your Complaints',
-      hi_IN: 'कृप्या टाइप करे\n\n  1 यदि आप शिकायत दर्ज करना चाहते हैं\n  2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
+      en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
+      hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
     }
   } 
 };
