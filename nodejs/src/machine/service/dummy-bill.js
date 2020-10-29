@@ -1,7 +1,6 @@
 class DummyBillService {
 
     async fetchBillsFor(user) {
-        console.log("qwe");
         var randomUserBehaviour = parseInt(Math.random() * 3);
         if(randomUserBehaviour === 0) {     // Pending bills exist
             return {

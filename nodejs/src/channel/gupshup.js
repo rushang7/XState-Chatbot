@@ -39,7 +39,7 @@ class GupShupWhatsAppProvider {
         urlSearchParams.append("channel", "whatsapp");
         urlSearchParams.append("source", "917834811114");
         urlSearchParams.append("destination", phone);
-        urlSearchParams.append("src.name", "eGovPGRChatbot");
+        urlSearchParams.append("src.name", "mSevaChatbot");
         urlSearchParams.append("message", message);
 
         var request = {
