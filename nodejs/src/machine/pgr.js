@@ -98,11 +98,104 @@ const pgr =  {
                 },
               },
               on: {
-                USER_MESSAGE: '#city'
+                USER_MESSAGE: '#geoLocationSharingInfo'
               }
             } //top4
           } // states
         }, // complaintType
+        geoLocationSharingInfo: {
+          id: 'geoLocationSharingInfo',
+          onEntry: assign( (context, event) => {
+            context.chatInterface.toUser(context.user, '_Informational Image_');
+          }),
+          always: 'geoLocation'
+        },
+        geoLocation: {
+          id: 'geoLocation',
+          initial: 'question',
+          states : {
+            question: {
+              onEntry: assign( (context, event) => {
+                let message = 'If you are at the grievance site, Please share your geo-location or type and send \'No\'';
+                context.chatInterface.toUser(context.user, message);
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            },
+            process: {
+              invoke: {
+                id: 'getCityAndLocality',
+                src: (context, event) => pgrService.getCityAndLocality(event),
+                onDone: [
+                  {
+                    target: '#confirmLocation',
+                    cond: (context, event) => event.data.city,
+                    actions: assign((context, event) => {
+                      console.log('asd');
+                      context.pgr.slots.city = event.data.city;
+                      context.pgr.slots.locality = event.data.locality;
+                    })
+                  },
+                  {
+                    target: '#city',
+                    actions: assign((context, event) => {
+                      console.log('qwe');
+                    })
+                  }
+                ],
+                onError: {
+                  target: '#city',
+                  actions: assign((context, event) => {
+                    console.log('onError');
+                  })
+                }
+              }
+            }
+          }
+        },
+        confirmLocation: {
+          id: 'confirmLocation',
+          initial: 'question',
+          states: {
+            question: {
+              onEntry: assign((context, event) => {
+                var message = 'Is this the correct location of the complaint?';
+                message += '\nCity: ' + context.pgr.slots.city;
+                if(context.pgr.slots.locality) {
+                  message += '\nLocality: ' + context.pgr.slots.locality;
+                }
+                message += '\nPlease send \'No\', if it isn\'t correct'
+                context.chatInterface.toUser(context.user, message);
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            },
+            process: {
+              onEntry: assign((context, event) => {
+                if(event.message.input.trim().toLowerCase() === 'no') {
+                  context.pgr.confirmLocation = false;
+                } else {
+                  context.pgr.confirmLocation = true;
+                }
+              }),
+              always: [
+                {
+                  target: '#persistComplaint',
+                  cond: (context, event) => context.pgr.confirmLocation && context.pgr.slots.locality
+                },
+                {
+                  target: '#locality',
+                  cond: (context, event) => context.pgr.confirmLocation
+                },
+                {
+                  target: '#city'
+                }
+              ]
+            }
+          }
+        },
         city: {
           id: 'city',
           initial: 'question',
@@ -154,7 +247,7 @@ const pgr =  {
                   }
                 },
                 {
-                  target: '#geoLocationSharingInfo'
+                  target: '#locality'
                 }
               ]
             },
@@ -164,50 +257,6 @@ const pgr =  {
                 context.chatInterface.toUser(context.user, message);
               }),
               always : 'question'
-            }
-          }
-        },
-        geoLocationSharingInfo: {
-          id: 'geoLocationSharingInfo',
-          onEntry: assign( (context, event) => {
-            context.chatInterface.toUser(context.user, '<i>Informational Image</i>');
-          }),
-          always: [ { target: 'geoLocation' } ]
-        },
-        geoLocation: {
-          id: 'geoLocation',
-          initial: 'question',
-          states : {
-            question: {
-              onEntry: assign( (context, event) => {
-                let message = 'Please share your geo-location or type and send \'No\'';
-                context.chatInterface.toUser(context.user, message);
-              }),
-              on: {
-                USER_MESSAGE: [ { target: 'process' } ]
-              }
-            },
-            process: {
-              onEntry: assign( (context, event) => {
-                let message = event.message;
-                if(message.type === 'location') {
-                  context.pgr.slots.geoLocation = message.input;
-                } else {
-                  console.error(`Expected location message type. Received ${message.type}. Unimplemented. Skipping ...`);
-                }
-              }),
-              always: [
-                {
-                  target: '#persistComplaint',
-                  cond: (context, event) => {
-                    if(context.pgr.slots.geoLocation)
-                      return true;
-                  }
-                },
-                {
-                  target: '#locality'
-                }
-              ]
             }
           }
         },

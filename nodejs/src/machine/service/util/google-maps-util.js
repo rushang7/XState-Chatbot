@@ -1,9 +1,8 @@
-const { add } = require("lodash");
 const fetch = require("node-fetch");
 const config = require('../../../env-variables');
 
 // Input latlng is a string containing pair of numbers separated by , and without but surrounding braces
-async function getUlbAndLocality(latlng) {
+async function getCityAndLocality(latlng) {
     let apiKey = config.googleAPIKey;
     var reverseGeocodeURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng}&key=${apiKey}`;
 
@@ -11,21 +10,21 @@ async function getUlbAndLocality(latlng) {
     let responseJson = await response.json();
 
     if(responseJson.status === 'OK') {
-        let ulb = extractUlbFrom(responseJson);
+        let city = extractCityFrom(responseJson);
         let locality = extractLocalityFrom(responseJson);
         return {
-            ulb: ulb,
+            city: city,
             locality: locality
         }
     } else {
         return {
-            ulb: null,
+            city: null,
             locality: null
         }
     }
 }
 
-function extractUlbFrom(response) {
+function extractCityFrom(response) {
     return searchResponseFor('locality', response);
 }
 
@@ -51,4 +50,4 @@ function searchResponseFor(key, response) {
     return null;
 }
 
-module.exports = getUlbAndLocality;
+module.exports = getCityAndLocality;
