@@ -105,6 +105,50 @@ const bills = {
       },
       billServices: {
         id: 'billServices',
+        initial: 'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              let message = 'Please type and send the number of your option from the list given 👇 below to search and pay:\n1. Water and Sewerage Bill\n2. Property Tax\n3. Trade License Fees\n4. Fire NOC Fees\n5. Building Plan Scrutiny Fees';
+              context.maxValidEntry = 5;
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }    
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
+              var isValid = parsedInput > 0 && parsedInput <= context.maxValidEntry;
+              context.message = {
+                isValid: isValid,
+                messageContent: parsedInput
+              }
+              console.log(context.message);
+              context.bills.slots.service = '';
+            }),
+            always: [
+              {
+                target: 'error',
+                cond: (context, event) => !context.message.isValid
+              },
+              {
+                target: '#searchParamOptions'
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              let message = 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always: 'question'
+          }
+        }
+      },
+      searchParamOptions: {
+        id: 'searchParamOptions',
         onEntry: assign((context, event) => {
           context.chatInterface.toUser(context.user, 'Yet to be implemented');
         }),
