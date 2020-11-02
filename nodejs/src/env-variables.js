@@ -5,7 +5,7 @@ const envVariables = {
     ver : process.env.version || '0.0.1',
 
     port: process.env.service_port || 8080,
-    endPoint : process.env.endPoint || '/whatsapp-webhook/messages',
+    contextPath : process.env.contextPath || '/',
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
