@@ -1,0 +1,96 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: xstate-chatbot-server
+    group: rainmaker
+  name: xstate-chatbot-server
+  namespace: egov
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: xstate-chatbot-server
+      group: rainmaker
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: xstate-chatbot-server
+        group: rainmaker
+    spec:
+      containers:
+      - env: 
+        - name: whatsAppProvider
+          value: GupShup
+        - name: contextPath
+          value: /xstate-chatbot-server
+        image: rushang7/xstate-chatbot-server:0.0.1
+        imagePullPolicy: Always
+        name: xstate-chatbot-server
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: xstate-chatbot-server
+    group: rainmaker
+  name: xstate-chatbot-server
+  namespace: egov
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: xstate-chatbot-server
+    group: rainmaker
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/lua-resty-waf: active
+    nginx.ingress.kubernetes.io/lua-resty-waf-allow-unknown-content-types: "true"
+    nginx.ingress.kubernetes.io/lua-resty-waf-debug: "true"
+    nginx.ingress.kubernetes.io/lua-resty-waf-process-multipart-body: "false"
+    nginx.ingress.kubernetes.io/lua-resty-waf-score-threshold: "10"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  labels:
+    app: xstate-chatbot-server
+    group: rainmaker
+  name: xstate-chatbot-server
+  namespace: egov
+spec:
+  rules:
+  - host: egov-micro-dev.egovernments.org
+    http:
+      paths:
+      - backend:
+          serviceName: xstate-chatbot-server
+          servicePort: 8080
+        path: /xstate-chatbot-server
+  tls:
+  - hosts:
+    - egov-micro-dev.egovernments.org
+    secretName: egov-micro-dev.egovernments.org-tls-certs

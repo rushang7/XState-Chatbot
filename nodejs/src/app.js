@@ -24,4 +24,4 @@ const app = express();
 }
 
 const app = createAppServer();
-app.listen(port, () => console.log(`XState-Chatbot-Server is running on port ${envVariables.port}`));
+app.listen(port, () => console.log(`XState-Chatbot-Server is running on port ${envVariables.port} with contextPath: ${envVariables.contextPath}`));
