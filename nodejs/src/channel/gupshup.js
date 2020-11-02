@@ -9,8 +9,9 @@ class GupShupWhatsAppProvider {
         
         let type = requestBody.payload.type;
         let input;
-        if(type == "location") {
-            input = requestBody.payload.payload;
+        if(type === "location") {
+            let location = requestBody.payload.payload;
+            input = '(' + location.latitude + ',' + location.longitude + ')';
         } else {
             input = requestBody.payload.payload.text;
         }
