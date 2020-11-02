@@ -6,10 +6,31 @@ const receipts = {
       receiptsMenu: {
         id: 'receiptsMenu',
         onEntry: assign((context, event) => {
-          context.chatInterface.toUser(context.user, "Receipts is unimplemented");
+          console.log("onEntry");
+          context.receipts = {slots: {}};
+          let mess='Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees'
+          // context.chatInterface.toUser(context.user, get_message(messages.menu.question));
+          context.chatInterface.toUser(context.user, mess);
         }),
-        always: '#sevamenu'
+        on: {
+          USER_MESSAGE:'process'
+        }
+        // always: '#sevamenu'
       },
+      process:{
+        actions: assign((context, event) => {
+          let message = 'Your response is recorded';
+          context.chatInterface.toUser(context.user, message);
+        })
+      }
     }
+};
+
+let messages = {
+  menu: {
+    question: {
+      en_IN : 'Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees',
+    }
+  } 
 };
 module.exports = receipts;
