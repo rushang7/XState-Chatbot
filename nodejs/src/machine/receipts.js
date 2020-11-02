@@ -1,10 +1,10 @@
 const { assign } = require('xstate');
 const receipts = {
     id: 'receipts',
-    initial: 'menu',
+    initial: 'receiptsMenu',
     states: {
-      menu: {
-        id: 'menu',
+      receiptsMenu: {
+        id: 'receiptsMenu',
         onEntry: assign((context, event) => {
           context.chatInterface.toUser(context.user, "Receipts is unimplemented");
         }),
