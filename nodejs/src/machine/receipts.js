@@ -38,33 +38,9 @@ const receipts = {
             }
           },
           {
-            target: 'WaterandSewerageBill',
+            target: 'run',
             cond: (context, event) => {
-              return context.message.messageContent.localeCompare('1') === 0;
-            }
-          },
-          {
-            target: 'PropertyTax',
-            cond: (context, event) => {
-              return context.message.messageContent.localeCompare('2') === 0;
-            }
-          },
-          {
-            target: 'TradeLicenseFees',
-            cond: (context, event) => {
-              return context.message.messageContent.localeCompare('3') === 0;
-            }
-          },
-          {
-            target: 'FireNOCFees',
-            cond: (context, event) => {
-              return context.message.messageContent.localeCompare('4') === 0;
-            }
-          },
-          {
-            target: 'BuildingPlanScrutinyFees',
-            cond: (context, event) => {
-              return context.message.messageContent.localeCompare('5') === 0;
+              return context.message.isValid;
             }
           }
         ]
@@ -80,6 +56,68 @@ const receipts = {
           }
         ]
       }, // menu.error
+      run:{
+        onEntry: assign((context, event) => {
+          let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with <Service_Name>. Still you can avail service by searching your account information.';
+          let message2='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID.';
+          context.chatInterface.toUser(context.user, message1);
+          context.chatInterface.toUser(context.user, message2);
+        }),
+        on: {
+          USER_MESSAGE:'process2'
+        }
+      },
+      process2:{
+        onEntry: assign( (context, event) => {
+          let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
+          context.message = {
+            isValid: isValid,
+            messageContent: event.message.input
+          }
+          if(isValid) {
+            context.receipts.slots.mobileoption = event.message.input;
+          }
+        }),
+        always :[
+          {
+            target: 'error',
+            cond: (context, event) => {
+              return ! context.message.isValid;
+            }
+          },
+          {
+            target: 'WaterandSewerageBill',
+            cond: (context, event) => {
+              return context.receipts.slots.menu.localeCompare('1') === 0;
+            }
+          },
+          {
+            target: 'PropertyTax',
+            cond: (context, event) => {
+              return context.receipts.slots.menu.localeCompare('2') === 0;
+            }
+          },
+          {
+            target: 'TradeLicenseFees',
+            cond: (context, event) => {
+              return context.receipts.slots.menu.localeCompare('3') === 0;
+            }
+          },
+          {
+            target: 'FireNOCFees',
+            cond: (context, event) => {
+              return context.receipts.slots.menu.localeCompare('4') === 0;
+            }
+          },
+          {
+            target: 'BuildingPlanScrutinyFees',
+            cond: (context, event) => {
+              return context.receipts.slots.menu.localeCompare('5') === 0;
+            }
+          }
+        ]
+
+      },
       WaterandSewerageBill:{
         onEntry: assign((context, event) => {
           let message1='Your Water 🚰 and Sewerage last three bills and payments details for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n';
