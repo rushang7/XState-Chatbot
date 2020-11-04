@@ -92,7 +92,7 @@ const receipts = {
                 messageContent: event.message.input
               }
               if(isValid) {
-                let mess1='transaction successfull';
+                let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
                 context.chatInterface.toUser(context.user, mess1);
                 context.mobile.slots.searchparams = event.message.input;
               }
