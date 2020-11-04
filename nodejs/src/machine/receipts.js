@@ -93,7 +93,9 @@ const receipts = {
               }
               if(isValid) {
                 let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
+                let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
                 context.chatInterface.toUser(context.user, mess1);
+                context.chatInterface.toUser(context.user, mess2);
                 context.mobile.slots.searchparams = event.message.input;
               }
             }),
