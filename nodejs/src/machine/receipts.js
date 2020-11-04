@@ -11,7 +11,7 @@ const receipts = {
             onEntry: assign((context, event) => {
               console.log("onEntry");
               context.receipts = {slots: {}};
-              let mess='Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees';
+              let mess='Please type and send the number of your option from the list given 👇 below:\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees';
               context.chatInterface.toUser(context.user, mess);
             }),
             on: {
@@ -60,9 +60,9 @@ const receipts = {
       },
       Mobile:{
         id:'Mobile',
-        initial:'searchparams',
+        initial:'mobilecheck',
         states:{
-          searchparams:{
+          mobilecheck:{
             onEntry: assign((context, event) => {
               let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with <Service_Name>. Still you can avail service by searching your account information.';
               context.chatInterface.toUser(context.user, message1);
@@ -75,9 +75,35 @@ const receipts = {
           },
           question:{
             onEntry: assign((context, event) => {
+              let message='Please Enter Mobile Number to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process'
+            },
+          },
+          process:{
+            onEntry: assign( (context, event) => {
+              context.receipts.slots.mobilenumber=event.message.input;
+            }),
+            always:[
+              {
+                target:'#searchparams',
+              }
+            ]
+
+          },
+        },
+      },
+      searchparams:{
+        id:'searchparams',
+        initial:'question',
+        states:{
+          question:{
+            onEntry: assign((context, event) => {
               context.mobile = {slots: {}};
-              let message2='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID.';
-              context.chatInterface.toUser(context.user, message2);
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
             }),
             on: {
               USER_MESSAGE:'process'
@@ -96,7 +122,7 @@ const receipts = {
                 let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
                 context.chatInterface.toUser(context.user, mess1);
                 context.chatInterface.toUser(context.user, mess2);
-                context.mobile.slots.searchparams = event.message.input;
+                context.receipts.slots.searchparams=event.message.input;
               }
             }),
             always :[
@@ -123,12 +149,12 @@ const receipts = {
             }),
             always : [
               {
-                target: '#receiptsMenu'
+                target: '#searchparams'
               }
             ]
-          }
-        }
-      }
+          },
+        },
+      },
     }//receipts.states
 };
 
