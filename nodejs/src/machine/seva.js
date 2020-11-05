@@ -15,9 +15,6 @@ const sevaMachine = Machine({
     },
     states: {
         start: {
-          onEntry:assign((context,event)=>{
-            console.log(context.user);
-          }),
             on: {
               // USER_MESSAGE: 'locale'
               USER_MESSAGE: 'welcome'

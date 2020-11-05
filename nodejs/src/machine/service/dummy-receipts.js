@@ -17,7 +17,7 @@ class DummyReceipts{
 
         let emptyReceipts = []
 
-        return emptyReceipts;
+        return receipts;
     }
 
 }

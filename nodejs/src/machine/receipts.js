@@ -76,17 +76,14 @@ const receipts = {
                 {
                   target: '#billreceipts',
                   cond: (context, event) => {
-                    return event.data.receipts;
+                    return event.data.length>0;
                   },
                   actions: assign((context, event) => {
-                    context.receipts.slots.personalizedreceipts = event.data.receipts;
+                    context.receipts.slots.personalizedreceipts = event.data;
                   })
                 },
                 {
                   target:'#Mobile',
-                  // cond:(context,event)=>{
-                  //   return event.data.emptyReceipts;
-                  // },
                 }
     
               ],
@@ -201,6 +198,9 @@ const receipts = {
       },//parameterinput
       billreceipts:{
         id:'billreceipts',
+        onEntry:assign((context,event)=>{
+          console.log(context.receipts.slots.personalizedreceipts);
+        }),
         initial:'bill',
         states:{
           bill:{
