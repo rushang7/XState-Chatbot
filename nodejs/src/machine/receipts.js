@@ -57,7 +57,7 @@ const receipts = {
             ]
           } // menu.error
         }
-      },
+      },//receiptsmenu
       Mobile:{
         id:'Mobile',
         initial:'mobilecheck',
@@ -69,32 +69,12 @@ const receipts = {
             }),
             always:[
               {
-                target:'question',
-              }
-            ]
-          },
-          question:{
-            onEntry: assign((context, event) => {
-              let message='Please Enter Mobile Number to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process'
-            },
-          },
-          process:{
-            onEntry: assign( (context, event) => {
-              context.receipts.slots.mobilenumber=event.message.input;
-            }),
-            always:[
-              {
                 target:'#searchparams',
               }
             ]
-
           },
         },
-      },
+      },//mobilelinkage
       searchparams:{
         id:'searchparams',
         initial:'question',
@@ -117,13 +97,7 @@ const receipts = {
                 isValid: isValid,
                 messageContent: event.message.input
               }
-              if(isValid) {
-                let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
-                let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
-                context.chatInterface.toUser(context.user, mess1);
-                context.chatInterface.toUser(context.user, mess2);
-                context.receipts.slots.searchparams=event.message.input;
-              }
+              context.receipts.slots.searchparams=event.message.input;
             }),
             always :[
               {
@@ -133,7 +107,7 @@ const receipts = {
                 }
               },
               {
-                target:'#endstate',
+                target:'#paraminput',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }
@@ -150,6 +124,51 @@ const receipts = {
             always : [
               {
                 target: '#searchparams'
+              }
+            ]
+          },
+        },
+      },//serachparametre
+      paraminput:{
+        id:'paraminput',
+        initial:'question',
+        states:{
+          question:{
+            onEntry: assign((context, event) => {
+              let message='Please Enter Mobile Number to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process'
+            },
+          },
+          process:{
+            onEntry: assign( (context, event) => {
+              context.receipts.slots.mobilenumber=event.message.input;
+            }),
+            always:[
+              {
+                target:'#billreceipts',
+              }
+            ]
+
+          },
+        },
+      },//parameterinput
+      billreceipts:{
+        id:'billreceipts',
+        initial:'bill',
+        states:{
+          bill:{
+            onEntry: assign((context, event) => {
+              let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
+              let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
+              context.chatInterface.toUser(context.user, mess1);
+              context.chatInterface.toUser(context.user, mess2);
+            }),
+            always:[
+              {
+                target:'#endstate',
               }
             ]
           },
