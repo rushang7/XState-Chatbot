@@ -15,9 +15,13 @@ const sevaMachine = Machine({
     },
     states: {
         start: {
+          onEntry:assign((context,event)=>{
+            console.log(context.user);
+          }),
             on: {
               // USER_MESSAGE: 'locale'
               USER_MESSAGE: 'welcome'
+
             }
           },
           locale: {
@@ -27,6 +31,7 @@ const sevaMachine = Machine({
               question: {
                 onEntry: assign((context, event) => {
                   context.chatInterface.toUser(context.user, get_message(messages.locale.question, context.user.locale));
+                  
                 }),
                 on: {
                   USER_MESSAGE: 'process'

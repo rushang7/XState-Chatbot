@@ -1,4 +1,6 @@
 const { assign } = require('xstate');
+const dummyReceipts = require('./service/dummy-receipts');
+
 const receipts = {
     id: 'receipts',
     initial: 'receiptsMenu',
@@ -37,8 +39,9 @@ const receipts = {
                   return ! context.message.isValid;
                 }
               },
+
               {
-                target: '#Mobile',
+                target: '#fetchreceipts',
                 cond: (context, event) => {
                   return context.message.isValid;
                 }
@@ -58,6 +61,47 @@ const receipts = {
           } // menu.error
         }
       },//receiptsmenu
+      fetchreceipts:{
+        id:'fetchreceipts',
+        initial:'start',
+        states:{
+          start:{
+            onEntry: assign((context, event) => {
+              console.log("onEntry");
+            }),
+            invoke:{
+              id:'receiptstatus',
+              src: (context) => dummyReceipts.findreceipts(context.user),
+              onDone:[
+                {
+                  target: '#billreceipts',
+                  cond: (context, event) => {
+                    return event.data.receipts;
+                  },
+                  actions: assign((context, event) => {
+                    context.receipts.slots.personalizedreceipts = event.data.receipts;
+                  })
+                },
+                {
+                  target:'#Mobile',
+                  // cond:(context,event)=>{
+                  //   return event.data.emptyReceipts;
+                  // },
+                }
+    
+              ],
+              onError: {
+                actions: assign((context, event) => {
+                  let message = 'Sorry. Some error occurred on server';
+                  context.chatInterface.toUser(context.user, message);
+                })
+              }
+            }
+
+          },
+          
+        },
+      },
       Mobile:{
         id:'Mobile',
         initial:'mobilecheck',
@@ -74,7 +118,7 @@ const receipts = {
             ]
           },
         },
-      },//mobilelinkage
+      },//mobilecheck
       searchparams:{
         id:'searchparams',
         initial:'question',
@@ -128,7 +172,7 @@ const receipts = {
             ]
           },
         },
-      },//serachparametre
+      },//serachparameter
       paraminput:{
         id:'paraminput',
         initial:'question',
@@ -173,7 +217,7 @@ const receipts = {
             ]
           },
         },
-      },
+      },//receipts
     }//receipts.states
 };
 
