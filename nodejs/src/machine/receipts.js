@@ -41,7 +41,7 @@ const receipts = {
               },
 
               {
-                target: '#fetchreceipts',
+                target: '#trackreceipts',
                 cond: (context, event) => {
                   return context.message.isValid;
                 }
@@ -61,20 +61,20 @@ const receipts = {
           } // menu.error
         }
       },//receiptsmenu
-      fetchreceipts:{
-        id:'fetchreceipts',
+      trackreceipts:{
+        id:'trackreceipts',
         initial:'start',
         states:{
           start:{
             onEntry: assign((context, event) => {
-              console.log("onEntry");
+              console.log("Entered into trackreceipts");
             }),
             invoke:{
               id:'receiptstatus',
               src: (context) => dummyReceipts.findreceipts(context.user),
               onDone:[
                 {
-                  target: '#billreceipts',
+                  target: '#receiptslip',
                   cond: (context, event) => {
                     return event.data.length>0;
                   },
@@ -189,15 +189,15 @@ const receipts = {
             }),
             always:[
               {
-                target:'#billreceipts',
+                target:'#receiptslip',
               }
             ]
 
           },
         },
       },//parameterinput
-      billreceipts:{
-        id:'billreceipts',
+      receiptslip:{
+        id:'receiptslip',
         onEntry:assign((context,event)=>{
           console.log(context.receipts.slots.personalizedreceipts);
         }),
