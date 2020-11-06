@@ -4,7 +4,7 @@ class ConsoleProvider {
     }
 
     sendMessageToUser(user, message) {
-        console.log(user);
+        // console.log(user);
         console.log(message);
     }
 }

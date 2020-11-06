@@ -1,6 +1,6 @@
 const { assign } = require('xstate');
 const { pgrService } = require('./service/service-loader')
-const {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammerFromList} = require('./util/dialog.js');
+const {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer} = require('./util/dialog.js');
 
 
 const pgr =  {
@@ -47,32 +47,59 @@ const pgr =  {
       states: {
         complaintType: {
           id: 'complaintType',
-          initial: 'question',
+          initial: 'top5',
           states: {
-            question: {
+            top5: {
               invoke: {
-                id: 'question',
+                id: 'top5',
                 src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 5),
                 onDone: {
-                  actions: assign((context, event) => {
-                    let preamble = get_message(messages.fileComplaint.question.preamble, context.user.locale)
-                    let {prompt, grammer} = constructPromptAndGrammerFromList(event.data);
-                    context.grammer = grammer;
-                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                  })
+                  target: 'question',
+                  actions: assign((context, event) => context.scratch = event.data) //context.pgr.scratch.top5 
                 },
                 onError: {
                   actions: assign((context, event) => {
-                    let message = 'Sorry. Some error occurred on server';
+                    let message = get_message(global_messages.system_error, context.user.locale);
                     context.chatInterface.toUser(context.user, message);
                   })
-                },
-              },
-              on: {
-                USER_MESSAGE: '#geoLocationSharingInfo'
+                }
               }
-            } //question TODO add process and error states
-          } // states
+            }, // top 5
+            question: {
+              id: 'question',
+              onEntry: assign((context, event) => {
+                let preamble = get_message(messages.fileComplaint.question.preamble, context.user.locale);
+                let other = get_message(messages.fileComplaint.question.other, context.user.locale);
+                let {prompt, grammer} = constructPromptAndGrammer(context.scratch.concat([other]));
+                context.grammer = grammer; // save the grammer in context to be used in next step
+                context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            }, //question
+            process: {
+              id: 'process',
+              onEntry: assign((context, event) => {
+                context.intention = get_intention(context.grammer, event)
+              }),
+              always: [
+                {
+                  target: '#geoLocationSharingInfo',
+                  cond: (context) => context.intention != INTENTION_UNKOWN
+                },
+                {
+                  target: 'error'
+                }
+              ]
+            }, // process
+            error: {
+              onEntry: assign( (context, event) => {
+                context.chatInterface.toUser(context.user, get_message(global_messages.error.retry, context.user.locale));
+              }),
+              always:  'question',
+            } // error
+          } // states of complaintType
         }, // complaintType
         geoLocationSharingInfo: {
           id: 'geoLocationSharingInfo',
@@ -296,6 +323,10 @@ let messages = {
       preamble: {
         en_IN : 'Please enter the number for your complaint',
         hi_IN : 'कृपया अपनी शिकायत के लिए नंबर दर्ज करें'
+      },
+      other: {
+        en_IN : 'Other ...',
+        hi_IN : 'कुछ अन्य ...'
       }
     }
   } 

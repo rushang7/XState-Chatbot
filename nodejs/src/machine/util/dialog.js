@@ -12,7 +12,7 @@ function get_intention(g, event, strict = false) {
   let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
-function constructPromptAndGrammerFromList(data) {
+function constructPromptAndGrammer(data) {
   var prompt;
   var grammer = [];
   data.forEach((element, index) => {
@@ -35,6 +35,10 @@ let global_messages = {
       hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर भी आगे बढ़ें।'
     }
   },
+  system_error: {
+    en_IN: 'I am sorry, our system has a problem. Could you try again in a few minutes please?',
+    hi_IN: 'हमारे सिस्टम में एक समस्या है। क्या आप कुछ मिनटों में फिर से कोशिश कर सकते हैं?'
+  }
 }
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammerFromList};
+module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer};
