@@ -12,5 +12,29 @@ function get_intention(g, event, strict = false) {
   let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
+function constructPromptAndGrammerFromList(data) {
+  var prompt;
+  var grammer = [];
+  data.forEach((element, index) => {
+    prompt+= `\n ${index+1}. ${element}`;
+    grammer.push({intention: element, recognize: [index+1]});
+  });
+  // console.log(prompt);
+  // console.log(grammer);
+  return {prompt, grammer};
+}
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN};
+let global_messages = {
+  error: {
+    retry: {
+      en_IN: 'I am sorry, I didn\'t understand. Let\'s try again.',
+      hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर से कोशिश करें।'
+    },
+    proceeding: {
+      en_IN: 'I am sorry, I didn\'t understand. But proceeding nonetheless',
+      hi_IN: 'मुझे क्षमा करें, मुझे समझ नहीं आया। फिर भी आगे बढ़ें।'
+    }
+  },
+}
+
+module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammerFromList};

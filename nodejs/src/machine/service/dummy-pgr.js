@@ -7,7 +7,7 @@ class DummyPGRService {
     async fetchCities() {
         return ["Bangalore", "Boston"];
     }
-    async fetchFrequentComplaints() {
+    async fetchFrequentComplaints(locale, n) {
         return [
             'Streetlight not working',
             'Sewage overflow / blocked',

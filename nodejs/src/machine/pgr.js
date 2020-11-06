@@ -1,6 +1,6 @@
 const { assign } = require('xstate');
 const { pgrService } = require('./service/service-loader')
-const {get_message, get_intention, INTENTION_UNKOWN} = require('./util/dialog.js');
+const {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammerFromList} = require('./util/dialog.js');
 
 
 const pgr =  {
@@ -14,55 +14,30 @@ const pgr =  {
         question: {
           onEntry: assign( (context, event) => {
               context.chatInterface.toUser(context.user, get_message(messages.menu.question, context.user.locale));
-              context.pgr = {slots: {}}; // TODO is this the right pattern? Seems wrong
           }),
           on: {
               USER_MESSAGE:'process'
           }
-        }, // question
+        }, // menu.question
         process: {
-          onEntry: assign((context, event) => {
-            let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0; 
-
-            context.message = {
-              isValid: isValid,
-              messageContent: event.message.input
-            }
-            if(isValid) {
-              context.pgr.slots.menu = event.message.input;
-            }
-          }),
+          onEntry: assign((context, event) => context.intention = get_intention(grammer.menu.question, event)),
           always : [
             {
-              target: 'error',
-              cond: (context, event) => {
-                return ! context.message.isValid;
-              }
-            },
-            {
               target: '#fileComplaint',
-              cond: (context, event) => {
-                return context.message.messageContent.localeCompare('1') === 0;
-              }
+              cond: (context) => context.intention == 'file_new_complaint'
             },
             {
-              target: '#trackComplaint',
-              cond: (context, event) => { 
-                return  context.message.messageContent.localeCompare('2') === 0; 
-              }
+              target: '#trackComplaint', 
+              cond: (context) => context.intention == 'track_existing_complaints'
+            },
+            {
+              target: 'error'
             }
           ]
         }, // menu.process
         error: {
-          onEntry: assign( (context, event) => {
-            let message = 'Sorry, I didn\'t understand';
-            context.chatInterface.toUser(context.user, message);
-          }),
-          always : [
-            {
-              target: 'question'
-            }
-          ]
+          onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, get_message(global_messages.error.retry, context.user.locale))),
+          always : 'question'
         } // menu.error
       }, // menu.states
     }, // menu
@@ -72,22 +47,18 @@ const pgr =  {
       states: {
         complaintType: {
           id: 'complaintType',
-          initial: 'top4',
+          initial: 'question',
           states: {
-            top4: {
+            question: {
               invoke: {
-                id: 'top4',
-                src: (context) => pgrService.fetchFrequentComplaints(context.user.locale),
+                id: 'question',
+                src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 5),
                 onDone: {
                   actions: assign((context, event) => {
-                    // TODO create grammer and prompt dynamically
-                    var complaints = event.data;
-                    var message = 'Please enter name of the compaint';
-                    for(var i = 0; i < complaints.length; i++) {
-                      message += '\n' + (i+1) + '. ' + complaints[i];
-                    }
-                    context.maxValidEntry = complaints.length;
-                    context.chatInterface.toUser(context.user, message);
+                    let preamble = get_message(messages.fileComplaint.question.preamble, context.user.locale)
+                    let {prompt, grammer} = constructPromptAndGrammerFromList(event.data);
+                    context.grammer = grammer;
+                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   })
                 },
                 onError: {
@@ -100,7 +71,7 @@ const pgr =  {
               on: {
                 USER_MESSAGE: '#geoLocationSharingInfo'
               }
-            } //top4
+            } //question TODO add process and error states
           } // states
         }, // complaintType
         geoLocationSharingInfo: {
@@ -319,6 +290,23 @@ let messages = {
       en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
       hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
     }
+  },
+  fileComplaint: {
+    question: {
+      preamble: {
+        en_IN : 'Please enter the number for your complaint',
+        hi_IN : 'कृपया अपनी शिकायत के लिए नंबर दर्ज करें'
+      }
+    }
   } 
+};
+
+let grammer = {
+  menu: {
+    question: [
+      {intention: 'file_new_complaint', recognize: ['1', 'file', 'new']},
+      {intention: 'track_existing_complaints', recognize: ['2', 'track', 'existing']}
+    ]
+  },
 };
 module.exports = pgr;

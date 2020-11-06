@@ -13,7 +13,7 @@ class SessionManager {
         // handle reset case
         let intention = get_intention(grammer.reset, reformattedMessage, true)
         if (intention == 'reset' && chatState) {
-            chatStateRepository.updateState(userId, false, JSON.stringify(chaState));
+            chatStateRepository.updateState(userId, false, JSON.stringify(chatState));
             chatState = null; // so downstream code treats this like an inactive state and creates a new machine
         }
 
