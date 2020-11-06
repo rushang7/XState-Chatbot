@@ -8,20 +8,27 @@ class SessionManager {
 
     async fromUser(reformattedMessage) {
         let userId = reformattedMessage.userId;
-
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
+
+        // handle reset case
+        let intention = get_intention(grammer.reset, reformattedMessage, true)
+        if (intention == 'reset' && chatState) {
+            chatStateRepository.updateState(userId, false, JSON.stringify(chaState));
+            chatState = null; // so downstream code treats this like an inactive state and creates a new machine
+        }
+
         let service;
         if(!chatState) {
+            // come here if virgin dialog, old dialog was inactive, or reset case
             service = this.createChatServiceFor(userId);
             await chatStateRepository.insertNewState(userId, true, JSON.stringify(service.state));
         } else {
             service = this.getChatServiceFor(chatState);
         }
-        let intention = get_intention(grammer.reset, reformattedMessage, true);
+        
         let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';
         service.send(event, { message: reformattedMessage.message });
     }
-
     async toUser(user, message) {
         channelProvider.sendMessageToUser(user, message);
     }
@@ -37,7 +44,7 @@ class SessionManager {
         service.onTransition( state => {
             let userId = state.context.user.uuid;
             if(state.changed) {
-                let active = !state.done;
+                let active = !state.done && !state.forcedClose;
                 chatStateRepository.updateState(userId, active, JSON.stringify(state));
             }
         });

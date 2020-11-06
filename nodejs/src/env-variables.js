@@ -11,7 +11,7 @@ const envVariables = {
 
     pgrServiceProvider: process.env.pgrServiceProvider || 'DummyPGR',
 
-    repoProvider: process.env.repoProvider || 'InMemory',
+    repoProvider: process.env.repoProvider || 'PostgreSQL',
 
     mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
 

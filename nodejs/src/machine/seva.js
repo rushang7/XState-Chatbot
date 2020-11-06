@@ -104,8 +104,7 @@ const sevaMachine = Machine({
       }, // sevamenu
       endstate: {
         id: 'endstate',
-        // type: 'final', May want to make it a final state and kill the machine
-        always: 'start',  // Or restart the conversation with same machine by putting user to start state
+        type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
         onEntry: assign((context, event) => {
           context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another conversation");
         })
