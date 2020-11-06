@@ -81,7 +81,7 @@ const pgr =  {
             process: {
               id: 'process',
               onEntry: assign((context, event) => {
-                context.intention = get_intention(context.grammer, event)
+                context.intention = get_intention(context.grammer, event) // TODO come back here to handle the Other ...
               }),
               always: [
                 {
@@ -114,7 +114,7 @@ const pgr =  {
           states : {
             question: {
               onEntry: assign( (context, event) => {
-                let message = 'If you are at the grievance site, Please share your geo-location or type and send \'No\'';
+                let message = get_message(messages.geoLocation.question, context.user.locale)
                 context.chatInterface.toUser(context.user, message);
               }),
               on: {
@@ -328,6 +328,12 @@ let messages = {
         en_IN : 'Other ...',
         hi_IN : 'कुछ अन्य ...'
       }
+    }
+  },
+  geoLocation: {
+    question: {
+      en_IN :'If you are at the grievance site, please share your location. Otherwise type any character.',
+      hi_IN : 'यदि आप शिकायत स्थल पर हैं, तो कृपया अपना स्थान साझा करें। अगर नहीं किसी भी चरित्र को टाइप करें।'
     }
   } 
 };
