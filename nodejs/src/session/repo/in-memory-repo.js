@@ -14,7 +14,10 @@ class StateRepository {
 
     async getActiveStateForUserId(userId) {
         if(this.states[userId]) {
-            return JSON.parse(this.states[userId]);
+            let state = JSON.parse(this.states[userId]);
+            if(!state.done) {
+                return state;
+            }
         }
     }
 

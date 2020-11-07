@@ -31,6 +31,8 @@ spec:
           value: GupShup
         - name: contextPath
           value: /xstate-chatbot-server
+        - name: repoProvider
+          value: InMemory
         image: rushang7/xstate-chatbot-server:0.0.1
         imagePullPolicy: Always
         name: xstate-chatbot-server
