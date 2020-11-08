@@ -18,10 +18,10 @@ const app = express();
     app.use(express.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     // app.use(cookieParser());
-    app.use('/', require('./channel/routes'));
+    app.use(envVariables.contextPath, require('./channel/routes'));
     module.exports = app;
     return app;
 }
 
 const app = createAppServer();
-app.listen(port, () => console.log(`XState-Chatbot-Server is running on port ${envVariables.port}`));
+app.listen(port, () => console.log(`XState-Chatbot-Server is running on port ${envVariables.port} with contextPath: ${envVariables.contextPath}`));

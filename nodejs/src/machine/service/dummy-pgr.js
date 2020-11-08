@@ -7,7 +7,7 @@ class DummyPGRService {
     async fetchCities() {
         return ["Bangalore", "Boston"];
     }
-    async fetchFrequentComplaints() {
+    async fetchFrequentComplaints(locale, n) {
         return [
             'Streetlight not working',
             'Sewage overflow / blocked',
@@ -16,7 +16,9 @@ class DummyPGRService {
             'Water Pipe broken / leaking'
         ]
     }
-
+    async persistComplaint(bundle) {
+        console.log(`Saving complaint ${bundle} to database`);
+    }
     async getCityAndLocality(event) {
         let messageType = event.message.type;
         if(messageType !== 'location') {

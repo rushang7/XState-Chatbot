@@ -5,13 +5,13 @@ const envVariables = {
     ver : process.env.version || '0.0.1',
 
     port: process.env.service_port || 8080,
-    endPoint : process.env.endPoint || '/whatsapp-webhook/messages',
+    contextPath : process.env.contextPath || '/',
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
     pgrServiceProvider: process.env.pgrServiceProvider || 'DummyPGR',
 
-    repoProvider: process.env.repoProvider || 'InMemory',
+    repoProvider: process.env.repoProvider || 'PostgreSQL',
 
     mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
 
