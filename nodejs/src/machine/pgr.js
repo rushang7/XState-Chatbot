@@ -1,5 +1,5 @@
 const { assign } = require('xstate');
-const { pgrService } = require('./service/service-loader')
+const { pgrService } = require('./service/service-loader');
 const dialog = require('./util/dialog');
 
 const pgr =  {
@@ -12,7 +12,8 @@ const pgr =  {
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
+            context.pgr = {slots: {}};
+            context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
           }),
           on: {
               USER_MESSAGE:'process'
@@ -42,7 +43,7 @@ const pgr =  {
     }, // menu
     fileComplaint: {
       id: 'fileComplaint',
-      initial: 'complaintType',
+      initial: 'city',
       states: {
         complaintType: {
           id: 'complaintType',
@@ -51,7 +52,7 @@ const pgr =  {
             top5: {
               invoke: {
                 id: 'top5',
-                src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 5),
+                src: (context) => pgrService.fetchFrequentComplaints(),
                 onDone: {
                   target: 'question',
                   actions: assign((context, event) => context.scratch = event.data) //context.pgr.scratch.top5 
@@ -67,9 +68,9 @@ const pgr =  {
             question: {
               id: 'question',
               onEntry: assign((context, event) => {
-                let preamble = dialog.get_message(messages.fileComplaint.question.preamble, context.user.locale);
-                let other = dialog.get_message(messages.fileComplaint.question.other, context.user.locale);
-                let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([other]));
+                let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
+                // let other = dialog.get_message(messages.fileComplaint.complaintType.question.other, context.user.locale);
+                let {prompt, grammer} = pgrService.generatePromptAndGrammer(context.scratch);
                 context.grammer = grammer; // save the grammer in context to be used in next step
                 context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
               }),
@@ -78,14 +79,16 @@ const pgr =  {
               }
             }, //question
             process: {
-              id: 'process',
               onEntry: assign((context, event) => {
                 context.intention = dialog.get_intention(context.grammer, event) // TODO come back here to handle the Other ...
               }),
               always: [
                 {
-                  target: '#geoLocationSharingInfo',
-                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                  target: '#additionalInfo',
+                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                  actions: assign((context, event) => {
+                    context.pgr.slots.complaintType = context.intention;
+                  })
                 },
                 {
                   target: 'error'
@@ -129,7 +132,6 @@ const pgr =  {
                     target: '#confirmLocation',
                     cond: (context, event) => event.data.city,
                     actions: assign((context, event) => {
-                      console.log('asd');
                       context.pgr.slots.city = event.data.city;
                       context.pgr.slots.locality = event.data.locality;
                     })
@@ -137,15 +139,11 @@ const pgr =  {
                   {
                     target: '#city',
                     actions: assign((context, event) => {
-                      console.log('qwe');
                     })
                   }
                 ],
                 onError: {
-                  target: '#city',
-                  actions: assign((context, event) => {
-                    console.log('onError');
-                  })
+                  target: '#city'
                 }
               }
             }
@@ -203,12 +201,11 @@ const pgr =  {
                 src: (context, event) => pgrService.fetchCities(),
                 onDone: {
                   actions: assign((context, event) => {
-                    var cityNames = event.data;
-                    var message = 'Please select your city';
-                    for(var i = 0; i < cityNames.length; i++) {
-                      message += '\n' + (i+1) + '. ' + cityNames[i];
-                    }
-                    context.maxValidEntry = cityNames.length;
+                    var cityData = event.data;
+                    let preamble = dialog.get_message(messages.fileComplaint.city, context.user.locale);
+                    let {prompt, grammer} = pgrService.generatePromptAndGrammer(cityData);
+                    let message = `${preamble} \n${prompt}`;
+                    context.grammer = grammer;
                     context.chatInterface.toUser(context.user, message);
                   })
                 },
@@ -225,32 +222,24 @@ const pgr =  {
             },
             process: {
               onEntry:  assign((context, event) => {
-                let parsed = parseInt(event.message.input.trim())
-                // debugger
-                let isValid = !isNaN(parsed) && parsed >=0 && parsed <= context.maxValidEntry;
-                context.message = {
-                  isValid: true,
-                  messageContent: event.message.input.trim()
-                }
-                if(isValid) { // TODO This does not seem to be the right place for this. It's too early here
-                  context.pgr.slots.city = parsed;
-                }
+                context.intention = dialog.get_intention(context.grammer, event);
               }),
               always : [
                 {
-                  target: 'error',
-                  cond: (context, event) => {
-                    return ! context.message.isValid;
-                  }
+                  cond: (context, event) => context.intention != dialog.INTENTION_UNKOWN,
+                  target: '#locality',
+                  actions: assign((context, event) => {
+                    context.pgr.slots.city = context.intention;
+                  })
                 },
                 {
-                  target: '#locality'
+                  target: 'error'
                 }
               ]
             },
             error: {
               onEntry: assign( (context, event) => {
-                let message = 'Sorry, I didn\'t understand';
+                let message = dialog.get_message(dialog.global_messages.error.retry);
                 context.chatInterface.toUser(context.user, message);
               }),
               always : 'question'
@@ -262,17 +251,91 @@ const pgr =  {
           initial: 'question',
           states: {
             question: {
-              onEntry: assign( (context, event) => {
-                let message = 'Please enter your locality'
-                context.chatInterface.toUser(context.user, message);
-              }),
+              invoke: {
+                id: 'fetchLocalities',
+                src: (context, event) => pgrService.fetchLocalities(context.pgr.slots.city),
+                onDone: {
+                  actions: assign((context, event) => {
+                    var localityData = event.data;
+                    let preamble = dialog.get_message(messages.fileComplaint.locality, context.user.locale);
+                    let {prompt, grammer} = pgrService.generatePromptAndGrammerForLocalities(localityData, context.pgr.slots.city);
+                    let message = `${preamble} \n${prompt}`;
+                    context.grammer = grammer;
+                    context.chatInterface.toUser(context.user, message);
+                  })
+                },
+                onError: {
+                  actions: assign((context, event) => {
+                    let message = 'Sorry. Some error occurred on server';
+                    context.chatInterface.toUser(context.user, message);
+                  })
+                }
+              },
               on: {
                 USER_MESSAGE: [{target: 'process'}]
               }
             },
             process: {
+              onEntry:  assign((context, event) => {
+                context.intention = dialog.get_intention(context.grammer, event);
+              }),
+              always : [
+                {
+                  cond: (context, event) => context.intention != dialog.INTENTION_UNKOWN,
+                  target: '#landmark',
+                  actions: assign((context, event) => {
+                    context.pgr.slots.locality = context.intention;
+                  })
+                },
+                {
+                  target: 'error'
+                }
+              ]
+            },
+            error: {
+              onEntry: assign( (context, event) => {
+                let message = dialog.get_message(dialog.global_messages.error.retry);
+                context.chatInterface.toUser(context.user, message);
+              }),
+              always : 'question'
+            }
+          }
+        },
+        landmark: {
+          id: 'landmark',
+          initial: 'question',
+          states: {
+            question: {
               onEntry: assign((context, event) => {
-                context.pgr.slots.locality = event.message.input;
+                context.chatInterface.toUser(context.user, dialog.get_message(messages.fileComplaint.landmark, context.user.locale));
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            },
+            process: {
+              onEntry: assign((context, event) => {
+                context.pgr.slots.landmark = dialog.get_input(event);
+              }),
+              always: '#complaintType'
+            }
+          }
+        },
+        additionalInfo: {
+          id: 'additionalInfo',
+          initial: 'question',
+          states: {
+            question: {
+              onEntry: assign((context, event) => {
+                context.chatInterface.toUser(context.user, dialog.get_message(messages.fileComplaint.additionalInfo, context.user.locale));
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            },
+            process: {
+              onEntry: assign((context, event) => {
+                context.pgr.slots.additionalInfo = dialog.get_input(event);
               }),
               always: '#persistComplaint'
             }
@@ -285,9 +348,11 @@ const pgr =  {
             console.log(context.pgr.slots);
             //make api call
             console.log('Making api call to PGR Service');
-            let message = 'Complaint has been filed successfully {{number}}';
-            let number = '123';
-            message = message.replace('{{number}}', number);
+            let message = 'Complaint has been filed successfully with params: ';
+            Object.entries(context.pgr.slots).forEach(entry => {
+              const [key, value] = entry;
+              message += `\n${key} : ${value}`;
+            })
             context.chatInterface.toUser(context.user, message);
             context.pgr = {};
           })
@@ -318,14 +383,28 @@ let messages = {
     }
   },
   fileComplaint: {
-    question: {
-      preamble: {
-        en_IN : 'Please enter the number for your complaint',
-        hi_IN : 'कृपया अपनी शिकायत के लिए नंबर दर्ज करें'
-      },
-      other: {
-        en_IN : 'Other ...',
-        hi_IN : 'कुछ अन्य ...'
+    city: {
+      en_IN: 'Please type and send the number of your city:'
+    },
+    locality: {
+      en_IN: 'Please select the locality of your complaint from the link below. Tap on the link to search and select a locality.'
+    },
+    landmark: {
+      en_IN: 'Please send the address/landmark of the complaint. Else, type and send “No”.'
+    },
+    additionalInfo: {
+      en_IN: 'Please send any additional information about the complaint. Else, type and send “No”.'
+    },
+    complaintType: {
+      question: {
+        preamble: {
+          en_IN : 'Please enter the number for your complaint',
+          hi_IN : 'कृपया अपनी शिकायत के लिए नंबर दर्ज करें'
+        },
+        other: {
+          en_IN : 'Other ...',
+          hi_IN : 'कुछ अन्य ...'
+        }
       }
     }
   },

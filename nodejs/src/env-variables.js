@@ -9,11 +9,19 @@ const envVariables = {
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
-    pgrServiceProvider: process.env.pgrServiceProvider || 'DummyPGR',
+    pgrServiceProvider: process.env.pgrServiceProvider || 'eGovPGR',
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
-    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
+    mdmsHost: process.env.mdmsHost || '/',
+
+    externalHost: process.env.externalHost || 'https://egov-micro-dev.egovernments.org/',
+
+    cityExternalWebpagePath: process.env.cityExternalWebpagePath || 'citizen/openlink/whatsapp/city',
+
+    localityExternalWebpagePath: process.env.localityExternalWebpagePath || 'citizen/openlink/whatsapp/locality',
+
+    whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',
 
     googleAPIKey: process.env.googleAPIKey || ''
 }

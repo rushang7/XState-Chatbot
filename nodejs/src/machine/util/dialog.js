@@ -41,4 +41,4 @@ let global_messages = {
   }
 }
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer};
+module.exports = {get_input, get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer};
