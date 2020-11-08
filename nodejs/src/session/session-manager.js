@@ -3,7 +3,7 @@ const sevaStateMachine =  require('../machine/seva'),
     chatStateRepository = require('./repo'),
     telemetry = require('./telemetry');
 const { State, interpret } = require('xstate');
-const {get_message, get_intention, INTENTION_UNKOWN} = require('../machine/util/dialog.js');
+const dialog = require('../machine/util/dialog.js');
 
 class SessionManager {
 
@@ -13,7 +13,7 @@ class SessionManager {
         telemetry.log(userId, 'from user', reformattedMessage);
 
         // handle reset case
-        let intention = get_intention(grammer.reset, reformattedMessage, true)
+        let intention = dialog.get_intention(grammer.reset, reformattedMessage, true)
         if (intention == 'reset' && chatState) {
             chatStateRepository.updateState(userId, false, JSON.stringify(chatState));
             chatState = null; // so downstream code treats this like an inactive state and creates a new machine

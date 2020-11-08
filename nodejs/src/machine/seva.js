@@ -2,7 +2,7 @@ const { Machine, assign } = require('xstate');
 const pgr = require('./pgr');
 const bills = require('./bills');
 const receipts = require('./receipts');
-const {get_message, get_intention, INTENTION_UNKOWN, global_messages} = require('./util/dialog.js');
+const dialog = require('./util/dialog.js');
 
 const sevaMachine = Machine({
     id: 'mseva',
@@ -10,7 +10,7 @@ const sevaMachine = Machine({
     on: {
       USER_RESET: {
         target: 'sevamenu',
-        actions: assign( (context, event) => context.chatInterface.toUser(context.user, get_message(messages.reset, context.user.locale)))
+        actions: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(messages.reset, context.user.locale)))
       }
     },
     states: {
@@ -26,7 +26,7 @@ const sevaMachine = Machine({
             states: {
               question: {
                 onEntry: assign((context, event) => {
-                  context.chatInterface.toUser(context.user, get_message(messages.locale.question, context.user.locale));
+                  context.chatInterface.toUser(context.user, dialog.get_message(messages.locale.question, context.user.locale));
                 }),
                 on: {
                   USER_MESSAGE: 'process'
@@ -34,10 +34,10 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.user.locale  = get_intention(grammer.locale.question, event, true);
-                  if (context.user.locale === INTENTION_UNKOWN) {
+                  context.user.locale  = dialog.get_intention(grammer.locale.question, event, true);
+                  if (context.user.locale === dialog.INTENTION_UNKOWN) {
                     context.user.locale = 'en_IN';
-                    context.chatInterface.toUser(context.user, get_message(global_messages.error.proceeding, context.user.locale));      
+                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));      
                   }
                 }),
                 always: '#welcome'
@@ -47,8 +47,8 @@ const sevaMachine = Machine({
           welcome: {
             id: 'welcome',
             onEntry: assign( (context, event, meta) => {
-              let hello = get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
-              let welcome = get_message(messages.welcome.welcome, context.user.locale); 
+              let hello = dialog.get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
+              let welcome = dialog.get_message(messages.welcome.welcome, context.user.locale); 
               context.chatInterface.toUser(context.user, `${hello} ${welcome}`);
             }),
             always: '#sevamenu'
@@ -59,7 +59,7 @@ const sevaMachine = Machine({
             states: {
               question: {
                 onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, get_message(messages.sevamenu.question, context.user.locale));
+                    context.chatInterface.toUser(context.user, dialog.get_message(messages.sevamenu.question, context.user.locale));
                 }),
                 on: {
                     USER_MESSAGE: 'process'
@@ -67,7 +67,7 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.intention = get_intention(grammer.menu.question, event)
+                  context.intention = dialog.get_intention(grammer.menu.question, event)
                 }),
                 always : [
                   {
@@ -93,7 +93,7 @@ const sevaMachine = Machine({
               }, // sevamenu.process
               error: {
                 onEntry: assign( (context, event) => {
-                  context.chatInterface.toUser(context.user, get_message(global_messages.error.retry, context.user.locale));
+                  context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
                 }),
                 always : 'question'
               }, // sevamenu.error 

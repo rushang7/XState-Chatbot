@@ -1,7 +1,6 @@
 const { assign } = require('xstate');
 const { pgrService } = require('./service/service-loader')
-const {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer} = require('./util/dialog.js');
-
+const dialog = require('./util/dialog');
 
 const pgr =  {
   id: 'pgr',
@@ -13,14 +12,14 @@ const pgr =  {
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, get_message(messages.menu.question, context.user.locale));
+              context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
           }),
           on: {
               USER_MESSAGE:'process'
           }
         }, // menu.question
         process: {
-          onEntry: assign((context, event) => context.intention = get_intention(grammer.menu.question, event)),
+          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event)),
           always : [
             {
               target: '#fileComplaint',
@@ -36,7 +35,7 @@ const pgr =  {
           ]
         }, // menu.process
         error: {
-          onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, get_message(global_messages.error.retry, context.user.locale))),
+          onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale))),
           always : 'question'
         } // menu.error
       }, // menu.states
@@ -59,7 +58,7 @@ const pgr =  {
                 },
                 onError: {
                   actions: assign((context, event) => {
-                    let message = get_message(global_messages.system_error, context.user.locale);
+                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                     context.chatInterface.toUser(context.user, message);
                   })
                 }
@@ -68,9 +67,9 @@ const pgr =  {
             question: {
               id: 'question',
               onEntry: assign((context, event) => {
-                let preamble = get_message(messages.fileComplaint.question.preamble, context.user.locale);
-                let other = get_message(messages.fileComplaint.question.other, context.user.locale);
-                let {prompt, grammer} = constructPromptAndGrammer(context.scratch.concat([other]));
+                let preamble = dialog.get_message(messages.fileComplaint.question.preamble, context.user.locale);
+                let other = dialog.get_message(messages.fileComplaint.question.other, context.user.locale);
+                let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([other]));
                 context.grammer = grammer; // save the grammer in context to be used in next step
                 context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
               }),
@@ -81,12 +80,12 @@ const pgr =  {
             process: {
               id: 'process',
               onEntry: assign((context, event) => {
-                context.intention = get_intention(context.grammer, event) // TODO come back here to handle the Other ...
+                context.intention = dialog.get_intention(context.grammer, event) // TODO come back here to handle the Other ...
               }),
               always: [
                 {
                   target: '#geoLocationSharingInfo',
-                  cond: (context) => context.intention != INTENTION_UNKOWN
+                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN
                 },
                 {
                   target: 'error'
@@ -95,7 +94,7 @@ const pgr =  {
             }, // process
             error: {
               onEntry: assign( (context, event) => {
-                context.chatInterface.toUser(context.user, get_message(global_messages.error.retry, context.user.locale));
+                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
               }),
               always:  'question',
             } // error
@@ -114,7 +113,7 @@ const pgr =  {
           states : {
             question: {
               onEntry: assign( (context, event) => {
-                let message = get_message(messages.geoLocation.question, context.user.locale)
+                let message = dialog.get_message(messages.geoLocation.question, context.user.locale)
                 context.chatInterface.toUser(context.user, message);
               }),
               on: {
