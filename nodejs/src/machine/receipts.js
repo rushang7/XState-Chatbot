@@ -110,10 +110,70 @@ const receipts = {
             }),
             always:[
               {
-                target:'#searchparams',
+                target:'question',
               }
             ]
           },
+          question:{
+            onEntry: assign((context, event) => {
+              let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number. \n\n Please type and send "ULB" to link your account number with <Service_Name>';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process'
+            }
+
+          },
+          process:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 ;
+              let isulb=event.message.input.trim().localeCompare('ULB') === 0  
+              context.message = {
+                isulb:isulb,
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid && !context.message.isulb;
+                }
+              },
+              {
+                target:'#searchparams',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+              {
+                target:'ULB',
+                cond:(context,event)=>{
+                  return context.message.isulb;
+                }
+              },
+
+            ],
+          },
+          error: {
+            onEntry: assign( (context, event) => {
+              let message = 'Sorry, I didn\'t understand';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always : [
+              {
+                target: 'question'
+              }
+            ]
+          },
+          ULB:{
+            onEntry: assign( (context, event) => {
+              let message = 'Hi <Citizen_Name>, To get your mobile number linked to your water and sewerage service account please dial "ULB_Helpdesk_Phone_Number".\n\n After linking the mobile number with your service you will be able to make quick payment, View bills and payments without having to search for the bills.\n Thank you. \n\nType and Send 5 to Go ⬅️ Back to Main Menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+          },
+
         },
       },//mobilecheck
       searchparams:{
@@ -212,7 +272,52 @@ const receipts = {
             }),
             always:[
               {
-                target:'#endstate',
+                target:'question',
+              }
+            ]
+          },
+          question:{
+            onEntry: assign((context, event) => {
+              let message='Please type and send ‘1’ to Search and View payment receipt for other payments or service.\n\n Or "mseva" to Go ⬅️ Back to the main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process'
+            }
+
+          },
+          process:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 ; 
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target:'#receiptsMenu',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+
+            ],
+          },
+          error: {
+            onEntry: assign( (context, event) => {
+              let message = 'Sorry, I didn\'t understand';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always : [
+              {
+                target: 'question'
               }
             ]
           },
