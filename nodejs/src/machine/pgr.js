@@ -46,15 +46,20 @@ const pgr =  {
       states: {
         complaintType: {
           id: 'complaintType',
-          initial: 'fetchData',
+          initial: 'question',
           states: {
-            fetchData: {
+            question: {
+              id: 'question',
               invoke: {
-                id: 'fetchData',
                 src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 4),
                 onDone: {
-                  target: 'question',
-                  actions: assign((context, event) => context.scratch = event.data) //context.pgr.scratch.fetchData 
+                  actions: assign((context, event) => {
+                    let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
+                    let other = dialog.get_message(messages.fileComplaint.complaintType.question.other, context.user.locale);
+                    let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([other]));
+                    context.grammer = grammer; // save the grammer in context to be used in next step
+                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                  }) 
                 },
                 onError: {
                   actions: assign((context, event) => {
@@ -62,17 +67,7 @@ const pgr =  {
                     context.chatInterface.toUser(context.user, message);
                   })
                 }
-              }
-            }, // fetchData
-            question: {
-              id: 'question',
-              onEntry: assign((context, event) => {
-                let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                let other = dialog.get_message(messages.fileComplaint.complaintType.question.other, context.user.locale);
-                let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([other]));
-                context.grammer = grammer; // save the grammer in context to be used in next step
-                context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-              }),
+              },  // invoke
               on: {
                 USER_MESSAGE: 'process'
               }
@@ -100,68 +95,74 @@ const pgr =  {
               onEntry: assign( (context, event) => {
                 context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
               }),
-              always:  'question',
+              always: 'question',
             } // error
           } // states of complaintType
         }, // complaintType
         complaintType2Step: {
           id: 'complaintType2Step',
-          initial: 'fetchData',
+          initial: 'complaintCategory',
           states: {
-            fetchData: {
-              invoke: {
-                id: 'fetchData',
-                src: (context) => pgrService.fetchComplaintCategories(),
-                onDone: {
-                  target: 'question',
-                  actions: assign((context, event) => context.scratch = event.data) 
-                },
-                onError: {
-                  actions: assign((context, event) => {
-                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                    context.chatInterface.toUser(context.user, message);
-                  })
-                }
-              }
-            }, // fetchData
-            question: {
-              id: 'question',
-              onEntry: assign((context, event) => {
-                let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
-                let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
-                let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([startover]));
-                context.grammer = grammer; // save the grammer in context to be used in next step
-                context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-              }),
-              on: {
-                USER_MESSAGE: 'process'
-              }
-            }, //question
-            process: {
-              id: 'process',
-              onEntry: assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event) 
-              }),
-              always: [
-                {
-                  target: '#complaintType2Step',
-                  cond: (context) => context.intention == '100' // TODO come back to fix this
-                },
-                {
-                  target: '#geoLocationSharingInfo',
-                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN
-                },
-                {
-                  target: 'error'
-                }
-              ]
-            }, // process
-            error: {
-              onEntry: assign( (context, event) => {
-                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
-              }),
-              always:  'question',
-            } // error
+            complaintCategory: {
+              id: 'complaintCategory',
+              initial: 'fetchData',
+              states: {
+                fetchData: {
+                  invoke: {
+                    id: 'fetchData',
+                    src: (context) => pgrService.fetchComplaintCategories(),
+                    onDone: {
+                      target: 'question',
+                      actions: assign((context, event) => context.scratch = event.data) 
+                    },
+                    onError: {
+                      actions: assign((context, event) => {
+                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+                        context.chatInterface.toUser(context.user, message);
+                      })
+                    }
+                  }
+                }, // fetchData
+                question: {
+                  id: 'question',
+                  onEntry: assign((context, event) => {
+                    let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
+                    let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
+                    let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([startover]));
+                    context.grammer = grammer; // save the grammer in context to be used in next step
+                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                  }),
+                  on: {
+                    USER_MESSAGE: 'process'
+                  }
+                }, //question
+                process: {
+                  id: 'process',
+                  onEntry: assign((context, event) => {
+                    context.intention = dialog.get_intention(context.grammer, event) 
+                  }),
+                  always: [
+                    {
+                      target: '#complaintType2Step',
+                      cond: (context) => context.intention == '100' // TODO come back to fix this
+                    },
+                    {
+                      target: '#geoLocationSharingInfo',
+                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                    },
+                    {
+                      target: 'error'
+                    }
+                  ]
+                }, // process
+                error: {
+                  onEntry: assign( (context, event) => {
+                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                  }),
+                  always:  'question',
+                } // error
+              } // states of complaintCategory
+            } // category
           } // states of complaintType2Step
         }, // complaintType2Step
         geoLocationSharingInfo: {

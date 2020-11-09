@@ -1,6 +1,6 @@
 const INTENTION_UNKOWN = 'INTENTION_UKNOWN';
-function get_input(event) {
-  return event.message.input.trim().toLowerCase();
+function get_input(event, scrub = true) {
+  return scrub? event.message.input.trim().toLowerCase() : event.message.input;
 }
 function get_message(bundle, locale = 'en_IN') {
   return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
