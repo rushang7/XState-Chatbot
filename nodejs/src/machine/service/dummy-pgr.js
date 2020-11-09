@@ -305,10 +305,10 @@ class DummyPGRService {
         //     console.log(key);
         // } 
     } // constructor
-    fetchComplaintCategories() { // TODO making this async causes console.log() above to print Promise {<resolved>: undefined}
+    async fetchComplaintCategories() { // TODO making this async causes console.log() above to print Promise {<resolved>: undefined}
         return Object.keys(this.#complaintCategoryToItemsMap);
     }
-    fetchComplaintsForCategory(category) {
+    async fetchComplaintsForCategory(category) {
         return this.#complaintCategoryToItemsMap[category];
     }
     async fetchFrequentComplaints(locale, n) {
@@ -323,57 +323,4 @@ class DummyPGRService {
         console.log(`Saving complaint ${bundle} to database`);
     }
 }
-
-// -------------- Use this to create prompts for en_IN and hi_IN
-// Categories
-// StreetLights
-// Garbage
-// Drains
-// WaterandSewage
-// RoadsAndFootpaths
-// Mosquitos
-// Animals
-// PublicToilets
-// LandViolations
-// Trees
-// OpenDefecation
-// Parks
-
-// -------
-//////Complaint Codes
-// NoStreetlight
-// StreetLightNotWorking
-// GarbageNeedsTobeCleared
-// DamagedGarbageBin
-// BurningOfGarbage
-// OverflowingOrBlockedDrain
-// illegalDischargeOfSewage
-// BlockOrOverflowingSewage
-// ShortageOfWater
-// NoWaterSupply
-// DirtyWaterSupply
-// BrokenWaterPipeOrLeakage
-// WaterPressureisVeryLess
-// DamagedRoad
-// WaterLoggedRoad
-// ManholeCoverMissingOrDamaged
-// DamagedOrBlockedFootpath
-// ConstructionMaterialLyingOntheRoad
-// RequestSprayingOrFoggingOperation
-// StrayAnimals
-// DeadAnimals
-// DirtyOrSmellyPublicToilets
-// PublicToiletIsDamaged
-// NoWaterOrElectricityinPublicToilet
-// IllegalShopsOnFootPath
-// IllegalConstructions
-// IllegalParking
-// IllegalCuttingOfTrees
-// CuttingOrTrimmingOfTreeRequired
-// OpenDefecation
-// ParkRequiresMaintenance
-// Others
-
-
-
 module.exports = new DummyPGRService();
