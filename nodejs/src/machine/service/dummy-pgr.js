@@ -18,6 +18,24 @@ class DummyPGRService {
         let cityAndLocality = await getCityAndLocality(latlng);
         return cityAndLocality;
     }
+    async fetchComplaintItemsForCategory(category) {
+        return this.complaintCategoryToItemsMap[category];
+    }
+    async fetchComplaintCategories() {
+        console.log(Object.keys(this.complaintCategoryToItemsMap));
+        return Object.keys(this.complaintCategoryToItemsMap);
+    }
+    async fetchFrequentComplaints(locale, n) {
+        return [
+            'StreetLightNotWorking',
+            'BlockOrOverflowingSewage',
+            'GarbageNeedsTobeCleared',
+            'BrokenWaterPipeOrLeakage'
+        ]
+    }
+    async persistComplaint(bundle) {
+        console.log(`Saving complaint ${bundle} to database`);
+    }
     constructor() {
         // 11 November, 2020
         //https://github.com/egovernments/egov-mdms-data/blob/master/data/pb/RAINMAKER-PGR/ServiceDefs.json
@@ -297,30 +315,6 @@ class DummyPGRService {
                 this.complaintCategoryToItemsMap[el.menuPath] = [el.serviceCode];
             }
         });
-        // this.fetchComplaintCategories().forEach(category => {
-        //     //console.log(`${category}`);
-        //     this.fetchComplaintsForCategory(category).forEach(el=>console.log(el));
-        // })
-        // for(var key in this.complaintCategoryToItemsMap) {
-        //     console.log(key);
-        // } 
     } // constructor
-    async fetchComplaintCategories() { // TODO making this async causes console.log() above to print Promise {<resolved>: undefined}
-        return Object.keys(this.complaintCategoryToItemsMap);
-    }
-    async fetchComplaintsForCategory(category) {
-        return this.complaintCategoryToItemsMap[category];
-    }
-    async fetchFrequentComplaints(locale, n) {
-        return [
-            'StreetLightNotWorking',
-            'BlockOrOverflowingSewage',
-            'GarbageNeedsTobeCleared',
-            'BrokenWaterPipeOrLeakage'
-        ]
-    }
-    async persistComplaint(bundle) {
-        console.log(`Saving complaint ${bundle} to database`);
-    }
 }
 module.exports = new DummyPGRService();

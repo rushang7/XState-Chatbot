@@ -105,33 +105,28 @@ const pgr =  {
           states: {
             complaintCategory: {
               id: 'complaintCategory',
-              initial: 'fetchData',
+              initial: 'question',
               states: {
-                fetchData: {
-                  invoke: {
-                    id: 'fetchData',
-                    src: (context) => pgrService.fetchComplaintCategories(),
+                question: {
+                  id: 'question',
+                  invoke:  {                  
+                    src: pgrService.fetchComplaintCategories(),
                     onDone: {
-                      target: 'question',
-                      actions: assign((context, event) => context.scratch = event.data) 
-                    },
+                      actions: assign((context, event) => {
+                        let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
+                        let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
+                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([startover]));
+                        context.grammer = grammer; // save the grammer in context to be used in next step
+                        context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                      }),
+                    }, 
                     onError: {
                       actions: assign((context, event) => {
                         let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                         context.chatInterface.toUser(context.user, message);
                       })
                     }
-                  }
-                }, // fetchData
-                question: {
-                  id: 'question',
-                  onEntry: assign((context, event) => {
-                    let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
-                    let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
-                    let {prompt, grammer} = dialog.constructPromptAndGrammer(context.scratch.concat([startover]));
-                    context.grammer = grammer; // save the grammer in context to be used in next step
-                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                  }),
+                  }, // invoke
                   on: {
                     USER_MESSAGE: 'process'
                   }
@@ -143,9 +138,56 @@ const pgr =  {
                   }),
                   always: [
                     {
-                      target: '#complaintType2Step',
-                      cond: (context) => context.intention == '100' // TODO come back to fix this
+                      target: '#complaintItem',
+                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN
                     },
+                    {
+                      target: 'error'
+                    }
+                  ]
+                }, // process
+                error: {
+                  onEntry: assign( (context, event) => {
+                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                  }),
+                  always:  'question',
+                } // error
+              } // states of complaintCategory
+            }, // complaintCategory
+            complaintItem: {
+              id: 'complaintItem',
+              initial: 'question',
+              states: {
+                question: {
+                  id: 'question',
+                  invoke:  {                  
+                    src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
+                    onDone: {
+                      actions: assign((context, event) => {
+                        let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
+                        let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
+                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([startover]));
+                        context.grammer = grammer; // save the grammer in context to be used in next step
+                        context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                      }),
+                    }, 
+                    onError: {
+                      actions: assign((context, event) => {
+                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+                        context.chatInterface.toUser(context.user, message);
+                      })
+                    }
+                  }, // invoke
+                  on: {
+                    USER_MESSAGE: 'process'
+                  }
+                }, //question
+                process: {
+                  id: 'process',
+                  onEntry: assign((context, event) => {
+                    context.intention = dialog.get_intention(context.grammer, event) 
+                  }),
+                  always: [
                     {
                       target: '#geoLocationSharingInfo',
                       cond: (context) => context.intention != dialog.INTENTION_UNKOWN
@@ -161,8 +203,8 @@ const pgr =  {
                   }),
                   always:  'question',
                 } // error
-              } // states of complaintCategory
-            } // category
+              } // states of complaintItem
+            }, // complaintItem
           } // states of complaintType2Step
         }, // complaintType2Step
         geoLocationSharingInfo: {
@@ -411,7 +453,7 @@ let messages = {
       item: {
         question: {
           preamble : {
-            en_IN : 'Please enter the number for your complaint',
+            en_IN : 'Please enter the number for your complaint item',
             hi_IN : 'अपनी शिकायत के लिए नंबर दर्ज करें'
           },
           startover: {
