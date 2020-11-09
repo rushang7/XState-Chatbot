@@ -105,7 +105,7 @@ const receipts = {
         states:{
           mobilecheck:{
             onEntry: assign((context, event) => {
-              let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with <Service_Name>. Still you can avail service by searching your account information.';
+              let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.';
               context.chatInterface.toUser(context.user, message1);
             }),
             always:[
@@ -116,7 +116,7 @@ const receipts = {
           },
           question:{
             onEntry: assign((context, event) => {
-              let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number. \n\n Please type and send "ULB" to link your account number with <Service_Name>';
+              let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number. \n\n Please type and send "ULB" to link your account number with Service_Name';
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -485,7 +485,7 @@ const receipts = {
                 }
               },
               {
-                target:'#receiptsMenu',
+                target:'#searchparams',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }
