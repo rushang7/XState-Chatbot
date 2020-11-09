@@ -169,7 +169,7 @@ const receipts = {
           },
           ULB:{
             onEntry: assign( (context, event) => {
-              let message = 'Hi <Citizen_Name>, To get your mobile number linked to your water and sewerage service account please dial "ULB_Helpdesk_Phone_Number".\n\n After linking the mobile number with your service you will be able to make quick payment, View bills and payments without having to search for the bills.\n Thank you. \n\nType and Send 5 to Go ⬅️ Back to Main Menu.';
+              let message = 'Hi  Citizen_Name , To get your mobile number linked to your water and sewerage service account please dial "ULB_Helpdesk_Phone_Number".\n\n After linking the mobile number with your service you will be able to make quick payment, View bills and payments without having to search for the bills.\n Thank you. \n\nType and Send 5 to Go ⬅️ Back to Main Menu.';
               context.chatInterface.toUser(context.user, message);
             }),
           },
@@ -178,22 +178,205 @@ const receipts = {
       },//mobilecheck
       searchparams:{
         id:'searchparams',
-        initial:'question',
+        initial:'respectiveparams',
         states:{
-          question:{
+          respectiveparams:{
+            always:[
+              {
+                target:'question1',
+                cond:(context,event)=>{
+                  return context.receipts.slots.menu==='1'
+                }
+              },
+              {
+                target:'question2',
+                cond:(context,event)=>{
+                  return context.receipts.slots.menu==='2'
+                }
+              },
+              {
+                target:'question3',
+                cond:(context,event)=>{
+                  return context.receipts.slots.menu==='3'
+                }
+              },
+              {
+                target:'question4',
+                cond:(context,event)=>{
+                  return context.receipts.slots.menu==='4'
+                }
+              },
+              {
+                target:'question5',
+                cond:(context,event)=>{
+                  return context.receipts.slots.menu==='5'
+                }
+              },
+            ],
+            
+          },
+          question1:{
             onEntry: assign((context, event) => {
               context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID/Consumer Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
-              USER_MESSAGE:'process'
+              USER_MESSAGE:'process1'
             }
 
           },
-          process:{
+          process1:{
             onEntry: assign( (context, event) => {
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+              context.receipts.slots.searchparams=event.message.input;
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target:'#paraminput',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+
+            ]
+    
+          },
+          question2:{
+            onEntry: assign((context, event) => {
+              context.mobile = {slots: {}};
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Property ID.\n\n3. Search 🔎 using Consumer ID/Consumer Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process2'
+            }
+
+          },
+          process2:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+              context.receipts.slots.searchparams=event.message.input;
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target:'#paraminput',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+
+            ]
+    
+          },
+          question3:{
+            onEntry: assign((context, event) => {
+              context.mobile = {slots: {}};
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using TL Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process3'
+            }
+
+          },
+          process3:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+              context.receipts.slots.searchparams=event.message.input;
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target:'#paraminput',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+
+            ]
+    
+          },
+          question4:{
+            onEntry: assign((context, event) => {
+              context.mobile = {slots: {}};
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using NOC Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process4'
+            }
+
+          },
+          process4:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
+              context.receipts.slots.searchparams=event.message.input;
+            }),
+            always :[
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target:'#paraminput',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+
+            ]
+    
+          },
+          question5:{
+            onEntry: assign((context, event) => {
+              context.mobile = {slots: {}};
+              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using BPA Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE:'process5'
+            }
+
+          },
+          process5:{
+            onEntry: assign( (context, event) => {
+              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
