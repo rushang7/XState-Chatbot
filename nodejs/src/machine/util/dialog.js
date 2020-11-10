@@ -12,12 +12,16 @@ function get_intention(g, event, strict = false) {
   let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
-function constructPromptAndGrammer(data) {
+function constructPromptAndGrammer(keys, message_bundle, locale) {
   var prompt = '';
   var grammer = [];
-  data.forEach((element, index) => {
-    prompt+= `\n${index+1}. ${element}`;
-    grammer.push({intention: element, recognize: [index+1]});
+  keys.forEach((element, index) => {
+    if (message_bundle[element] === undefined) {
+      console.log(`Could not find message for <${element}>, skipping ...`);
+    } else {
+      prompt+= `\n${index+1}. ${message_bundle[element][locale]}`;
+      grammer.push({intention: element, recognize: [(index+1).toString()]});
+    }
   });
   // console.log(prompt);
   // console.log(grammer);

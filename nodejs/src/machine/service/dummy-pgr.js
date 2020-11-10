@@ -22,10 +22,9 @@ class DummyPGRService {
         return this.complaintCategoryToItemsMap[category];
     }
     async fetchComplaintCategories() {
-        console.log(Object.keys(this.complaintCategoryToItemsMap));
         return Object.keys(this.complaintCategoryToItemsMap);
     }
-    async fetchFrequentComplaints(locale, n) {
+    async fetchFrequentComplaints() {
         return [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',

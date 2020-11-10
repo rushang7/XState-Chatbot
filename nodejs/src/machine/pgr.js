@@ -50,13 +50,12 @@ const pgr =  {
           states: {
             question: {
               invoke: {
-                src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 4),
+                src: (context) => pgrService.fetchFrequentComplaints(),
                 id: 'fetchFrequentComplaints',
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let other = dialog.get_message(messages.fileComplaint.complaintType.question.other, context.user.locale);
-                    let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([other]));
+                    let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat(['More']), Object.assign({}, messages.complaintCodes, {'More': messages.fileComplaint.complaintType2Step.category.question.More}), context.user.locale);
                     context.grammer = grammer; // save the grammer in context to be used in next step
                     context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   }) 
@@ -80,7 +79,7 @@ const pgr =  {
               always: [
                 {
                   target: '#complaintType2Step',
-                  cond: (context) => context.intention == 'Other ...' // TODO come back to fix this
+                  cond: (context) => context.intention == 'More' 
                 },
                 {
                   target: '#geoLocationSharingInfo',
@@ -114,8 +113,7 @@ const pgr =  {
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
-                        let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
-                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([startover]));
+                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data, messages.complaintCategories, context.user.locale);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                       }),
@@ -134,7 +132,7 @@ const pgr =  {
                 process: {
                   id: 'process',
                   onEntry: assign((context, event) => {
-                    context.intention = dialog.get_intention(context.grammer, event) 
+                    context.intention = dialog.get_intention(context.grammer, event, true) 
                   }),
                   always: [
                     {
@@ -165,8 +163,7 @@ const pgr =  {
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
-                        let startover = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.startover, context.user.locale);
-                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat([startover]));
+                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat(['GoBack']), Object.assign({}, messages.complaintCodes, {'GoBack': messages.fileComplaint.complaintType2Step.item.question.goback}), context.user.locale);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                       }),
@@ -188,6 +185,10 @@ const pgr =  {
                     context.intention = dialog.get_intention(context.grammer, event) 
                   }),
                   always: [
+                    {
+                      target: '#complaintCategory',
+                      cond: (context) => context.intention == 'GoBack'
+                    },
                     {
                       target: '#geoLocationSharingInfo',
                       cond: (context) => context.intention != dialog.INTENTION_UNKOWN
@@ -444,10 +445,14 @@ let messages = {
             en_IN : 'Please enter the number for your complaint category',
             hi_IN : 'अपनी शिकायत श्रेणी के लिए नंबर दर्ज करें'
           },
-          startover: {
-            en_IN : 'To start over',
-            hi_IN : 'दुबारा प्रारम्भ करना'
+          More: {
+            en_IN : "See more complaints ...",
+            hi_IN : "TODO"
           },
+          // startover: {
+          //   en_IN : 'To start over',
+          //   hi_IN : 'दुबारा प्रारम्भ करना'
+          // },
         }
       },
       item: {
@@ -456,9 +461,9 @@ let messages = {
             en_IN : 'Please enter the number for your complaint item',
             hi_IN : 'अपनी शिकायत के लिए नंबर दर्ज करें'
           },
-          startover: {
-            en_IN : 'To start over',
-            hi_IN : 'दुबारा प्रारम्भ करना'
+          goback: {
+            en_IN : 'To go back',
+            hi_IN : 'पीछे जाना'
           },
         }
       },
@@ -470,6 +475,186 @@ let messages = {
       }
     } // geoLocation 
   }, // fileComplaint
+  complaintCodes: {
+    NoStreetlight: {
+      en_IN : "Please install new streetlight",
+      hi_IN : "कृपया नई स्ट्रीटलाइट स्थापित करें"
+    },
+    StreetLightNotWorking: {
+      en_IN : "Streetlight not working",
+      hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
+    },
+    GarbageNeedsTobeCleared: {
+      en_IN : "Garbage not cleared",
+      hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
+    },
+    DamagedGarbageBin: {
+      en_IN : "Garbage bin damaged",
+      hi_IN : "कचरा बिन टूटा है"
+    },
+    BurningOfGarbage: {
+      en_IN : "Garbage being burnt",
+      hi_IN : "कचरा जलाया जा रहा है"
+    },
+    OverflowingOrBlockedDrain: {
+      en_IN : "Drain overflow / blocked",
+      hi_IN : "नाली अतिप्रवाह या अवरुद्ध है"
+    },
+    illegalDischargeOfSewage: {
+      en_IN : "Sewage illegal discharge",
+      hi_IN : "सीवेज का अवैध निर्वहन"
+    },
+    BlockOrOverflowingSewage: {
+      en_IN : "Sewage overflow / blocked",
+      hi_IN : "सीवेज अतिप्रवाह या अवरुद्ध है"
+    },
+    ShortageOfWater: {
+      en_IN : "Water shortage",
+      hi_IN : "पानी की कमी"
+    },
+    NoWaterSupply: {
+      en_IN : "No Water supply",
+      hi_IN : "पानी नहीं है"
+    },
+    DirtyWaterSupply: {
+      en_IN : "Water supply dirty",
+      hi_IN : "पानी गंदी है"
+    },
+    BrokenWaterPipeOrLeakage: {
+      en_IN : "Pipe broken / leaking",
+      hi_IN : "पानी का पाइप टूट या लीक होना"
+    },
+    WaterPressureisVeryLess: {
+      en_IN : "Low water pressure",
+      hi_IN : "कम पानी का दबाव"
+    },
+    DamagedRoad: {
+      en_IN : "Road bad condition",
+      hi_IN : "सड़क टूटी हुई है"
+    },
+    WaterLoggedRoad: {
+      en_IN : "Road waterlogged ",
+      hi_IN : "ड़क पर पानी जमा है"
+    },
+    ManholeCoverMissingOrDamaged: {
+      en_IN : "Manhole open / cover damaged",
+      hi_IN : "मैनहोल खुला है या कवर गायब है"
+    },
+    DamagedOrBlockedFootpath: {
+      en_IN : "Footpath bad condition / blocked",
+      hi_IN : "फुटपाथ टूटा या अवरुद्ध है"
+    },
+    ConstructionMaterialLyingOntheRoad: {
+      en_IN : "Construction material lying on road",
+      hi_IN : "निर्माण सामग्री सड़क पर पड़ी है"
+    },
+    RequestSprayingOrFoggingOperation: {
+      en_IN : "Request mosquito spraying",
+      hi_IN : "मच्छरों के लिए डरावना"
+    },
+    StrayAnimals: {
+      en_IN : "Stray animal menace",
+      hi_IN : "आवारा पशु खतरा"
+    },
+    DeadAnimals: {
+      en_IN : "Dead animal. Please remove.",
+      hi_IN : "मृत पशु। कृपया निकालें"
+    },
+    DirtyOrSmellyPublicToilets: {
+      en_IN : "Toilet dirty / smelly",
+      hi_IN : "TODO"
+    },
+    PublicToiletIsDamaged: {
+      en_IN : "Toilet damaged",
+      hi_IN : "TODO"
+    },
+    NoWaterOrElectricityinPublicToilet: {
+      en_IN : "No water / electricity in Toilet",
+      hi_IN : "TODO"
+    },
+    IllegalShopsOnFootPath: {
+      en_IN : "Illegal shops on footpath",
+      hi_IN : "TODO"
+    },
+    IllegalConstructions: {
+      en_IN : "Illegal constructions",
+      hi_IN : "TODO"
+    },
+    IllegalParking: {
+      en_IN : "Illegal parking",
+      hi_IN : "TODO"
+    },
+    IllegalCuttingOfTrees: {
+      en_IN : "Illegal tree cutting",
+      hi_IN : "TODO"
+    },
+    CuttingOrTrimmingOfTreeRequired: {
+      en_IN : "Request tree trimming / cutting",
+      hi_IN : "TODO"
+    },
+    OpenDefecation: {
+      en_IN : "Open defecation",
+      hi_IN : "TODO"
+    },
+    ParkRequiresMaintenance: {
+      en_IN : "Request park maintenance",
+      hi_IN : "TODO"
+    },
+    Others: {
+      en_IN : "Something else",
+      hi_IN : "कुछ अन्य ..."
+    },
+  },
+  complaintCategories: {
+    StreetLights: {
+      en_IN : "Streetlights",
+      hi_IN : "TODO"
+    },
+    Garbage: {
+      en_IN : "Garbage",
+      hi_IN : "TODO"
+    }, 
+    Drains: {
+      en_IN : "Drains",
+      hi_IN : "TODO"
+    },
+    WaterandSewage: {
+      en_IN : "Water and Sewage",
+      hi_IN : "TODO"
+    },
+    RoadsAndFootpaths: {
+      en_IN : "Roads and Footpaths",
+      hi_IN : "TODO"
+    },
+    Mosquitos: {
+      en_IN : "Mosquitos",
+      hi_IN : "TODO"
+    },
+    Animals: {
+      en_IN : "Animals",
+      hi_IN : "TODO"
+    },
+    PublicToilets: {
+      en_IN : "Public Toilets",
+      hi_IN : "TODO"
+    },
+    LandViolations: {
+      en_IN : "Land violations",
+      hi_IN : "TODO"
+    },
+    Trees: {
+      en_IN : "Trees",
+      hi_IN : "TODO"
+    },
+    OpenDefecation: {
+      en_IN : "Open defecation",
+      hi_IN : "TODO"
+    },
+    Parks: {
+      en_IN : "Parks",
+      hi_IN : "TODO"
+    },
+  }
 }; // messages
 
 let grammer = {
@@ -481,52 +666,3 @@ let grammer = {
   },
 };
 module.exports = pgr;
-// -------------- Use this to create prompts for en_IN and hi_IN
-// Categories
-// StreetLights
-// Garbage
-// Drains
-// WaterandSewage
-// RoadsAndFootpaths
-// Mosquitos
-// Animals
-// PublicToilets
-// LandViolations
-// Trees
-// OpenDefecation
-// Parks
-
-// -------
-//////Complaint Codes
-// NoStreetlight
-// StreetLightNotWorking
-// GarbageNeedsTobeCleared
-// DamagedGarbageBin
-// BurningOfGarbage
-// OverflowingOrBlockedDrain
-// illegalDischargeOfSewage
-// BlockOrOverflowingSewage
-// ShortageOfWater
-// NoWaterSupply
-// DirtyWaterSupply
-// BrokenWaterPipeOrLeakage
-// WaterPressureisVeryLess
-// DamagedRoad
-// WaterLoggedRoad
-// ManholeCoverMissingOrDamaged
-// DamagedOrBlockedFootpath
-// ConstructionMaterialLyingOntheRoad
-// RequestSprayingOrFoggingOperation
-// StrayAnimals
-// DeadAnimals
-// DirtyOrSmellyPublicToilets
-// PublicToiletIsDamaged
-// NoWaterOrElectricityinPublicToilet
-// IllegalShopsOnFootPath
-// IllegalConstructions
-// IllegalParking
-// IllegalCuttingOfTrees
-// CuttingOrTrimmingOfTreeRequired
-// OpenDefecation
-// ParkRequiresMaintenance
-// Others
