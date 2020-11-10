@@ -13,7 +13,7 @@ const envVariables = {
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
-    mdmsHost: process.env.mdmsHost || '/',
+    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
 
     externalHost: process.env.externalHost || 'https://egov-micro-dev.egovernments.org/',
 

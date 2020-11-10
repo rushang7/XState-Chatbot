@@ -20,7 +20,7 @@ const pgr =  {
           }
         }, // menu.question
         process: {
-          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event)),
+          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event, true)),
           always : [
             {
               target: '#fileComplaint',
@@ -80,7 +80,7 @@ const pgr =  {
             }, //question
             process: {
               onEntry: assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event) // TODO come back here to handle the Other ...
+                context.intention = dialog.get_intention(context.grammer, event, true) // TODO come back here to handle the Other ...
               }),
               always: [
                 {
@@ -222,7 +222,7 @@ const pgr =  {
             },
             process: {
               onEntry:  assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event);
+                context.intention = dialog.get_intention(context.grammer, event, true);
               }),
               always : [
                 {
@@ -277,7 +277,7 @@ const pgr =  {
             },
             process: {
               onEntry:  assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event);
+                context.intention = dialog.get_intention(context.grammer, event, true);
               }),
               always : [
                 {

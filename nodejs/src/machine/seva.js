@@ -14,12 +14,109 @@ const sevaMachine = Machine({
       }
     },
     states: {
-        start: {
+      start: {
+        on: {
+          USER_MESSAGE: [
+            {
+              cond: (context) => context.user.locale,
+              target: '#welcome'
+            },
+            {
+              target: '#onboardingWelcome'
+            }
+          ]
+        }
+      },
+      onboardingWelcome: {
+        id: 'onboardingWelcome',
+        onEntry: assign((context, event) => {
+          let message = 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through whatsapp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।\n\nAt any stage type and send “mseva” to go to the main menu options.\n\nकिसी भी पड़ाव से main मेन्यू में वापस आने के लिए mSeva टाईप कर और भेजे।';
+          context.chatInterface.toUser(context.user, message);
+        }),
+        always: '#onboardingLocale'
+      },
+      onboardingLocale: {
+        id: 'onboardingLocale',
+        initial: 'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              let message = 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी';
+              context.grammer = grammer.locale.question;
+              context.chatInterface.toUser(context.user, message);
+            }),
             on: {
-              // USER_MESSAGE: 'locale'
-              USER_MESSAGE: 'welcome'
+              USER_MESSAGE: 'process'
             }
           },
+          process: {
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event, true);
+              console.log(context.intention);
+              if(context.intention != dialog.INTENTION_UNKOWN) {
+                context.user.locale = context.intention;
+              } else {
+                context.user.locale = 'en_IN';
+              }
+            }),
+            always: '#onboardingName'
+          }
+        }
+      },
+      onboardingName: {
+        id: 'onboardingName',
+        initial: 'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.onboardingName, context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let name = event.message.input.trim();
+              if(name.toLowerCase() != 'no') {
+                context.user.name = name;
+              }
+            }),
+            always: [
+              {
+                cond: (context) => context.user.name,
+                target: '#onboardingThankYou'
+              },
+              {
+                target: '#welcome'
+              }
+            ]
+          }
+        }
+      },
+      onboardingThankYou: {
+        id: 'onboardingThankYou',
+        onEntry: assign((context, event) => {
+          var message = dialog.get_message(messages.onboardingThankYou, context.user.locale);
+          message = message.replace('{{name}}', context.user.name);
+          context.chatInterface.toUser(context.user, message);
+        }),
+        always: '#welcome'
+      },
+      welcome: {
+        id: 'welcome',
+        onEntry: assign((context, event) => {
+          var message = dialog.get_message(messages.welcome, context.user.locale);
+          if(context.user.name)
+            message = message.replace('{{name}}', context.user.name);
+          else 
+            message = message.replace('{{name}}', '');
+          context.chatInterface.toUser(context.user, message);
+        }),
+        always: '#sevamenu'
+      },
+
           locale: {
             id: 'locale',
             initial: 'question',
@@ -44,8 +141,8 @@ const sevaMachine = Machine({
               }
             }
           },
-          welcome: {
-            id: 'welcome',
+          oldWelcome: {
+            id: 'oldWelcome',
             onEntry: assign( (context, event, meta) => {
               let hello = dialog.get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
               let welcome = dialog.get_message(messages.welcome.welcome, context.user.locale); 
@@ -67,7 +164,7 @@ const sevaMachine = Machine({
               },
               process: {
                 onEntry: assign((context, event) => {
-                  context.intention = dialog.get_intention(grammer.menu.question, event)
+                  context.intention = dialog.get_intention(grammer.menu.question, event, true)
                 }),
                 always : [
                   {
@@ -104,7 +201,8 @@ const sevaMachine = Machine({
       }, // sevamenu
       endstate: {
         id: 'endstate',
-        type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
+        always: 'start',
+        // type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
         onEntry: assign((context, event) => {
           context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another conversation");
         })
@@ -124,20 +222,20 @@ let messages = {
     }
   },
   welcome: {
-    hello: {
-      en_IN: (name)=>name? `Hello ${name}.\n`: `Hello,\n`,
-      hi_IN: (name)=>name? `नमस्ते ${name},\n`: `नमस्ते।\n`
-    },
-    welcome: {
-      en_IN: 'Welcome to the State of Punjab\'s Seva Chatline.\n You may type "seva" at any time to come back to this main menu',
-      hi_IN: 'पंजाब राज्य शिकायत चैट लाइन में आपका स्वागत है।\n किसी भी अवस्था में, आप इस मुख्य मेनू पर वापस आने के लिए "सेवा" टाइप कर सकते हैं।',
-    }
+    en_IN: 'Hi {{name}}, \nWelcome to mSeva Punjab 🙏. Now you can File a Complaint and track it’s status, you can also Pay your bills through WhatsApp.\nAt any stage type and send “mseva” to go to the main menu options.',
+    hi_IN: 'नमस्ते {{name}}\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।\nकिसी भी पड़ाव से main मेन्यू में वापस आने के लिए mSeva टाईप कर और भेजे।'
   },
   sevamenu: {
     question: {
       en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n5 to Change Language',
       hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n5 भाषा बदलने के लिए'
     }
+  },
+  onboardingName: {
+    en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".'
+  },
+  onboardingThankYou: {
+    en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.'
   }
 }
 

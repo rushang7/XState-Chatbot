@@ -3,7 +3,7 @@ function get_input(event) {
   return event.message.input.trim().toLowerCase();
 }
 function get_message(bundle, locale = 'en_IN') {
-  return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
+  return (bundle[locale] === undefined)? bundle['en_IN'] : bundle[locale];
 }
 function get_intention(g, event, strict = false) {
   let utterance = get_input(event);
