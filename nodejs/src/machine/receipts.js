@@ -228,10 +228,21 @@ const receipts = {
           },
           process1:{
             onEntry: assign( (context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
+              }
+              if(isValid) {
+                var searchParamOption = ''
+                if(parsedInput === 1)
+                  searchParamOption = 'Mobile Number'
+                else if(parsedInput === 2)
+                  searchParamOption = 'Connection Number'
+                else
+                  searchParamOption = 'Consumer ID'
+                context.receipts.slots.searchParamOption = searchParamOption;
               }
               context.receipts.slots.searchparams=event.message.input;
             }),
@@ -265,10 +276,21 @@ const receipts = {
           },
           process2:{
             onEntry: assign( (context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
+              }
+              if(isValid) {
+                var searchParamOption = ''
+                if(parsedInput === 1)
+                  searchParamOption = 'Mobile Number'
+                else if(parsedInput === 2)
+                  searchParamOption = 'property ID'
+                else
+                  searchParamOption = 'Consumer ID'
+                context.receipts.slots.searchParamOption = searchParamOption;
               }
               context.receipts.slots.searchparams=event.message.input;
             }),
@@ -302,11 +324,21 @@ const receipts = {
           },
           process3:{
             onEntry: assign( (context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
               }
+              if(isValid) {
+                var searchParamOption = ''
+                if(parsedInput === 1)
+                  searchParamOption = 'Mobile Number'
+                else
+                  searchParamOption = 'TL Application number'
+                context.receipts.slots.searchParamOption = searchParamOption;
+              }
+              
               context.receipts.slots.searchparams=event.message.input;
             }),
             always :[
@@ -339,10 +371,19 @@ const receipts = {
           },
           process4:{
             onEntry: assign( (context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
+              }
+              if(isValid) {
+                var searchParamOption = ''
+                if(parsedInput === 1)
+                  searchParamOption = 'Mobile Number'
+                else
+                  searchParamOption = 'NOC Application Number'
+                context.receipts.slots.searchParamOption = searchParamOption;
               }
               context.receipts.slots.searchparams=event.message.input;
             }),
@@ -376,10 +417,19 @@ const receipts = {
           },
           process5:{
             onEntry: assign( (context, event) => {
+              var parsedInput = parseInt(event.message.input.trim());
               let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
+              }
+              if(isValid) {
+                var searchParamOption = ''
+                if(parsedInput === 1)
+                  searchParamOption = 'Mobile Number'
+                else
+                  searchParamOption = 'BPA Application number'
+                context.receipts.slots.searchParamOption = searchParamOption;
               }
               context.receipts.slots.searchparams=event.message.input;
             }),
@@ -419,7 +469,7 @@ const receipts = {
         states:{
           question:{
             onEntry: assign((context, event) => {
-              let message='Please Enter Mobile Number to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
+              let message='Please Enter  '+ context.receipts.slots.searchParamOption +'  to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -428,9 +478,23 @@ const receipts = {
           },
           process:{
             onEntry: assign( (context, event) => {
-              context.receipts.slots.mobilenumber=event.message.input;
+              let parsedInput = parseInt(event.message.input.trim());
+              let isValid=event.message.input.trim().length===10;
+              let message = {
+                isValid:isValid,
+                messageContent: parsedInput,
+              };
+              if(isValid) {
+                context.receipts.slots.paraminput=parsedInput;
+              }
             }),
             always:[
+              {
+                target:'#paraminput',
+                cond:(contex,event)=>{
+                  return  !context.message.isvalid;
+                }
+              },
               {
                 target:'#receiptslip',
               }
@@ -485,7 +549,7 @@ const receipts = {
                 }
               },
               {
-                target:'#searchparams',
+                target:'#receiptsMenu',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }

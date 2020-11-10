@@ -19,6 +19,10 @@ class DummyReceipts{
 
         return emptyReceipts;
     }
+    async fetchReceiptsForParam(user, menu, searchparams, paraminput) {
+        console.log(`Received params: ${user}, ${menu}, ${searchparams}, ${paraminput}`);
+        return this.fetchBillsFor(user);
+    }
 
 }
 module.exports = new DummyReceipts();
