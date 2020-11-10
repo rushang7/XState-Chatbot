@@ -52,6 +52,7 @@ const pgr =  {
               id: 'question',
               invoke: {
                 src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 4),
+                id: 'fetchFrequentComplaints',
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
@@ -110,7 +111,8 @@ const pgr =  {
                 question: {
                   id: 'question',
                   invoke:  {                  
-                    src: pgrService.fetchComplaintCategories(),
+                    src: (context, event)=>pgrService.fetchComplaintCategories(),
+                    id: 'fetchComplaintCategories',
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
@@ -162,6 +164,7 @@ const pgr =  {
                   id: 'question',
                   invoke:  {                  
                     src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
+                    id: 'fetchComplaintItemsForCategory',
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
