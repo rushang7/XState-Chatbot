@@ -1,9 +1,9 @@
 const INTENTION_UNKOWN = 'INTENTION_UKNOWN';
-function get_input(event) {
-  return event.message.input.trim().toLowerCase();
+function get_input(event, scrub = true) {
+  return scrub? event.message.input.trim().toLowerCase() : event.message.input;
 }
 function get_message(bundle, locale = 'en_IN') {
-  return (bundle[locale] === 'undefined')? bundle[en_IN] : bundle[locale];
+  return (bundle[locale] === undefined)? bundle['en_IN'] : bundle[locale];
 }
 function get_intention(g, event, strict = false) {
   let utterance = get_input(event);
@@ -13,10 +13,10 @@ function get_intention(g, event, strict = false) {
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
 function constructPromptAndGrammer(data) {
-  var prompt;
+  var prompt = '';
   var grammer = [];
   data.forEach((element, index) => {
-    prompt+= `\n ${index+1}. ${element}`;
+    prompt+= `\n${index+1}. ${element}`;
     grammer.push({intention: element, recognize: [index+1]});
   });
   // console.log(prompt);
