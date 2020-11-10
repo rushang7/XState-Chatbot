@@ -49,7 +49,6 @@ const pgr =  {
           initial: 'question',
           states: {
             question: {
-              id: 'question',
               invoke: {
                 src: (context) => pgrService.fetchFrequentComplaints(context.user.locale, 4),
                 id: 'fetchFrequentComplaints',
@@ -109,7 +108,6 @@ const pgr =  {
               initial: 'question',
               states: {
                 question: {
-                  id: 'question',
                   invoke:  {                  
                     src: (context, event)=>pgrService.fetchComplaintCategories(),
                     id: 'fetchComplaintCategories',
@@ -161,7 +159,6 @@ const pgr =  {
               initial: 'question',
               states: {
                 question: {
-                  id: 'question',
                   invoke:  {                  
                     src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
                     id: 'fetchComplaintItemsForCategory',
