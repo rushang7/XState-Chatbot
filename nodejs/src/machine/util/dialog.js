@@ -66,11 +66,11 @@ let global_messages = {
   },
   [INTENTION_MORE]: {
     en_IN : "See more ...",
-    hi_IN : "और देखें"
+    hi_IN : "और देखें ..."
   },
   [INTENTION_GOBACK]: {
-    en_IN : 'To go back',
-    hi_IN : 'पीछे जाना'
+    en_IN : 'To go back ...',
+    hi_IN : 'पीछे जाना ...'
   },
 }
 

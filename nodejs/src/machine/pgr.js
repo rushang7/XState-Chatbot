@@ -569,43 +569,43 @@ let messages = {
     },
     DirtyOrSmellyPublicToilets: {
       en_IN : "Toilet dirty / smelly",
-      hi_IN : "TODO"
+      hi_IN : "टॉयलेट गंदा या बदबूदार"
     },
     PublicToiletIsDamaged: {
       en_IN : "Toilet damaged",
-      hi_IN : "TODO"
+      hi_IN : "टॉयलेट टूट गया"
     },
     NoWaterOrElectricityinPublicToilet: {
       en_IN : "No water / electricity in Toilet",
-      hi_IN : "TODO"
+      hi_IN : "टॉयलेट में पानी या बिजली नहीं"
     },
     IllegalShopsOnFootPath: {
       en_IN : "Illegal shops on footpath",
-      hi_IN : "TODO"
+      hi_IN : "फुटपाथ पर अवैध दुकानें"
     },
     IllegalConstructions: {
       en_IN : "Illegal constructions",
-      hi_IN : "TODO"
+      hi_IN : "अवैध निर्माण"
     },
     IllegalParking: {
       en_IN : "Illegal parking",
-      hi_IN : "TODO"
+      hi_IN : "अवैध पार्किंग"
     },
     IllegalCuttingOfTrees: {
       en_IN : "Illegal tree cutting",
-      hi_IN : "TODO"
+      hi_IN : "अवैध पेड़ की कटाई"
     },
     CuttingOrTrimmingOfTreeRequired: {
       en_IN : "Request tree trimming / cutting",
-      hi_IN : "TODO"
+      hi_IN : "पेड़ की कटाई का अनुरोध करें"
     },
     OpenDefecation: {
       en_IN : "Open defecation",
-      hi_IN : "TODO"
+      hi_IN : "खुले में शौच जाना"
     },
     ParkRequiresMaintenance: {
       en_IN : "Request park maintenance",
-      hi_IN : "TODO"
+      hi_IN : "पार्क रखरखाव का अनुरोध करें"
     },
     Others: {
       en_IN : "Something else",
@@ -615,51 +615,51 @@ let messages = {
   complaintCategories: {
     StreetLights: {
       en_IN : "Streetlights",
-      hi_IN : "TODO"
+      hi_IN : "सड़क की बत्तियाँ"
     },
     Garbage: {
       en_IN : "Garbage",
-      hi_IN : "TODO"
+      hi_IN : "कचरा"
     }, 
     Drains: {
       en_IN : "Drains",
-      hi_IN : "TODO"
+      hi_IN : "नालियों"
     },
     WaterandSewage: {
       en_IN : "Water and Sewage",
-      hi_IN : "TODO"
+      hi_IN : "पानी और सीवेज"
     },
     RoadsAndFootpaths: {
       en_IN : "Roads and Footpaths",
-      hi_IN : "TODO"
+      hi_IN : "सड़कें और फुटपाथ"
     },
     Mosquitos: {
       en_IN : "Mosquitos",
-      hi_IN : "TODO"
+      hi_IN : "मच्छर"
     },
     Animals: {
       en_IN : "Animals",
-      hi_IN : "TODO"
+      hi_IN : "जानवरों"
     },
     PublicToilets: {
       en_IN : "Public Toilets",
-      hi_IN : "TODO"
+      hi_IN : "सार्वजनिक शौंचालय"
     },
     LandViolations: {
       en_IN : "Land violations",
-      hi_IN : "TODO"
+      hi_IN : "भूमि का उल्लंघन"
     },
     Trees: {
       en_IN : "Trees",
-      hi_IN : "TODO"
+      hi_IN : "पेड़"
     },
     OpenDefecation: {
       en_IN : "Open defecation",
-      hi_IN : "TODO"
+      hi_IN : "खुले में शौच जाना"
     },
     Parks: {
       en_IN : "Parks",
-      hi_IN : "TODO"
+      hi_IN : "पार्क"
     },
   }
 }; // messages
