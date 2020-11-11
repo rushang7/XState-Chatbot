@@ -1,5 +1,5 @@
 const { assign } = require('xstate');
-const { pgrService } = require('./service/service-loader')
+const { pgrService } = require('./service/service-loader');
 const dialog = require('./util/dialog');
 
 const pgr =  {
@@ -55,7 +55,7 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data.concat(['More']), Object.assign({}, messages.complaintCodes, {'More': messages.fileComplaint.complaintType2Step.category.question.More}), context.user.locale);
+                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, true);
                     context.grammer = grammer; // save the grammer in context to be used in next step
                     context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   }) 
@@ -81,7 +81,7 @@ const pgr =  {
               always: [
                 {
                   target: '#complaintType2Step',
-                  cond: (context) => context.intention == 'More' 
+                  cond: (context) => context.intention == dialog.INTENTION_MORE
                 },
                 {
                   target: '#geoLocationSharingInfo',
@@ -170,7 +170,7 @@ const pgr =  {
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
-                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data.concat(['GoBack']), Object.assign({}, messages.complaintCodes, {'GoBack': messages.fileComplaint.complaintType2Step.item.question.goback}), context.user.locale);
+                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, false, true);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                       }),
@@ -196,7 +196,7 @@ const pgr =  {
                   always: [
                     {
                       target: '#complaintCategory',
-                      cond: (context) => context.intention == 'GoBack'
+                      cond: (context) => context.intention == dialog.INTENTION_GOBACK
                     },
                     {
                       target: '#geoLocationSharingInfo',
@@ -446,14 +446,6 @@ let messages = {
             en_IN : 'Please enter the number for your complaint category',
             hi_IN : 'अपनी शिकायत श्रेणी के लिए नंबर दर्ज करें'
           },
-          More: {
-            en_IN : "See more ...",
-            hi_IN : "TODO"
-          },
-          // startover: {
-          //   en_IN : 'To start over',
-          //   hi_IN : 'दुबारा प्रारम्भ करना'
-          // },
         }
       },
       item: {
@@ -461,10 +453,6 @@ let messages = {
           preamble : {
             en_IN : 'Please enter the number for your complaint item',
             hi_IN : 'अपनी शिकायत के लिए नंबर दर्ज करें'
-          },
-          goback: {
-            en_IN : 'To go back',
-            hi_IN : 'पीछे जाना'
           },
         }
       },
