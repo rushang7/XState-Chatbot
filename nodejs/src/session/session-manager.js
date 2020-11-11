@@ -63,7 +63,7 @@ class SessionManager {
                 uuid: userId,
                 locale: 'en_IN'
             },
-            slots: {}
+            slots: {pgr: {}, bills: {}, receipts: {}}
         }))
         service.start();
 

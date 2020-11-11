@@ -83,7 +83,10 @@ const pgr =  {
                 },
                 {
                   target: '#geoLocationSharingInfo',
-                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                  actions: assign((context, event) => {
+                    context.slots.pgr["complaint"]= context.intention;
+                  })
                 },
                 {
                   target: 'error'
@@ -191,7 +194,10 @@ const pgr =  {
                     },
                     {
                       target: '#geoLocationSharingInfo',
-                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                      actions: assign((context, event) => {
+                        context.slots.pgr["complaint"]= context.intention;
+                      })
                     },
                     {
                       target: 'error'
@@ -237,9 +243,8 @@ const pgr =  {
                     target: '#confirmLocation',
                     cond: (context, event) => event.data.city,
                     actions: assign((context, event) => {
-                      console.log('asd');
-                      context.pgr.slots.city = event.data.city;
-                      context.pgr.slots.locality = event.data.locality;
+                      context.slots.pgr["city"]= event.data.city;
+                      context.slots.pgr["locality"] = event.data.locality;
                     })
                   },
                   {
@@ -266,10 +271,8 @@ const pgr =  {
             question: {
               onEntry: assign((context, event) => {
                 var message = 'Is this the correct location of the complaint?';
-                message += '\nCity: ' + context.pgr.slots.city;
-                if(context.pgr.slots.locality) {
-                  message += '\nLocality: ' + context.pgr.slots.locality;
-                }
+                message += '\nCity: ' + context.slots.pgr["city"];
+                message += '\nLocality: ' + context.slots.pgr["locality"];
                 message += '\nPlease send \'No\', if it isn\'t correct'
                 context.chatInterface.toUser(context.user, message);
               }),
@@ -280,19 +283,19 @@ const pgr =  {
             process: {
               onEntry: assign((context, event) => {
                 if(event.message.input.trim().toLowerCase() === 'no') {
-                  context.pgr.confirmLocation = false;
+                  context.slots.pgr["locationConfirmed"] = false;
                 } else {
-                  context.pgr.confirmLocation = true;
+                  context.slots.pgr["locationConfirmed"] = true;
                 }
               }),
               always: [
                 {
                   target: '#persistComplaint',
-                  cond: (context, event) => context.pgr.confirmLocation && context.pgr.slots.locality
+                  cond: (context, event) => context.slots.pgr["locationConfirmed"]  && context.slots.pgr["locality"]
                 },
                 {
                   target: '#locality',
-                  cond: (context, event) => context.pgr.confirmLocation
+                  cond: (context, event) => context.slots.pgr["locationConfirmed"] 
                 },
                 {
                   target: '#city'
@@ -341,7 +344,7 @@ const pgr =  {
                   messageContent: event.message.input.trim()
                 }
                 if(isValid) { // TODO This does not seem to be the right place for this. It's too early here
-                  context.pgr.slots.city = parsed;
+                  context.slots.pgr["city"] = parsed;
                 }
               }),
               always : [
@@ -352,7 +355,8 @@ const pgr =  {
                   }
                 },
                 {
-                  target: '#locality'
+                  target: '#locality',
+                  
                 }
               ]
             },
@@ -380,7 +384,7 @@ const pgr =  {
             },
             process: {
               onEntry: assign((context, event) => {
-                context.pgr.slots.locality = event.message.input;
+                context.slots.pgr["locality"] = event.message.input;
               }),
               always: '#persistComplaint'
             }
@@ -390,14 +394,15 @@ const pgr =  {
           id: 'persistComplaint',
           always: '#endstate',
           onEntry: assign((context, event) => {
-            console.log(context.pgr.slots);
+            console.log(context.slots.pgr);
             //make api call
             console.log('Making api call to PGR Service');
             let message = 'Complaint has been filed successfully {{number}}';
             let number = '123';
             message = message.replace('{{number}}', number);
             context.chatInterface.toUser(context.user, message);
-            context.pgr = {};
+            context.chatInterface.toUser(context.user, `Complaint Details: ${JSON.stringify(context.slots.pgr)}`);
+            context.slots.pgr = {}; // clear slots
           })
         },
       }, // fileComplaint.states
@@ -412,7 +417,6 @@ const pgr =  {
         let details = 'No. - 123, ...';
         message = message.replace('{{details}}', details);
         context.chatInterface.toUser(context.user, message);
-        context.pgr = {};
       })
     } // trackComplaint
   } // pgr.states
