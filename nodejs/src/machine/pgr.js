@@ -321,15 +321,10 @@ const pgr =  {
                 id: 'fetchCities',
                 src: (context, event) => pgrService.fetchCities(),
                 onDone: {
-                  // TODO - Rushang - replace with constructListPromptAndGrammer()
                   actions: assign((context, event) => {
-                    var cityNames = event.data;
-                    var message = 'Please select your city';
-                    for(var i = 0; i < cityNames.length; i++) {
-                      message += '\n' + (i+1) + '. ' + cityNames[i];
-                    }
-                    context.maxValidEntry = cityNames.length;
-                    context.chatInterface.toUser(context.user, message);
+                    let preamble = "Click here to select your city"
+                    context.grammer = dialog.constructLiteralGrammer(event.data, messages.cities, context.user.locale);
+                    context.chatInterface.toUser(context.user, `${preamble}`);
                   })
                 },
                 onError: {
@@ -347,36 +342,24 @@ const pgr =  {
             },
             process: {
               onEntry:  assign((context, event) => {
-                let parsed = parseInt(event.message.input.trim())
-                // debugger
-                let isValid = !isNaN(parsed) && parsed >=0 && parsed <= context.maxValidEntry;
-                context.message = {
-                  isValid: true,
-                  messageContent: event.message.input.trim()
-                }
-                if(isValid) { // TODO This does not seem to be the right place for this. It's too early here
-                  context.slots.pgr["city"] = parsed;
-                }
+                context.intention = dialog.get_intention(context.grammer, event) 
               }),
               always : [
                 {
-                  target: 'error',
-                  cond: (context, event) => {
-                    return ! context.message.isValid;
-                  }
+                  target: '#locality',
+                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                  actions: assign((context, event) => context.slots.pgr["city"] = context.intention)    
                 },
                 {
-                  target: '#locality',
-                  
-                }
+                  target: 'error',
+                }, 
               ]
             },
             error: {
               onEntry: assign( (context, event) => {
-                let message = 'Sorry, I didn\'t understand';
-                context.chatInterface.toUser(context.user, message);
+                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
               }),
-              always : 'question'
+              always:  'question',
             }
           }
         },
@@ -493,6 +476,24 @@ let messages = {
       }
     } // geoLocation 
   }, // fileComplaint
+  cities: {
+    jalandhar: {
+      en_IN : "Jalandhar",
+      hi_IN : "जालंधर"
+    },
+    amritsar: {
+      en_IN : "Amritsar",
+      hi_IN : "अमृतसर"
+    },
+    patankot: {
+      en_IN : "Patankot",
+      hi_IN : "पठानकोट"
+    },
+    nawanshahr: {
+      en_IN : "Nawanshahr",
+      hi_IN : "नवांशहर"
+    }
+  },
   complaintCodes: {
     NoStreetlight: {
       en_IN : "Please install new streetlight",

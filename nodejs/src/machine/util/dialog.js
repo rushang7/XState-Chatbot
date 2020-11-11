@@ -31,7 +31,7 @@ function constructLiteralGrammer(keys, message_bundle, locale) {
     if (message_bundle[element] === undefined) {
       console.error(`Could not find message for <${element}>, skipping ...`);
     } else {
-      grammer.push({intention: element, recognize: [`${message_bundle[element][locale]}`]});
+      grammer.push({intention: element, recognize: [`${message_bundle[element][locale].toLowerCase()}`]});
     }
   });
   return grammer
@@ -54,4 +54,4 @@ let global_messages = {
   }
 }
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructListPromptAndGrammer};
+module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructListPromptAndGrammer, constructLiteralGrammer};
