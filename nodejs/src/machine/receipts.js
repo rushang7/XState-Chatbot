@@ -478,21 +478,22 @@ const receipts = {
           },
           process:{
             onEntry: assign( (context, event) => {
-              let parsedInput = parseInt(event.message.input.trim());
-              let isValid=event.message.input.trim().length===10;
-              let message = {
-                isValid:isValid,
-                messageContent: parsedInput,
-              };
+              var parsedInput = parseInt(event.message.input.trim());
+              let isValid = event.message.input.length ===10 ;
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              }
               if(isValid) {
-                context.receipts.slots.paraminput=parsedInput;
+                context.receipts.slots.paraminput =parsedInput;
               }
             }),
+
             always:[
               {
-                target:'#paraminput',
-                cond:(contex,event)=>{
-                  return  !context.message.isvalid;
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
                 }
               },
               {
@@ -501,6 +502,17 @@ const receipts = {
             ]
 
           },
+          error: {
+            onEntry: assign( (context, event) => {
+              let message = 'Invalid Entry , \nPlease try again!!';
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always : [
+              {
+                target: 'question'
+              }
+            ]
+          },
         },
       },//parameterinput
       receiptslip:{
@@ -508,9 +520,37 @@ const receipts = {
         onEntry:assign((context,event)=>{
           console.log(context.receipts.slots.personalizedreceipts);
         }),
-        initial:'bill',
+        initial:'start',
         states:{
-          bill:{
+          start:{
+            onEntry: assign((context, event) => {
+              console.log("Entered into receiptslip");
+            }),
+            invoke:{
+              id: 'fetchReceiptsForParam',
+              src: (context, event) => {
+                let slots = context.receipts.slots;
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.menu, slots.searchparams, slots.paraminput);
+              },
+              onDone:[
+                {
+                  actions: assign((context, event) => {
+                    let message = 'The ' + context.receipts.slots.searchParamOption + ': ' + context.receipts.slots.paraminput + ' is not found in our records. Please Check the details you have provided once again.';
+                    context.chatInterface.toUser(context.user, message);
+                  }),
+                  target: 'listofreceipts',
+                }
+              ],
+              onError: {
+                actions: assign((context, event) => {
+                  let message = 'Sorry. Some error occurred on server';
+                  context.chatInterface.toUser(context.user, message);
+                })
+              }  
+            
+            },
+          },
+          listofreceipts:{
             onEntry: assign((context, event) => {
               let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
               let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
