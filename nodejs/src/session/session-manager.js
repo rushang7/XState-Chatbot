@@ -11,7 +11,7 @@ class SessionManager {
     async fromUser(reformattedMessage) {
         let userId = reformattedMessage.userId;
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
-        telemetry.log(userId, 'from user', reformattedMessage);
+        telemetry.log(userId, 'from_user', reformattedMessage);
 
         // handle reset case
         let intention = dialog.get_intention(grammer.reset, reformattedMessage, true)
@@ -34,7 +34,7 @@ class SessionManager {
     }
     async toUser(user, message) {
         channelProvider.sendMessageToUser(user, message);
-        telemetry.log(user.uuid, 'to user', message);
+        telemetry.log(user.uuid, 'to_user', message);
     }
 
     getChatServiceFor(chatStateJson) {
