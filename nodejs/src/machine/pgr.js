@@ -55,7 +55,7 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat(['More']), Object.assign({}, messages.complaintCodes, {'More': messages.fileComplaint.complaintType2Step.category.question.More}), context.user.locale);
+                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data.concat(['More']), Object.assign({}, messages.complaintCodes, {'More': messages.fileComplaint.complaintType2Step.category.question.More}), context.user.locale);
                     context.grammer = grammer; // save the grammer in context to be used in next step
                     context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   }) 
@@ -118,7 +118,7 @@ const pgr =  {
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
-                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data, messages.complaintCategories, context.user.locale);
+                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCategories, context.user.locale);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                       }),
@@ -170,7 +170,7 @@ const pgr =  {
                     onDone: {
                       actions: assign((context, event) => {
                         let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
-                        let {prompt, grammer} = dialog.constructPromptAndGrammer(event.data.concat(['GoBack']), Object.assign({}, messages.complaintCodes, {'GoBack': messages.fileComplaint.complaintType2Step.item.question.goback}), context.user.locale);
+                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data.concat(['GoBack']), Object.assign({}, messages.complaintCodes, {'GoBack': messages.fileComplaint.complaintType2Step.item.question.goback}), context.user.locale);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                       }),
@@ -277,6 +277,7 @@ const pgr =  {
           states: {
             question: {
               onEntry: assign((context, event) => {
+                // TODO - Rushang clean this?
                 var message = 'Is this the correct location of the complaint?';
                 message += '\nCity: ' + context.slots.pgr["city"];
                 message += '\nLocality: ' + context.slots.pgr["locality"];
@@ -320,6 +321,7 @@ const pgr =  {
                 id: 'fetchCities',
                 src: (context, event) => pgrService.fetchCities(),
                 onDone: {
+                  // TODO - Rushang - replace with constructListPromptAndGrammer()
                   actions: assign((context, event) => {
                     var cityNames = event.data;
                     var message = 'Please select your city';
@@ -379,6 +381,7 @@ const pgr =  {
           }
         },
         locality: {
+           // TODO - Rushang move to invoke pattern
           id: 'locality',
           initial: 'question',
           states: {
@@ -400,6 +403,7 @@ const pgr =  {
           }
         },
         persistComplaint: {
+          // TODO - Rushang move to invoke pattern
           id: 'persistComplaint',
           always: '#endstate',
           onEntry: assign((context, event) => {
@@ -417,6 +421,7 @@ const pgr =  {
       }, // fileComplaint.states
     },  // fileComplaint
     trackComplaint: {
+       // TODO - Rushang move to invoke pattern
       id: 'trackComplaint',
       always: '#endstate',
       onEntry: assign( (context, event) => {
@@ -459,7 +464,7 @@ let messages = {
             hi_IN : 'अपनी शिकायत श्रेणी के लिए नंबर दर्ज करें'
           },
           More: {
-            en_IN : "See more complaints ...",
+            en_IN : "See more ...",
             hi_IN : "TODO"
           },
           // startover: {

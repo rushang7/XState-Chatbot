@@ -12,20 +12,29 @@ function get_intention(g, event, strict = false) {
   let index = strict? g.findIndex(exact) : g.findIndex(e=>contains(e));
   return (index == -1) ? INTENTION_UNKOWN : g[index].intention;
 }
-function constructPromptAndGrammer(keys, message_bundle, locale) {
+function constructListPromptAndGrammer(keys, message_bundle, locale) {
   var prompt = '';
   var grammer = [];
   keys.forEach((element, index) => {
     if (message_bundle[element] === undefined) {
-      console.log(`Could not find message for <${element}>, skipping ...`);
+      console.error(`Could not find message for <${element}>, skipping ...`);
     } else {
       prompt+= `\n${index+1}. ${message_bundle[element][locale]}`;
       grammer.push({intention: element, recognize: [(index+1).toString()]});
     }
   });
-  // console.log(prompt);
-  // console.log(grammer);
   return {prompt, grammer};
+}
+function constructLiteralGrammer(keys, message_bundle, locale) {
+  var grammer = [];
+  keys.forEach((element) => {
+    if (message_bundle[element] === undefined) {
+      console.error(`Could not find message for <${element}>, skipping ...`);
+    } else {
+      grammer.push({intention: element, recognize: [`${message_bundle[element][locale]}`]});
+    }
+  });
+  return grammer
 }
 
 let global_messages = {
@@ -45,4 +54,4 @@ let global_messages = {
   }
 }
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructPromptAndGrammer};
+module.exports = {get_message, get_intention, INTENTION_UNKOWN, global_messages, constructListPromptAndGrammer};
