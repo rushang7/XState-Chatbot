@@ -61,12 +61,14 @@ const pgr =  {
                   }) 
                 },
                 onError: {
+                  target: '#welcome',
                   actions: assign((context, event) => {
                     let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                     context.chatInterface.toUser(context.user, message);
+                    context.chatInterface.system_error(event.data);
                   })
                 }
-              },  // invoke
+              },
               on: {
                 USER_MESSAGE: 'process'
               }
@@ -122,12 +124,14 @@ const pgr =  {
                       }),
                     }, 
                     onError: {
+                      target: '#welcome',
                       actions: assign((context, event) => {
                         let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                         context.chatInterface.toUser(context.user, message);
+                        context.chatInterface.system_error(event.data);
                       })
                     }
-                  }, // invoke
+                  },
                   on: {
                     USER_MESSAGE: 'process'
                   }
@@ -172,12 +176,14 @@ const pgr =  {
                       }),
                     }, 
                     onError: {
+                      target: '#welcome',
                       actions: assign((context, event) => {
                         let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                         context.chatInterface.toUser(context.user, message);
+                        context.chatInterface.system_error(event.data);
                       })
                     }
-                  }, // invoke
+                  },
                   on: {
                     USER_MESSAGE: 'process'
                   }
@@ -257,7 +263,8 @@ const pgr =  {
                 onError: {
                   target: '#city',
                   actions: assign((context, event) => {
-                    console.log('onError');
+                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+                    context.chatInterface.toUser(context.user, message);
                   })
                 }
               }
@@ -324,9 +331,11 @@ const pgr =  {
                   })
                 },
                 onError: {
+                  target: '#welcome',
                   actions: assign((context, event) => {
-                    let message = 'Sorry. Some error occurred on server';
+                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
                     context.chatInterface.toUser(context.user, message);
+                    context.chatInterface.system_error(event.data);
                   })
                 }
               },

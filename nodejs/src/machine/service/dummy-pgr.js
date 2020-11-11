@@ -25,6 +25,7 @@ class DummyPGRService {
         return Object.keys(this.complaintCategoryToItemsMap);
     }
     async fetchFrequentComplaints() {
+        //  throw new Error(400); // Use for testing, throws an error to simulate service call error path
         return [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',

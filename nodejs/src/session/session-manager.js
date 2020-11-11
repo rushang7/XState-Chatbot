@@ -1,7 +1,8 @@
 const sevaStateMachine =  require('../machine/seva'),
     channelProvider = require('../channel'),
     chatStateRepository = require('./repo'),
-    telemetry = require('./telemetry');
+    telemetry = require('./telemetry'),
+    system = require('./system');
 const { State, interpret } = require('xstate');
 const dialog = require('../machine/util/dialog.js');
 
@@ -73,10 +74,12 @@ class SessionManager {
                 chatStateRepository.updateState(userId, active, JSON.stringify(state));
             }
         });
-
-        return service;
+        return service;    
     }
 
+    system_error(message) {
+        system.error(message);
+    }
 }
 
 let grammer = {

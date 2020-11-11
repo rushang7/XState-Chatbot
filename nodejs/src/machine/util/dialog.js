@@ -40,8 +40,8 @@ let global_messages = {
     }
   },
   system_error: {
-    en_IN: 'I am sorry, our system has a problem. Could you try again in a few minutes please?',
-    hi_IN: 'हमारे सिस्टम में एक समस्या है। क्या आप कुछ मिनटों में फिर से कोशिश कर सकते हैं?'
+    en_IN: 'I am sorry, our system has a problem and I cannot fulfill your request right now. Could you try again in a few minutes please?',
+    hi_IN: 'हमारे सिस्टम में एक समस्या है। मैं अभी तुम्हारी मदद नहीं कर सकता, क्या आप कुछ मिनटों में फिर से कोशिश कर सकते हैं?'
   }
 }
 
