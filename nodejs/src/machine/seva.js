@@ -14,92 +14,92 @@ const sevaMachine = Machine({
       }
     },
     states: {
-        start: {
-            on: {
-              // USER_MESSAGE: 'locale'
-              USER_MESSAGE: 'welcome'
-            }
-          },
-          locale: {
-            id: 'locale',
-            initial: 'question',
-            states: {
-              question: {
-                onEntry: assign((context, event) => {
-                  context.chatInterface.toUser(context.user, dialog.get_message(messages.locale.question, context.user.locale));
-                }),
-                on: {
-                  USER_MESSAGE: 'process'
-                }
-              },
-              process: {
-                onEntry: assign((context, event) => {
-                  context.user.locale  = dialog.get_intention(grammer.locale.question, event, true);
-                  if (context.user.locale === dialog.INTENTION_UNKOWN) {
-                    context.user.locale = 'en_IN';
-                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));      
-                  }
-                }),
-                always: '#welcome'
-              }
-            }
-          },
-          welcome: {
-            id: 'welcome',
-            onEntry: assign( (context, event, meta) => {
-              let hello = dialog.get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
-              let welcome = dialog.get_message(messages.welcome.welcome, context.user.locale); 
-              context.chatInterface.toUser(context.user, `${hello} ${welcome}`);
+      start: {
+        on: {
+          // USER_MESSAGE: 'locale'
+          USER_MESSAGE: 'welcome'
+        }
+      },
+      locale: {
+        id: 'locale',
+        initial: 'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              context.chatInterface.toUser(context.user, dialog.get_message(messages.locale.question, context.user.locale));
             }),
-            always: '#sevamenu'
+            on: {
+              USER_MESSAGE: 'process'
+            }
           },
-          sevamenu : { // TODO rename to menu if you can figure out how to avoid name clash with seva's menu
-            id: 'sevamenu',
-            initial: 'question',
-            states: {
-              question: {
-                onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, dialog.get_message(messages.sevamenu.question, context.user.locale));
-                }),
-                on: {
-                    USER_MESSAGE: 'process'
-                }
+          process: {
+            onEntry: assign((context, event) => {
+              context.user.locale  = dialog.get_intention(grammer.locale.question, event, true);
+              if (context.user.locale === dialog.INTENTION_UNKOWN) {
+                context.user.locale = 'en_IN';
+                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));      
+              }
+            }),
+            always: '#welcome'
+          }
+        }
+      },
+      welcome: {
+        id: 'welcome',
+        onEntry: assign( (context, event, meta) => {
+          let hello = dialog.get_message(messages.welcome.hello, context.user.locale)(context.user.name); 
+          let welcome = dialog.get_message(messages.welcome.welcome, context.user.locale); 
+          context.chatInterface.toUser(context.user, `${hello} ${welcome}`);
+        }),
+        always: '#sevamenu'
+      },
+      sevamenu : { // TODO rename to menu if you can figure out how to avoid name clash with seva's menu
+        id: 'sevamenu',
+        initial: 'question',
+        states: {
+          question: {
+            onEntry: assign( (context, event) => {
+                context.chatInterface.toUser(context.user, dialog.get_message(messages.sevamenu.question, context.user.locale));
+            }),
+            on: {
+                USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(grammer.menu.question, event)
+            }),
+            always : [
+              {
+                target: '#pgr',
+                cond: (context) => context.intention == 'pgr'
               },
-              process: {
-                onEntry: assign((context, event) => {
-                  context.intention = dialog.get_intention(grammer.menu.question, event)
-                }),
-                always : [
-                  {
-                    target: '#pgr',
-                    cond: (context) => context.intention == 'pgr'
-                  },
-                  {
-                    target: '#bills', 
-                    cond: (context) => context.intention == 'bills'
-                  },
-                  {
-                    target: '#receipts', 
-                    cond: (context) => context.intention == 'receipts'
-                  },
-                  {
-                    target: '#locale', 
-                    cond: (context) => context.intention == 'locale'
-                  },
-                  {
-                    target: 'error'
-                  }
-                ]
-              }, // sevamenu.process
-              error: {
-                onEntry: assign( (context, event) => {
-                  context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
-                }),
-                always : 'question'
-              }, // sevamenu.error 
-              pgr: pgr,
-              bills: bills,
-              receipts: receipts
+              {
+                target: '#bills', 
+                cond: (context) => context.intention == 'bills'
+              },
+              {
+                target: '#receipts', 
+                cond: (context) => context.intention == 'receipts'
+              },
+              {
+                target: '#locale', 
+                cond: (context) => context.intention == 'locale'
+              },
+              {
+                target: 'error'
+              }
+            ]
+          }, // sevamenu.process
+          error: {
+            onEntry: assign( (context, event) => {
+              context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+            }),
+            always : 'question'
+          }, // sevamenu.error 
+          pgr: pgr,
+          bills: bills,
+          receipts: receipts
         } // sevamenu.states
       }, // sevamenu
       endstate: {
@@ -108,6 +108,17 @@ const sevaMachine = Machine({
         onEntry: assign((context, event) => {
           context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another conversation");
         })
+      },
+      system_error: {
+        id: 'system_error',
+        always: {
+          target: '#welcome',
+          actions: assign((context, event) => {
+            let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+            context.chatInterface.toUser(context.user, message);
+            context.chatInterface.system_error(event.data);
+          })
+        }
       }
     }, // states
 }); // Machine

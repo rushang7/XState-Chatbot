@@ -61,12 +61,7 @@ const pgr =  {
                   }) 
                 },
                 onError: {
-                  target: '#welcome',
-                  actions: assign((context, event) => {
-                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                    context.chatInterface.toUser(context.user, message);
-                    context.chatInterface.system_error(event.data);
-                  })
+                  target: '#system_error'
                 }
               },
               on: {
@@ -124,16 +119,11 @@ const pgr =  {
                       }),
                     }, 
                     onError: {
-                      target: '#welcome',
-                      actions: assign((context, event) => {
-                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                        context.chatInterface.toUser(context.user, message);
-                        context.chatInterface.system_error(event.data);
-                      })
+                      target: '#system_error'
+                    },
+                    on: {
+                      USER_MESSAGE: 'process'
                     }
-                  },
-                  on: {
-                    USER_MESSAGE: 'process'
                   }
                 }, //question
                 process: {
@@ -176,12 +166,7 @@ const pgr =  {
                       }),
                     }, 
                     onError: {
-                      target: '#welcome',
-                      actions: assign((context, event) => {
-                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                        context.chatInterface.toUser(context.user, message);
-                        context.chatInterface.system_error(event.data);
-                      })
+                      target: '#system_error'
                     }
                   },
                   on: {
@@ -264,7 +249,7 @@ const pgr =  {
                   target: '#city',
                   actions: assign((context, event) => {
                     let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                    context.chatInterface.toUser(context.user, message);
+                    context.chatInterface.toUser(context.user, message); // TODO - Rushang - message should say, "we are going to try different approach"
                   })
                 }
               }
@@ -328,12 +313,7 @@ const pgr =  {
                   })
                 },
                 onError: {
-                  target: '#welcome',
-                  actions: assign((context, event) => {
-                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                    context.chatInterface.toUser(context.user, message);
-                    context.chatInterface.system_error(event.data);
-                  })
+                  target: '#system_error'
                 }
               },
               on: {
@@ -417,7 +397,7 @@ const pgr =  {
       })
     } // trackComplaint
   } // pgr.states
-} // pgr
+}; // pgr
 
 let messages = {
   menu: {
