@@ -517,9 +517,6 @@ const receipts = {
       },//parameterinput
       receiptslip:{
         id:'receiptslip',
-        onEntry:assign((context,event)=>{
-          console.log(context.receipts.slots.personalizedreceipts);
-        }),
         initial:'start',
         states:{
           start:{
@@ -534,12 +531,18 @@ const receipts = {
               },
               onDone:[
                 {
+                  cond:(context,event)=>{
+                    return event.data.length>0
+                  },
+                  target: 'listofreceipts',
+                },
+                {
                   actions: assign((context, event) => {
                     let message = 'The ' + context.receipts.slots.searchParamOption + ': ' + context.receipts.slots.paraminput + ' is not found in our records. Please Check the details you have provided once again.';
                     context.chatInterface.toUser(context.user, message);
                   }),
-                  target: 'listofreceipts',
-                }
+                  target:'#searchparams'
+                },
               ],
               onError: {
                 actions: assign((context, event) => {
