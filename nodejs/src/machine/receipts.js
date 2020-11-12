@@ -127,9 +127,7 @@ const receipts = {
           process:{
             onEntry: assign( (context, event) => {
               let isValid = event.message.input.trim().localeCompare('1') === 0 ;
-              let isulb=event.message.input.trim().localeCompare('ULB') === 0  
               context.message = {
-                isulb:isulb,
                 isValid: isValid,
                 messageContent: event.message.input
               }
@@ -138,7 +136,7 @@ const receipts = {
               {
                 target: 'error',
                 cond: (context, event) => {
-                  return ! context.message.isValid && !context.message.isulb;
+                  return ! context.message.isValid;
                 }
               },
               {
@@ -147,13 +145,6 @@ const receipts = {
                   return  context.message.isValid;
                 }
               },
-              {
-                target:'ULB',
-                cond:(context,event)=>{
-                  return context.message.isulb;
-                }
-              },
-
             ],
           },
           error: {
@@ -176,7 +167,7 @@ const receipts = {
 
         },
       },//mobilecheck
-      searchparams:{
+      searchparams:{  
         id:'searchparams',
         initial:'respectiveparams',
         states:{
