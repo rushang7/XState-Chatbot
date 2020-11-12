@@ -1,7 +1,8 @@
 const sevaStateMachine =  require('../machine/seva'),
     channelProvider = require('../channel'),
     chatStateRepository = require('./repo'),
-    telemetry = require('./telemetry');
+    telemetry = require('./telemetry'),
+    system = require('./system');
 const { State, interpret } = require('xstate');
 const dialog = require('../machine/util/dialog.js');
 
@@ -10,7 +11,7 @@ class SessionManager {
     async fromUser(reformattedMessage) {
         let userId = reformattedMessage.userId;
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
-        telemetry.log(userId, 'from user', reformattedMessage);
+        telemetry.log(userId, 'from_user', reformattedMessage);
 
         // handle reset case
         let intention = dialog.get_intention(grammer.reset, reformattedMessage, true)
@@ -33,7 +34,7 @@ class SessionManager {
     }
     async toUser(user, message) {
         channelProvider.sendMessageToUser(user, message);
-        telemetry.log(user.uuid, 'to user', message);
+        telemetry.log(user.uuid, 'to_user', message);
     }
 
     getChatServiceFor(chatStateJson) {
@@ -62,7 +63,7 @@ class SessionManager {
             user: {
                 uuid: userId,
             },
-            slots: {}
+            slots: {pgr: {}, bills: {}, receipts: {}}
         }))
         service.start();
 
@@ -72,10 +73,12 @@ class SessionManager {
                 chatStateRepository.updateState(userId, active, JSON.stringify(state));
             }
         });
-
-        return service;
+        return service;    
     }
 
+    system_error(message) {
+        system.error(message);
+    }
 }
 
 let grammer = {

@@ -39,7 +39,7 @@ class App extends React.Component {
                 mobileNumber: "9284726483",
                 uuid: "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
             },
-            slots: {}
+            slots: {pgr: {}, bills: {}, receipts: {}}
         }));
         this.chatbotService.start();
     }

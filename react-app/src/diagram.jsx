@@ -46,7 +46,7 @@ class App extends React.Component {
                 uuid: "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
                 locale: "en_IN"
             },
-            slots: {}
+            slots: {pgr: {}, bills: {}, receipts: {}}
         }), { devTools: true });
         this.chatbotService.start();
     }
