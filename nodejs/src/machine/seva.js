@@ -30,8 +30,9 @@ const sevaMachine = Machine({
       onboardingWelcome: {
         id: 'onboardingWelcome',
         onEntry: assign((context, event) => {
-          let message = 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through whatsapp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।\n\nAt any stage type and send “mseva” to go to the main menu options.\n\nकिसी भी पड़ाव से main मेन्यू में वापस आने के लिए mSeva टाईप कर और भेजे।';
-          context.chatInterface.toUser(context.user, message);
+          var message_english = dialog.get_message(messages.welcome, 'en_IN');
+          var message_hindi = dialog.get_message(messages.welcome, 'hi_IN');
+          context.chatInterface.toUser(context.user, `${message_english}\n\n${message_hindi}`);
         }),
         always: '#onboardingLocale'
       },
@@ -235,8 +236,8 @@ let messages = {
     }
   },
   welcome: {
-    en_IN: 'Hi{{name}}, \nWelcome to mSeva Punjab 🙏. Now you can File a Complaint and track it’s status, you can also Pay your bills through WhatsApp.\nAt any stage type and send “mseva” to go to the main menu options.',
-    hi_IN: 'नमस्ते{{name}}\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।\nकिसी भी पड़ाव से main मेन्यू में वापस आने के लिए mSeva टाईप कर और भेजे।'
+    en_IN: 'Hi{{name}}, \nWelcome to mSeva Punjab 🙏. Now, using WhatsApp, you can:\n  - File a Complaint and Track its Status\n  - Pay your Bills.',
+    hi_IN: 'नमस्ते{{name}}\nmSeva पंजाब में आपका स्वागत है 🙏🏻। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे: \n  - आप शिकायत दर्ज कर सकते है \n  - बिल का भुगतान कर सकते है।'
   },
   sevamenu: {
     question: {
@@ -245,10 +246,12 @@ let messages = {
     }
   },
   onboardingName: {
-    en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".'
+    en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".',
+    hi_IN: 'TODO'
   },
   onboardingThankYou: {
-    en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.'
+    en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
+    hi_EN: 'TODO'
   }
 }
 
