@@ -69,7 +69,6 @@ const pgr =  {
               }
             }, //question
             process: {
-              id: 'process',
               onEntry: assign((context, event) => {
                 context.intention = dialog.get_intention(context.grammer, event) 
               }),
@@ -127,7 +126,6 @@ const pgr =  {
                   }
                 }, //question
                 process: {
-                  id: 'process',
                   onEntry: assign((context, event) => {
                     context.intention = dialog.get_intention(context.grammer, event, true) 
                   }),
@@ -174,7 +172,6 @@ const pgr =  {
                   }
                 }, //question
                 process: {
-                  id: 'process',
                   onEntry: assign((context, event) => {
                     context.intention = dialog.get_intention(context.grammer, event) 
                   }),
