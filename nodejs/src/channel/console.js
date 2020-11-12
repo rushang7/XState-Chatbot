@@ -1,5 +1,5 @@
 class ConsoleProvider {
-    reformatIncomingMessage(req) {
+    processMessageFromUser(req) {
         return req.body;
     }
 

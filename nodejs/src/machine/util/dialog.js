@@ -33,7 +33,7 @@ function constructListPromptAndGrammer(keys, message_bundle, locale, more = fals
   
   keys.forEach((element, index) => {
     if (message_bundle[element] === undefined) {
-      console.error(`Could not find message for <${element}>, skipping ...`);
+      console.error(`Could not find message for <${element.toString()}>, skipping ...`);
     } else {
       prompt+= `\n${index+1}. ${message_bundle[element][locale]}`;
       grammer.push({intention: element, recognize: [(index+1).toString()]});

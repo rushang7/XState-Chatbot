@@ -442,19 +442,19 @@ let messages = {
     } // geoLocation 
   }, // fileComplaint
   cities: {
-    jalandhar: {
+    "pb.jalandhar": {
       en_IN : "Jalandhar",
       hi_IN : "जालंधर"
     },
-    amritsar: {
+    "pb.amritsar": {
       en_IN : "Amritsar",
       hi_IN : "अमृतसर"
     },
-    patankot: {
+    "pb.patankot": {
       en_IN : "Patankot",
       hi_IN : "पठानकोट"
     },
-    nawanshahr: {
+    "5": {
       en_IN : "Nawanshahr",
       hi_IN : "नवांशहर"
     }

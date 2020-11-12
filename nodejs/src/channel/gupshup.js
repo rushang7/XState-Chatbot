@@ -3,7 +3,7 @@ require('url-search-params-polyfill');
 
 class GupShupWhatsAppProvider {
 
-    reformatIncomingMessage(req) {
+    processMessageFromUser(req) {
         let reformattedMessage = {}
         let requestBody = req.body;
         

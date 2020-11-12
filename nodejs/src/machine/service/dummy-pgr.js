@@ -5,8 +5,9 @@ class DummyPGRService {
     // Please mark the method async if the actual app-service method would involve api calls
 
     async fetchCities() {
-        let tenantId = this.cities.tenantId;
-        return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
+        return this.cities.tenantInfo.map(el=>el.code);
+        // let tenantId = this.cities.tenantId;
+        // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
     async getCityAndLocality(event) {
         let messageType = event.message.type;
@@ -27,6 +28,13 @@ class DummyPGRService {
     }
     async fetchFrequentComplaints() {
         //  throw new Error(400); // Use for testing, throws an error to simulate service call error path
+        // return [
+        //     {code: 'NoStreetlight', value: 'NoStreetlight'},
+        //     {code: 'StreetLightNotWorking', value: 'StreetLightNotWorking'},
+        //     {code: 'GarbageNeedsTobeCleared', value: 'GarbageNeedsTobeCleared'},
+        //     {code: 'DamagedGarbageBin', value: 'DamagedGarbageBin'},
+        //     {code: 'BurningOfGarbage', value: 'BurningOfGarbage'},
+        // ];
         return [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',

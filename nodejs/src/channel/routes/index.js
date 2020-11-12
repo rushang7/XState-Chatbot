@@ -6,7 +6,7 @@ const express = require('express'),
 
 router.post('/message', (req, res) =>  {
     try {
-        let reformattedMessage = channelProvider.reformatIncomingMessage(req);
+        let reformattedMessage = channelProvider.processMessageFromUser(req);
         sessionManager.fromUser(reformattedMessage);
     } catch(e) {
         console.log(e);
