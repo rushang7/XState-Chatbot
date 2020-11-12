@@ -17,7 +17,7 @@ class DummyReceipts{
 
         let emptyReceipts = []
 
-        return receipts;
+        return emptyReceipts;
     }
     async fetchReceiptsForParam(user, menu, searchparams, paraminput) {
         console.log(`Received params: ${user}, ${menu}, ${searchparams}, ${paraminput}`);
