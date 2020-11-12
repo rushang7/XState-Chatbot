@@ -62,7 +62,6 @@ class SessionManager {
             chatInterface: this,
             user: {
                 uuid: userId,
-                locale: 'en_IN'
             },
             slots: {pgr: {}, bills: {}, receipts: {}}
         }))

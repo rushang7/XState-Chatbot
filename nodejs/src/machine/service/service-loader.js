@@ -6,6 +6,7 @@ const dummyBillService = require('./dummy-bill');
 if(config.pgrServiceProvider === 'eGovPGR') {
     console.log("Using eGov Services");
     module.exports.pgrService = egovPGRService;
+    module.exports.billService = dummyBillService;
 }
 else {
     console.log("Using Dummy Services");
