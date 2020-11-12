@@ -592,7 +592,7 @@ const receipts = {
                 }
               },
               {
-                target:'#receiptsMenu',
+                target:'#searchparams',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }
