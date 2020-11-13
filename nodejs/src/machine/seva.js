@@ -22,88 +22,94 @@ const sevaMachine = Machine({
               target: '#welcome'
             },
             {
-              target: '#onboardingWelcome'
+              target: '#onboarding'
             }
           ]
         }
       },
-      onboardingWelcome: {
-        id: 'onboardingWelcome',
-        onEntry: assign((context, event) => {
-          var message_english = dialog.get_message(messages.welcome, 'en_IN');
-          var message_hindi = dialog.get_message(messages.welcome, 'hi_IN');
-          context.chatInterface.toUser(context.user, `${message_english}\n\n${message_hindi}`);
-        }),
-        always: '#onboardingLocale'
-      },
-      onboardingLocale: {
-        id: 'onboardingLocale',
-        initial: 'question',
-        states: {
-          question: {
-            onEntry: assign((context, event) => {
-              let message = 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी';
-              context.grammer = grammer.locale.question;
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE: 'process'
-            }
+      oboarding: {
+        id: 'onboarding',
+        initial: 'onboardingWelcome',
+        states:{
+          onboardingWelcome: {
+          id: 'onboardingWelcome',
+          onEntry: assign((context, event) => {
+            var message_english = dialog.get_message(messages.welcome, 'en_IN');
+            var message_hindi = dialog.get_message(messages.welcome, 'hi_IN');
+            context.chatInterface.toUser(context.user, `${message_english}\n\n${message_hindi}`);
+          }),
+          always: '#onboardingLocale'
           },
-          process: {
-            onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event, true);
-              console.log(context.intention);
-              if(context.intention != dialog.INTENTION_UNKOWN) {
-                context.user.locale = context.intention;
-              } else {
-                context.user.locale = 'en_IN';
-              }
-            }),
-            always: '#onboardingName'
-          }
-        }
-      },
-      onboardingName: {
-        id: 'onboardingName',
-        initial: 'question',
-        states: {
-          question: {
-            onEntry: assign((context, event) => {
-              let message = dialog.get_message(messages.onboardingName, context.user.locale);
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE: 'process'
-            }
-          },
-          process: {
-            onEntry: assign((context, event) => {
-              let name = event.message.input.trim();
-              if(name.toLowerCase() != 'no') {
-                context.user.name = name;
-              }
-            }),
-            always: [
-              {
-                cond: (context) => context.user.name,
-                target: '#onboardingThankYou'
+          onboardingLocale: {
+            id: 'onboardingLocale',
+            initial: 'question',
+            states: {
+              question: {
+                onEntry: assign((context, event) => {
+                  let message = 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी';
+                  context.grammer = grammer.locale.question;
+                  context.chatInterface.toUser(context.user, message);
+                }),
+                on: {
+                  USER_MESSAGE: 'process'
+                }
               },
-              {
-                target: '#welcome'
+              process: {
+                onEntry: assign((context, event) => {
+                  context.intention = dialog.get_intention(context.grammer, event, true);
+                  console.log(context.intention);
+                  if(context.intention != dialog.INTENTION_UNKOWN) {
+                    context.user.locale = context.intention;
+                  } else {
+                    context.user.locale = 'en_IN';
+                  }
+                }),
+                always: '#onboardingName'
               }
-            ]
-          }
+            }
+          },
+          onboardingName: {
+            id: 'onboardingName',
+            initial: 'question',
+            states: {
+              question: {
+                onEntry: assign((context, event) => {
+                  let message = dialog.get_message(messages.onboardingName, context.user.locale);
+                  context.chatInterface.toUser(context.user, message);
+                }),
+                on: {
+                  USER_MESSAGE: 'process'
+                }
+              },
+              process: {
+                onEntry: assign((context, event) => {
+                  let name = event.message.input.trim();
+                  if(name.toLowerCase() != 'no') {
+                    context.user.name = name;
+                  }
+                }),
+                always: [
+                  {
+                    cond: (context) => context.user.name,
+                    target: '#onboardingThankYou'
+                  },
+                  {
+                    target: '#welcome'
+                  }
+                ]
+              }
+            }
+          },
+          onboardingThankYou: {
+            id: 'onboardingThankYou',
+            onEntry: assign((context, event) => {
+              var message = dialog.get_message(messages.onboardingThankYou, context.user.locale);
+              message = message.replace('{{name}}', context.user.name);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always: '#welcome'
+          },
         }
-      },
-      onboardingThankYou: {
-        id: 'onboardingThankYou',
-        onEntry: assign((context, event) => {
-          var message = dialog.get_message(messages.onboardingThankYou, context.user.locale);
-          message = message.replace('{{name}}', context.user.name);
-          context.chatInterface.toUser(context.user, message);
-        }),
-        always: '#welcome'
       },
       welcome: {
         id: 'welcome',
