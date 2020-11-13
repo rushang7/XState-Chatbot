@@ -611,7 +611,7 @@ let messages = {
   menu: {
     question: {
       en_IN : 'Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees',
-    },
+    }
 }
 }
 
