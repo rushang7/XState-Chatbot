@@ -47,7 +47,13 @@ const sevaMachine = Machine({
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
+<<<<<<< HEAD
               USER_MESSAGE: 'process'
+=======
+              // USER_MESSAGE: 'locale'
+              USER_MESSAGE: 'welcome'
+
+>>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }
           },
           process: {
