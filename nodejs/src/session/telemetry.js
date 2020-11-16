@@ -1,3 +1,4 @@
+const fetch = require("node-fetch");5
 class Telemetry {
     log(userId, type, data) {
         let object = {
@@ -9,44 +10,24 @@ class Telemetry {
         console.log("-----------");
         console.log(JSON.stringify(object));
         console.log("-----------");
+        this.toElasticSearch(object);5
     }
-}
+    async toElasticSearch(data) {
+        // /test_index2/_doc
+        var elasticSearchHost = "http://localhost:9200"; // config.elasticSearchHost;
+        var elasticSearchPath = "/test_index2/_doc";
+        var url = `${elasticSearchHost}${elasticSearchPath}`  
+        var options = {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+              'Content-Type': 'application/json'
+          }
+        }
+        let response = await fetch(url, options);
+    }
+};
 
-// TODO from_user message, data paremeter is a JSON object. Elasticsearch is expecting a string
 
-// TODO transition message, ... ditto
-// {"date":1605536890093,"user":"919428010072","type":"transition","data":"{oboarding,oboarding.onboardingName,oboarding.onboardingName.question}"}
-// "reason": "object mapping for [data] tried to parse field [data] as object, but found a concrete value"
-
-// async fetchMdmsData(tenantId, moduleName, masterName, filterPath) {
-//     var mdmsHost = config.mdmsHost;
-//     var url = mdmsHost + 'egov-mdms-service/v1/_search';
-//     var request = {
-//       "RequestInfo": {},
-//       "MdmsCriteria": {
-//         "tenantId": tenantId,
-//         "moduleDetails": [
-//           {
-//             "moduleName": moduleName,
-//             "masterDetails": [
-//               {
-//                 "name": masterName,
-//                 "filter": filterPath
-//               }
-//             ]
-//           }
-//         ]
-//       }
-//     };
-  
-//     var options = {
-//       method: 'POST',
-//       body: JSON.stringify(request),
-//       headers: {
-//           'Content-Type': 'application/json'
-//       }
-//     }
-  
-//     let response = await fetch(url, options);
 
 module.exports = new Telemetry();
