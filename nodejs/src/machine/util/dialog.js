@@ -35,7 +35,7 @@ function constructListPromptAndGrammer(keys, message_bundle, locale, more = fals
     if (message_bundle[element] === undefined) {
       console.error(`Could not find message for <${element.toString()}>, skipping ...`);
     } else {
-      prompt+= `\n${index+1}. ${message_bundle[element][locale]}`;
+      prompt+= `\n${index+1}. ` + get_message(message_bundle[element], locale);
       grammer.push({intention: element, recognize: [(index+1).toString()]});
     }
   });
@@ -47,7 +47,7 @@ function constructLiteralGrammer(keys, message_bundle, locale) {
     if (message_bundle[element] === undefined) {
       console.error(`Could not find message for <${element}>, skipping ...`);
     } else {
-      grammer.push({intention: element, recognize: [`${message_bundle[element][locale].toLowerCase()}`]});
+      grammer.push({intention: element, recognize: [get_message(message_bundle[element], locale).toLowerCase()]});
     }
   });
   return grammer
