@@ -3,17 +3,10 @@ const dummyReceipts = require('./service/dummy-receipts');
 
 const receipts = {
     id: 'receipts',
-<<<<<<< HEAD
-    initial: 'receiptsMenu',
-    states: {
-      receiptsMenu: {
-        id: 'receiptsMenu',
-=======
     initial: 'services',
     states: {
       services: {
         id: 'services',
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
         initial: 'question',
         states:{
           question:{
@@ -62,11 +55,7 @@ const receipts = {
             }),
             always : [
               {
-<<<<<<< HEAD
-                target: '#receiptsMenu'
-=======
                 target: '#services'
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
               }
             ]
           } // menu.error
@@ -94,11 +83,7 @@ const receipts = {
                   })
                 },
                 {
-<<<<<<< HEAD
-                  target:'#Mobile',
-=======
                   target:'#mobilelinkage',
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
                 }
     
               ],
@@ -114,26 +99,6 @@ const receipts = {
           
         },
       },
-<<<<<<< HEAD
-      Mobile:{
-        id:'Mobile',
-        initial:'mobilecheck',
-        states:{
-          mobilecheck:{
-            onEntry: assign((context, event) => {
-              let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.';
-              context.chatInterface.toUser(context.user, message1);
-            }),
-            always:[
-              {
-                target:'question',
-              }
-            ]
-          },
-          question:{
-            onEntry: assign((context, event) => {
-              let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number. \n\n Please type and send "ULB" to link your account number with Service_Name';
-=======
       searchreceiptinitiate:{
         id:'searchreceiptinitiate',
         initial:'question',
@@ -141,7 +106,6 @@ const receipts = {
           question:{
             onEntry: assign((context, event) => {
               let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.';
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -183,15 +147,6 @@ const receipts = {
               }
             ]
           },
-<<<<<<< HEAD
-          ULB:{
-            onEntry: assign( (context, event) => {
-              let message = 'Hi  Citizen_Name , To get your mobile number linked to your water and sewerage service account please dial "ULB_Helpdesk_Phone_Number".\n\n After linking the mobile number with your service you will be able to make quick payment, View bills and payments without having to search for the bills.\n Thank you. \n\nType and Send 5 to Go ⬅️ Back to Main Menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-          },
-
-=======
         },
       },
       mobilelinkage:{
@@ -209,7 +164,6 @@ const receipts = {
               }
             ]
           },
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
         },
       },//mobilecheck
       searchparams:{  
@@ -248,12 +202,7 @@ const receipts = {
                   return context.receipts.slots.menu==='5'
                 }
               },
-<<<<<<< HEAD
-            ],
-            
-=======
             ], 
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
           },
           question1:{
             onEntry: assign((context, event) => {
@@ -283,14 +232,9 @@ const receipts = {
                 else
                   searchParamOption = 'Consumer ID'
                 context.receipts.slots.searchParamOption = searchParamOption;
-<<<<<<< HEAD
-              }
-              context.receipts.slots.searchparams=event.message.input;
-=======
                 context.receipts.slots.searchparams=event.message.input;
               }
               
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }),
             always :[
               {
@@ -337,14 +281,9 @@ const receipts = {
                 else
                   searchParamOption = 'Consumer ID'
                 context.receipts.slots.searchParamOption = searchParamOption;
-<<<<<<< HEAD
-              }
-              context.receipts.slots.searchparams=event.message.input;
-=======
                 context.receipts.slots.searchparams=event.message.input;
               }
              
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }),
             always :[
               {
@@ -389,16 +328,10 @@ const receipts = {
                 else
                   searchParamOption = 'TL Application number'
                 context.receipts.slots.searchParamOption = searchParamOption;
-<<<<<<< HEAD
-              }
-              
-              context.receipts.slots.searchparams=event.message.input;
-=======
                 context.receipts.slots.searchparams=event.message.input;
               }
               
               
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }),
             always :[
               {
@@ -443,14 +376,9 @@ const receipts = {
                 else
                   searchParamOption = 'NOC Application Number'
                 context.receipts.slots.searchParamOption = searchParamOption;
-<<<<<<< HEAD
-              }
-              context.receipts.slots.searchparams=event.message.input;
-=======
                 context.receipts.slots.searchparams=event.message.input;
               }
               
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }),
             always :[
               {
@@ -495,14 +423,9 @@ const receipts = {
                 else
                   searchParamOption = 'BPA Application number'
                 context.receipts.slots.searchParamOption = searchParamOption;
-<<<<<<< HEAD
-              }
-              context.receipts.slots.searchparams=event.message.input;
-=======
                 context.receipts.slots.searchparams=event.message.input;
               }
               
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
             }),
             always :[
               {
@@ -633,64 +556,13 @@ const receipts = {
             }),
             always:[
               {
-<<<<<<< HEAD
-                target:'question',
-              }
-            ]
-          },
-          question:{
-            onEntry: assign((context, event) => {
-              let message='Please type and send ‘1’ to Search and View payment receipt for other payments or service.\n\n Or "mseva" to Go ⬅️ Back to the main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process'
-            }
-
-          },
-          process:{
-            onEntry: assign( (context, event) => {
-              let isValid = event.message.input.trim().localeCompare('1') === 0 ; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-            }),
-            always :[
-              {
-                target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target:'#searchparams',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ],
-          },
-          error: {
-            onEntry: assign( (context, event) => {
-              let message = 'Sorry, I didn\'t understand';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            always : [
-              {
-                target: 'question'
-=======
                 target:'#searchreceiptinitiate',
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
               }
             ]
           },
         },
       },//receipts
     }//receipts.states
-<<<<<<< HEAD
-=======
 };
 
 let messages = {
@@ -699,7 +571,6 @@ let messages = {
       en_IN : 'Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees',
     }
   } 
->>>>>>> be2fa73ea016317a1c81b9fc6a883bb5c934d837
 };
 
 let messages = {
