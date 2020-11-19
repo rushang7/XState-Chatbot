@@ -119,10 +119,10 @@ const pgr =  {
                     }, 
                     onError: {
                       target: '#system_error'
-                    },
-                    on: {
-                      USER_MESSAGE: 'process'
                     }
+                  },
+                  on: {
+                    USER_MESSAGE: 'process'
                   }
                 }, //question
                 process: {
@@ -161,7 +161,7 @@ const pgr =  {
                         let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, false, true);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                      }),
+                      })
                     }, 
                     onError: {
                       target: '#system_error'
