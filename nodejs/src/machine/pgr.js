@@ -225,7 +225,12 @@ const pgr =  {
             process: {
               invoke: {
                 id: 'getCityAndLocality',
-                src: (context, event) => pgrService.getCityAndLocality(event),
+                src: (context, event) => {
+                  if(event.message.type === 'location') {
+                    context.slots.pgr.geocode = event.message.input;
+                  }
+                  return pgrService.getCityAndLocalityForGeocode(event)
+                },
                 onDone: [
                   {
                     target: '#confirmLocation',

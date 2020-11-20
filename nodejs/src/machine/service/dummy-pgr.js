@@ -9,7 +9,7 @@ class DummyPGRService {
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
-    async getCityAndLocality(event) {
+    async getCityAndLocalityForGeocode(event) {
         let messageType = event.message.type;
         if(messageType !== 'location') {
             console.log('Not a geocode');
