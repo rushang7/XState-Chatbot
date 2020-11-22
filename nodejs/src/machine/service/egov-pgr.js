@@ -51,6 +51,12 @@ class PGRService {
     return {complaintTypes, messageBundle};
   }
 
+  async getCityAndLocalityForGeocode(geocode) {
+    let latlng = geocode.substring(1, geocode.length - 1); // Remove braces
+    let cityAndLocality = await getCityAndLocality(latlng);
+    return cityAndLocality;
+  }
+
   async fetchCities(){
     let cities = await this.fetchMdmsData("pb", "tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*.code");
     let messageBundle = {};

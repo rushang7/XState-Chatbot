@@ -229,8 +229,9 @@ const pgr =  {
                 src: (context, event) => {
                   if(event.message.type === 'location') {
                     context.slots.pgr.geocode = event.message.input;
+                    return pgrService.getCityAndLocalityForGeocode(event.message.input);
                   }
-                  return pgrService.getCityAndLocalityForGeocode(event)
+                  return Promise.resolve({});
                 },
                 onDone: [
                   {
