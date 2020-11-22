@@ -55,8 +55,8 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let {complaintCodes, messageBundle} = event.data;
-                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintCodes, messageBundle, context.user.locale, true);
+                    let {complaintTypes, messageBundle} = event.data;
+                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintTypes, messageBundle, context.user.locale, true);
                     context.grammer = grammer; // save the grammer in context to be used in next step
                     context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   }) 

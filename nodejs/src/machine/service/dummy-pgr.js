@@ -28,7 +28,7 @@ class DummyPGRService {
         return Object.keys(this.complaintCategoryToItemsMap);
     }
     async fetchFrequentComplaints() {
-        let complaintCodes = [
+        let complaintTypes = [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',
             'GarbageNeedsTobeCleared',
@@ -36,11 +36,11 @@ class DummyPGRService {
         ];
         let localisationPrefix = 'pgr.complaint.category.';
         let messageBundle = {};
-        for(var complaintCode of complaintCodes) {
-            var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintCode);
-            messageBundle[complaintCode] = message;
+        for(var complaintType of complaintTypes) {
+            var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
+            messageBundle[complaintType] = message;
         }
-        return {complaintCodes, messageBundle};
+        return {complaintType, messageBundle};
     }
     async persistComplaint(bundle) {
         console.log(`Saving complaint ${bundle} to database`);
