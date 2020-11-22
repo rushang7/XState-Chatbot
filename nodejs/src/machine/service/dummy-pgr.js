@@ -1,4 +1,5 @@
 const getCityAndLocality = require('./util/google-maps-util');
+const localisationService = require('../util/localisation-service');
 
 class DummyPGRService {
 
@@ -27,20 +28,19 @@ class DummyPGRService {
         return Object.keys(this.complaintCategoryToItemsMap);
     }
     async fetchFrequentComplaints() {
-        //  throw new Error(400); // Use for testing, throws an error to simulate service call error path
-        // return [
-        //     {code: 'NoStreetlight', value: 'NoStreetlight'},
-        //     {code: 'StreetLightNotWorking', value: 'StreetLightNotWorking'},
-        //     {code: 'GarbageNeedsTobeCleared', value: 'GarbageNeedsTobeCleared'},
-        //     {code: 'DamagedGarbageBin', value: 'DamagedGarbageBin'},
-        //     {code: 'BurningOfGarbage', value: 'BurningOfGarbage'},
-        // ];
-        return [
+        let complaintCodes = [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',
             'GarbageNeedsTobeCleared',
             'BrokenWaterPipeOrLeakage'
-        ]
+        ];
+        let localisationPrefix = 'pgr.complaint.category.';
+        let messageBundle = {};
+        for(var complaintCode of complaintCodes) {
+            var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintCode);
+            messageBundle[complaintCode] = message;
+        }
+        return {complaintCodes, messageBundle};
     }
     async persistComplaint(bundle) {
         console.log(`Saving complaint ${bundle} to database`);
