@@ -34,7 +34,7 @@ class SessionManager {
     }
     async toUser(user, message) {
         channelProvider.sendMessageToUser(user, message);
-        telemetry.log(user.uuid, 'to_user', message);
+        telemetry.log(user.uuid, 'to_user', {message : {type: "text", output: message}});
     }
 
     getChatServiceFor(chatStateJson) {
@@ -47,7 +47,8 @@ class SessionManager {
 
         service.onTransition( state => {
             let userId = state.context.user.uuid;
-            telemetry.log(userId, 'transition', `{${state.toStrings()}}`);
+            let stateStrings = state.toStrings()
+            telemetry.log(userId, 'transition', {destination: stateStrings[stateStrings.length-1]});
             if(state.changed) {
                 let active = !state.done && !state.forcedClose;
                 chatStateRepository.updateState(userId, active, JSON.stringify(state));

@@ -55,7 +55,8 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, true);
+                    let {complaintTypes, messageBundle} = event.data;
+                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintTypes, messageBundle, context.user.locale, true);
                     context.grammer = grammer; // save the grammer in context to be used in next step
                     context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
                   }) 
@@ -119,10 +120,10 @@ const pgr =  {
                     }, 
                     onError: {
                       target: '#system_error'
-                    },
-                    on: {
-                      USER_MESSAGE: 'process'
                     }
+                  },
+                  on: {
+                    USER_MESSAGE: 'process'
                   }
                 }, //question
                 process: {
@@ -161,7 +162,7 @@ const pgr =  {
                         let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, false, true);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                      }),
+                      })
                     }, 
                     onError: {
                       target: '#system_error'
@@ -225,7 +226,13 @@ const pgr =  {
             process: {
               invoke: {
                 id: 'getCityAndLocality',
-                src: (context, event) => pgrService.getCityAndLocality(event),
+                src: (context, event) => {
+                  if(event.message.type === 'location') {
+                    context.slots.pgr.geocode = event.message.input;
+                    return pgrService.getCityAndLocalityForGeocode(event.message.input);
+                  }
+                  return Promise.resolve({});
+                },
                 onDone: [
                   {
                     target: '#confirmLocation',

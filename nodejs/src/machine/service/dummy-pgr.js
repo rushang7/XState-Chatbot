@@ -1,4 +1,5 @@
 const getCityAndLocality = require('./util/google-maps-util');
+const localisationService = require('../util/localisation-service');
 
 class DummyPGRService {
 
@@ -9,13 +10,7 @@ class DummyPGRService {
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
-    async getCityAndLocality(event) {
-        let messageType = event.message.type;
-        if(messageType !== 'location') {
-            console.log('Not a geocode');
-            return {};
-        }
-        let geocode = event.message.input;
+    async getCityAndLocalityForGeocode(geocode) {
         let latlng = geocode.substring(1, geocode.length - 1); // Remove braces
         let cityAndLocality = await getCityAndLocality(latlng);
         return cityAndLocality;
@@ -27,20 +22,19 @@ class DummyPGRService {
         return Object.keys(this.complaintCategoryToItemsMap);
     }
     async fetchFrequentComplaints() {
-        //  throw new Error(400); // Use for testing, throws an error to simulate service call error path
-        // return [
-        //     {code: 'NoStreetlight', value: 'NoStreetlight'},
-        //     {code: 'StreetLightNotWorking', value: 'StreetLightNotWorking'},
-        //     {code: 'GarbageNeedsTobeCleared', value: 'GarbageNeedsTobeCleared'},
-        //     {code: 'DamagedGarbageBin', value: 'DamagedGarbageBin'},
-        //     {code: 'BurningOfGarbage', value: 'BurningOfGarbage'},
-        // ];
-        return [
+        let complaintTypes = [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',
             'GarbageNeedsTobeCleared',
             'BrokenWaterPipeOrLeakage'
-        ]
+        ];
+        let localisationPrefix = 'pgr.complaint.category.';
+        let messageBundle = {};
+        for(var complaintType of complaintTypes) {
+            var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
+            messageBundle[complaintType] = message;
+        }
+        return {complaintType, messageBundle};
     }
     async persistComplaint(bundle) {
         console.log(`Saving complaint ${bundle} to database`);

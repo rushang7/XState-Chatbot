@@ -32,25 +32,31 @@ function constructListPromptAndGrammer(keys, message_bundle, locale, more = fals
   }
   
   keys.forEach((element, index) => {
-    if (message_bundle[element] === undefined) {
-      console.error(`Could not find message for <${element.toString()}>, skipping ...`);
-    } else {
-      prompt+= `\n${index+1}. ${message_bundle[element][locale]}`;
-      grammer.push({intention: element, recognize: [(index+1).toString()]});
+    let value = undefined;
+    if(message_bundle[element] !== undefined) {
+      value = get_message(message_bundle[element], locale);
     }
+    if (value === undefined) {
+      value = element;
+    }
+    prompt+= `\n${index+1}. ` + value;
+    grammer.push({intention: element, recognize: [(index+1).toString()]});
   });
   return {prompt, grammer};
 }
 function constructLiteralGrammer(keys, message_bundle, locale) {
   var grammer = [];
   keys.forEach((element) => {
-    if (message_bundle[element] === undefined) {
-      console.error(`Could not find message for <${element}>, skipping ...`);
-    } else {
-      grammer.push({intention: element, recognize: [`${message_bundle[element][locale].toLowerCase()}`]});
+    let value = undefined;
+    if (message_bundle[element] !== undefined) {
+      value = get_message(message_bundle[element], locale);
+    } 
+    if(value === undefined) {
+      value = element;
     }
+    grammer.push({intention: element, recognize: [value.toLowerCase()]});
   });
-  return grammer
+  return grammer;
 }
 
 let global_messages = {

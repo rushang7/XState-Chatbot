@@ -15,10 +15,16 @@ const envVariables = {
 
     mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
 
+    localisationServiceHost: process.env.localisationServiceHost || 'https://egov-micro-dev.egovernments.org/',
+    localisationServiceSearchPath: process.env.localisationServiceSearchPath || 'localization/messages/v1/_search',
+
+    rootTenantId: process.env.rootTenantId || 'pb',
+
+    supportedLocales: process.env.supportedLocales || 'en_IN,hi_IN',
+
     externalHost: process.env.externalHost || 'https://egov-micro-dev.egovernments.org/',
 
     cityExternalWebpagePath: process.env.cityExternalWebpagePath || 'citizen/openlink/whatsapp/city',
-
     localityExternalWebpagePath: process.env.localityExternalWebpagePath || 'citizen/openlink/whatsapp/locality',
 
     whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',

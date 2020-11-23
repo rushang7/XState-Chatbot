@@ -1,5 +1,7 @@
 const fetch = require("node-fetch");
 const config = require('../../env-variables');
+const getCityAndLocality = require('./util/google-maps-util');
+const localisationService = require('../util/localisation-service');
 
 class PGRService {
 
@@ -40,24 +42,29 @@ class PGRService {
   
   async fetchFrequentComplaints() {
     let complaintTypes = await this.fetchMdmsData("pb", "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.order)].serviceCode");
-    let complaintData = complaintTypes.map(element => {
-      return {
-        code: element,
-        value: element
-      }
-    });
-    return complaintData;
+    let localisationPrefix = 'pgr.complaint.category.';
+    let messageBundle = {};
+    for(let complaintType of complaintTypes) {
+      let message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
+      messageBundle[complaintType] = message;
+    }
+    return {complaintTypes, messageBundle};
+  }
+
+  async getCityAndLocalityForGeocode(geocode) {
+    let latlng = geocode.substring(1, geocode.length - 1); // Remove braces
+    let cityAndLocality = await getCityAndLocality(latlng);
+    return cityAndLocality;
   }
 
   async fetchCities(){
-    let cities = await this.fetchMdmsData("pb", "tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*");
-    let cityData = cities.map(element => {
-      return { 
-        code: element.code,
-        value: element.name
-      }
-    });
-    return cityData;
+    let cities = await this.fetchMdmsData("pb", "tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*.code");
+    let messageBundle = {};
+    for(let city of cities) {
+      let message = localisationService.getMessageBundleForCode(city);
+      messageBundle[city] = message;
+    }
+    return {cities, messageBundle};
   }
 
   async fetchLocalities(tenantId) {
