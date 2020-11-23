@@ -6,7 +6,13 @@ class DummyPGRService {
     // Please mark the method async if the actual app-service method would involve api calls
 
     async fetchCities() {
-        return this.cities.tenantInfo.map(el=>el.code);
+        let cities = this.cities.tenantInfo.map(el=>el.code);
+        let messageBundle = {};
+        for(let city of cities) {
+          let message = localisationService.getMessageBundleForCode(city);
+          messageBundle[city] = message;
+        }
+        return {cities, messageBundle};
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
@@ -34,7 +40,7 @@ class DummyPGRService {
             var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
             messageBundle[complaintType] = message;
         }
-        return {complaintType, messageBundle};
+        return {complaintTypes, messageBundle};
     }
     async persistComplaint(bundle) {
         console.log(`Saving complaint ${bundle} to database`);
