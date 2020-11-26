@@ -41,7 +41,7 @@ class PGRService {
   }
   
   async fetchFrequentComplaints() {
-    let complaintTypes = await this.fetchMdmsData("pb", "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.order)].serviceCode");
+    let complaintTypes = await this.fetchMdmsData(config.rootTenantId, "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.order && @.active == true)].serviceCode");
     let localisationPrefix = 'pgr.complaint.category.';
     let messageBundle = {};
     for(let complaintType of complaintTypes) {
@@ -58,7 +58,7 @@ class PGRService {
   }
 
   async fetchCities(){
-    let cities = await this.fetchMdmsData("pb", "tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*.code");
+    let cities = await this.fetchMdmsData(config.rootTenantId, "tenant", "citymodule", "$.[?(@.module=='PGR.WHATSAPP')].tenants.*.code");
     let messageBundle = {};
     for(let city of cities) {
       let message = localisationService.getMessageBundleForCode(city);
@@ -82,28 +82,6 @@ class PGRService {
     return localities;
   }
 
-  generatePromptAndGrammer(data) {
-    var prompt = '';
-    var grammer = [];
-    data.forEach((element, index) => {
-      let code = element.code;
-      let value = element.value;
-      prompt+= `\n ${index+1}. ${value}`;
-      grammer.push({intention: code, recognize: [index+1, value.trim().toLowerCase()]});
-    });
-    return {prompt, grammer};
-  }
-
-  generatePromptAndGrammerForLocalities(data, tenantId) {
-    var grammer = [];
-    data.forEach((element, index) => {
-      let code = element.code;
-      let value = element.value;
-      grammer.push({intention: code, recognize: [value.trim().toLowerCase()]});
-    });
-    var prompt = config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + config.whatsAppBusinessNumber;
-    return {prompt, grammer};
-  }
 }
 
 module.exports = new PGRService();
