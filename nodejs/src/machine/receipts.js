@@ -1,5 +1,7 @@
 const { assign } = require('xstate');
 const dummyReceipts = require('./service/dummy-receipts');
+const { INTENTION_UNKOWN } = require('./util/dialog');
+const dialog = require('./util/dialog');
 
 const receipts = {
     id: 'receipts',
@@ -7,44 +9,38 @@ const receipts = {
     states: {
       services: {
         id: 'services',
+        onEntry: assign((context, event) => {
+          context.receipts = {slots: {}};
+        }),
         initial: 'question',
         states:{
           question:{
             onEntry: assign((context, event) => {
-              console.log("onEntry");
-              context.receipts = {slots: {}};
-              let mess='Please type and send the number of your option from the list given 👇 below:\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees';
-              context.chatInterface.toUser(context.user, mess);
+              let { services, messageBundle } = dummyReceipts.getSupportedServicesAndMessageBundle();
+              let preamble = dialog.get_message(messages.services.question.preamble, context.user.locale);
+              let { prompt, grammer } = dialog.constructListPromptAndGrammer(services, messageBundle, context.user.locale);
+              context.grammer = grammer;
+              context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
             }),
             on: {
               USER_MESSAGE:'process'
             }
           },//question
           process:{
-            onEntry: assign( (context, event) => {
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0 || event.message.input.trim().localeCompare('4') === 0 || event.message.input.trim().localeCompare('5') === 0; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                context.receipts.slots.menu = event.message.input;
-              }
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event, true);
             }),
-    
             always:[
               {
                 target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
+                cond: (context, event) => context.intention === dialog.INTENTION_UNKOWN
               },
 
               {
                 target: '#trackreceipts',
-                cond: (context, event) => {
-                  return context.message.isValid;
-                }
+                actions: assign((context, event) => {
+                  context.receipts.slots.service = context.intention;
+                }),
               }
             ]
           },// menu.process
@@ -105,7 +101,7 @@ const receipts = {
         states:{
           question:{
             onEntry: assign((context, event) => {
-              let message='Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.';
+              let message = dialog.get_message(messages.searchreceiptinitiate.question, context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -115,7 +111,9 @@ const receipts = {
           },
           process:{
             onEntry: assign( (context, event) => {
-              let isValid = event.message.input.trim().localeCompare('1') === 0 ;
+              let messageText = event.message.input;
+              let parsed = parseInt(event.message.input.trim())
+              let isValid = parsed === 1;
               context.message = {
                 isValid: isValid,
                 messageContent: event.message.input
@@ -166,283 +164,38 @@ const receipts = {
           },
         },
       },//mobilecheck
-      searchparams:{  
+      searchparams:{
         id:'searchparams',
-        initial:'respectiveparams',
+        initial:'question',
         states:{
-          respectiveparams:{
+          question:{
+            onEntry:assign((context,event)=>{
+              let { searchOptions, messageBundle } = dummyReceipts.getSearchOptionsAndMessageBundleForService(context.receipts.slots.service);
+              let preamble=dialog.get_message(messages.searchparams.question.preamble,context.user.locale);
+              let { prompt, grammer } = dialog.constructListPromptAndGrammer(searchOptions, messageBundle, context.user.locale);
+              context.grammer = grammer;
+              context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+            }),
+            on:{
+              USER_MESSAGE:'process'
+            },
+          },
+          process:{
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event, true);
+            }),
             always:[
               {
-                target:'question1',
-                cond:(context,event)=>{
-                  return context.receipts.slots.menu==='1'
-                }
-              },
-              {
-                target:'question2',
-                cond:(context,event)=>{
-                  return context.receipts.slots.menu==='2'
-                }
-              },
-              {
-                target:'question3',
-                cond:(context,event)=>{
-                  return context.receipts.slots.menu==='3'
-                }
-              },
-              {
-                target:'question4',
-                cond:(context,event)=>{
-                  return context.receipts.slots.menu==='4'
-                }
-              },
-              {
-                target:'question5',
-                cond:(context,event)=>{
-                  return context.receipts.slots.menu==='5'
-                }
-              },
-            ], 
-          },
-          question1:{
-            onEntry: assign((context, event) => {
-              context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Connection No.\n\n3. Search 🔎 using Consumer ID/Consumer Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process1'
-            }
-
-          },
-          process1:{
-            onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                var searchParamOption = ''
-                if(parsedInput === 1)
-                  searchParamOption = 'Mobile Number'
-                else if(parsedInput === 2)
-                  searchParamOption = 'Connection Number'
-                else
-                  searchParamOption = 'Consumer ID'
-                context.receipts.slots.searchParamOption = searchParamOption;
-                context.receipts.slots.searchparams=event.message.input;
-              }
-              
-            }),
-            always :[
-              {
                 target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
+                cond: (context, event) => context.intention === dialog.INTENTION_UNKOWN
               },
               {
-                target:'#paraminput',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ]
-    
-          },
-          question2:{
-            onEntry: assign((context, event) => {
-              context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using Property ID.\n\n3. Search 🔎 using Consumer ID/Consumer Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process2'
-            }
-
-          },
-          process2:{
-            onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 || event.message.input.trim().localeCompare('3') === 0; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
+                target: '#paraminput',
+                actions: assign((context, event) => {
+                  context.receipts.slots.searchParamOption = context.intention;
+                })
               }
-              if(isValid) {
-                var searchParamOption = ''
-                if(parsedInput === 1)
-                  searchParamOption = 'Mobile Number'
-                else if(parsedInput === 2)
-                  searchParamOption = 'property ID'
-                else
-                  searchParamOption = 'Consumer ID'
-                context.receipts.slots.searchParamOption = searchParamOption;
-                context.receipts.slots.searchparams=event.message.input;
-              }
-             
-            }),
-            always :[
-              {
-                target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target:'#paraminput',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ]
-    
-          },
-          question3:{
-            onEntry: assign((context, event) => {
-              context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using TL Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process3'
-            }
-
-          },
-          process3:{
-            onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                var searchParamOption = ''
-                if(parsedInput === 1)
-                  searchParamOption = 'Mobile Number'
-                else
-                  searchParamOption = 'TL Application number'
-                context.receipts.slots.searchParamOption = searchParamOption;
-                context.receipts.slots.searchparams=event.message.input;
-              }
-              
-              
-            }),
-            always :[
-              {
-                target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target:'#paraminput',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ]
-    
-          },
-          question4:{
-            onEntry: assign((context, event) => {
-              context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using NOC Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process4'
-            }
-
-          },
-          process4:{
-            onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                var searchParamOption = ''
-                if(parsedInput === 1)
-                  searchParamOption = 'Mobile Number'
-                else
-                  searchParamOption = 'NOC Application Number'
-                context.receipts.slots.searchParamOption = searchParamOption;
-                context.receipts.slots.searchparams=event.message.input;
-              }
-              
-            }),
-            always :[
-              {
-                target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target:'#paraminput',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ]
-    
-          },
-          question5:{
-            onEntry: assign((context, event) => {
-              context.mobile = {slots: {}};
-              let message='Please type and send the number of your option from the list given 👇 below:\n\n1. Search 🔎 using another Mobile No📱.\n\n2. Search 🔎 using BPA Application Number.\n\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.';
-              context.chatInterface.toUser(context.user, message);
-            }),
-            on: {
-              USER_MESSAGE:'process5'
-            }
-
-          },
-          process5:{
-            onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.trim().localeCompare('1') === 0 || event.message.input.trim().localeCompare('2') === 0 ; 
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                var searchParamOption = ''
-                if(parsedInput === 1)
-                  searchParamOption = 'Mobile Number'
-                else
-                  searchParamOption = 'BPA Application number'
-                context.receipts.slots.searchParamOption = searchParamOption;
-                context.receipts.slots.searchparams=event.message.input;
-              }
-              
-            }),
-            always :[
-              {
-                target: 'error',
-                cond: (context, event) => {
-                  return ! context.message.isValid;
-                }
-              },
-              {
-                target:'#paraminput',
-                cond: (context, event) => {
-                  return  context.message.isValid;
-                }
-              },
-
-            ]
-    
+            ],
           },
           error: {
             onEntry: assign( (context, event) => {
@@ -461,51 +214,52 @@ const receipts = {
         id:'paraminput',
         initial:'question',
         states:{
-          question:{
+          question: {
             onEntry: assign((context, event) => {
-              let message='Please Enter  '+ context.receipts.slots.searchParamOption +'  to view the bill. (Condition example: Do not use +91 or 0 before mobile number)\n\n or Type and send 5 to Go ⬅️ Back to main menu.';
+              let { option, example } = dummyReceipts.getOptionAndExampleMessageBundle(context.receipts.slots.service,context.receipts.slots.searchParamOption);
+              let message = dialog.get_message(messages.paraminput.question, context.user.locale);
+              let optionMessage = dialog.get_message(option, context.user.locale);
+              let exampleMessage = dialog.get_message(example, context.user.locale);
+              message = message.replace('{{option}}', optionMessage);
+              message = message.replace('{{example}}', exampleMessage);
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
-              USER_MESSAGE:'process'
-            },
+              USER_MESSAGE: 'process'
+            }
           },
           process:{
             onEntry: assign( (context, event) => {
-              var parsedInput = parseInt(event.message.input.trim());
-              let isValid = event.message.input.length ===10 ;
-              context.message = {
-                isValid: isValid,
-                messageContent: event.message.input
-              }
-              if(isValid) {
-                context.receipts.slots.paraminput =parsedInput;
+              let paraminput = event.message.input;
+              context.isValid = dummyReceipts.validateParamInput(context.receipts.slots.service, context.receipts.slots.searchParamOption, paraminput);
+              if(context.isValid) {
+                context.receipts.slots.paraminput = paraminput;
               }
             }),
-
             always:[
               {
-                target: 'error',
+                target: '#receiptslip',
                 cond: (context, event) => {
-                  return ! context.message.isValid;
+                  return context.isValid;
                 }
               },
               {
-                target:'#receiptslip',
+                target:'re_enter',
               }
             ]
 
           },
-          error: {
-            onEntry: assign( (context, event) => {
-              let message = 'Invalid Entry , \nPlease try again!!';
+          re_enter:{
+            onEntry: assign((context, event) => {
+              let { option, example } = dummyReceipts.getOptionAndExampleMessageBundle(context.receipts.slots.service,context.receipts.slots.searchParamOption);
+              let message = dialog.get_message(messages.paraminput.re_enter, context.user.locale);
+              let optionMessage = dialog.get_message(option, context.user.locale);
+              message = message.replace('{{option}}', optionMessage);
               context.chatInterface.toUser(context.user, message);
             }),
-            always : [
-              {
-                target: 'question'
-              }
-            ]
+            on: {
+              USER_MESSAGE: 'process'
+            },
           },
         },
       },//parameterinput
@@ -566,11 +320,39 @@ const receipts = {
 };
 
 let messages = {
-  menu: {
+  services:{
+  question: {
+    preamble: {
+      en_IN: 'Please type and send the number of your option from the list given 👇 below:'
+    },
+  },
+  },
+  searchparams:{
     question: {
-      en_IN : 'Please type\n\n1 for Water and Sewerage Bill.\n2 for Property Tax.\n3 for Trade License Fees.\n4 for Fire NOC Fees.\n5 for Building Plan Scrutiny Fees',
+      preamble: {
+        en_IN: 'Please type and send the number of your option from the list given 👇 below:'
+      }
     }
-  } 
+  },
+  mobilelinkage:{
+    notLinked: {
+      en_IN: 'It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
+    },
+  },
+  paraminput: {
+    question: {
+      en_IN: 'Please Enter {{option}} to view the bill. {{example}}\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.'
+    },
+    re_enter: {
+      en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
+    }
+  },
+  searchreceiptinitiate:{
+    question:{
+      en_IN:'Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.'
+    },
+
+  },
 };
 
 module.exports = receipts;
