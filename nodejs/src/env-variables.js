@@ -13,9 +13,9 @@ const envVariables = {
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
-    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
+    mdmsHost: process.env.mdmsHost || '/',
 
-    localisationServiceHost: process.env.localisationServiceHost || 'https://egov-micro-dev.egovernments.org/',
+    localisationServiceHost: process.env.localisationServiceHost || '/',
     localisationServiceSearchPath: process.env.localisationServiceSearchPath || 'localization/messages/v1/_search',
 
     rootTenantId: process.env.rootTenantId || 'pb',
