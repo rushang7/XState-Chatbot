@@ -53,7 +53,7 @@ const bills = {
       states: {
         question: {
           onEntry: assign((context, event) => {
-            let message = 'Please type and send ‘1’ to Search and Pay for other bills or fees which are not linked with your mobile number. \nOr \'mseva\' to Go ⬅️ Back to the main menu.';
+            let message = dialog.get_message(messages.searchBillInitiate.question, context.user.locale);
             context.chatInterface.toUser(context.user, message);
           }),
           on: {
@@ -95,10 +95,11 @@ const bills = {
       id: 'noBills',
       onEntry: assign( (context, event) => {
         if(context.totalBills === 0) {
-          let message = dialog.get_message(messages.noBills, context.user.locale);
+          let message = dialog.get_message(messages.noBills.notLinked, context.user.locale);
           context.chatInterface.toUser(context.user, message);
         } else {
-          context.chatInterface.toUser(context.user, 'There are no pending bills against your account. You can still search the bills as given below');
+          let message = dialog.get_message(messages.noBills.noPending, context.user.locale);
+          context.chatInterface.toUser(context.user, message);
         }
       }),
       always: 'billServices'
@@ -268,7 +269,7 @@ const bills = {
             ]
           }
         },
-        
+
       },
     }
   }
@@ -279,11 +280,16 @@ let messages = {
     en_IN: 'Two bills found against your number:\n1. Water & Sewerage I Rs. 630 I Due on 25/06/20\nPayment Link: www.mseva.gov.in/cpay/WSbill/WS123456\n\n2. Property Tax I Rs. 1200 I Due on 30/09/20\nPayment Link: www.mseva.gov.in/cpay/tax/PT123456'
   },
   noBills: {
-    en_IN: 'Sorry, your mobile number is not linked to any service. Contact your ULB to link it. You can avail service by searching your account information as given below:'
+    notLinked: {
+      en_IN: 'Sorry, your mobile number is not linked to any service. Contact your ULB to link it. You can avail service by searching your account information as given below:'
+    },
+    noPending: {
+      en_IN: 'There are no pending bills against your account. You can still search the bills as given below'
+    }
   },
   searchBillInitiate: {
     question: {
-      en_IN: ''
+      en_IN: 'Please type and send ‘1’ to Search and Pay for other bills or fees which are not linked with your mobile number. \nOr \'mseva\' to Go ⬅️ Back to the main menu.'
     }
   },
   billServices: {
@@ -305,7 +311,7 @@ let messages = {
       en_IN: 'Please Enter {{option}} to view the bill. {{example}}\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.'
     },
     re_enter: {
-      en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.'
+      en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
     }
   },
   listOfBills: {
