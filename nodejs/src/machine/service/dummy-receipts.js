@@ -100,8 +100,8 @@ class DummyReceipts{
 
         return emptyReceipts;
     }
-    async fetchReceiptsForParam(user, menu, searchparams, paraminput) {
-        console.log(`Received params: ${user}, ${menu}, ${searchparams}, ${paraminput}`);
+    async fetchReceiptsForParam(user, service, searchParamOption, paraminput) {
+        console.log(`Received params: ${user}, ${service}, ${searchParamOption}, ${paraminput}`);
         return this.findreceipts(user);
     }
 

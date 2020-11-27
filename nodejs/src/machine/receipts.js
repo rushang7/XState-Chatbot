@@ -46,7 +46,7 @@ const receipts = {
           },// menu.process
           error: {
             onEntry: assign( (context, event) => {
-              let message = 'Sorry, I didn\'t understand';
+              let message =dialog.get_message(messages.services.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : [
@@ -85,7 +85,7 @@ const receipts = {
               ],
               onError: {
                 actions: assign((context, event) => {
-                  let message = 'Sorry. Some error occurred on server';
+                  let message = dialog.get_message(messages.trackreceipts.error,context.user.locale);
                   context.chatInterface.toUser(context.user, message);
                 })
               }
@@ -136,7 +136,7 @@ const receipts = {
           },
           error: {
             onEntry: assign( (context, event) => {
-              let message = 'Sorry, I didn\'t understand';
+              let message = dialog.get_message(messages.searchreceiptinitiate.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : [
@@ -153,7 +153,7 @@ const receipts = {
         states:{
           mobilecheck:{
             onEntry: assign((context, event) => {
-              let message1='It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.';
+              let message1=dialog.get_message(messages.mobilelinkage.notLinked,context.user.locale);
               context.chatInterface.toUser(context.user, message1);
             }),
             always:[
@@ -199,7 +199,7 @@ const receipts = {
           },
           error: {
             onEntry: assign( (context, event) => {
-              let message = 'Sorry, I didn\'t understand';
+              let message = dialog.get_message(messages.searchparams.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : [
@@ -275,7 +275,7 @@ const receipts = {
               id: 'fetchReceiptsForParam',
               src: (context, event) => {
                 let slots = context.receipts.slots;
-                return dummyReceipts.fetchReceiptsForParam(context.user, slots.menu, slots.searchparams, slots.paraminput);
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
               },
               onDone:[
                 {
@@ -286,7 +286,11 @@ const receipts = {
                 },
                 {
                   actions: assign((context, event) => {
-                    let message = 'The ' + context.receipts.slots.searchParamOption + ': ' + context.receipts.slots.paraminput + ' is not found in our records. Please Check the details you have provided once again.';
+                    let message = dialog.get_message(messages.receiptslip.not_found, context.user.locale);
+                    let optionMessage = context.receipts.slots.searchParamOption;
+                    let inputMessage = context.receipts.slots.paraminput;
+                    message = message.replace('{{searchparamoption}}', optionMessage);
+                    message = message.replace('{{paraminput}}', inputMessage);
                     context.chatInterface.toUser(context.user, message);
                   }),
                   target:'#searchparams'
@@ -294,7 +298,7 @@ const receipts = {
               ],
               onError: {
                 actions: assign((context, event) => {
-                  let message = 'Sorry. Some error occurred on server';
+                  let message = messages.receiptslip.error;
                   context.chatInterface.toUser(context.user, message);
                 })
               }  
@@ -303,10 +307,8 @@ const receipts = {
           },
           listofreceipts:{
             onEntry: assign((context, event) => {
-              let mess1='Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.';
-              let mess2='Last three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n';
-              context.chatInterface.toUser(context.user, mess1);
-              context.chatInterface.toUser(context.user, mess2);
+              let message=dialog.get_message(messages.receiptslip.listofreceipts,context.user.locale);
+              context.chatInterface.toUser(context.user,message);
             }),
             always:[
               {
@@ -321,23 +323,45 @@ const receipts = {
 
 let messages = {
   services:{
-  question: {
-    preamble: {
-      en_IN: 'Please type and send the number of your option from the list given 👇 below:'
+    question: {
+      preamble: {
+        en_IN: 'Please type and send the number of your option from the list given 👇 below:'
+      },
+    },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
     },
   },
+  trackreceipts:{
+    error:{
+      en_IN: 'Sorry. Some error occurred on server!'
+    },
+  },
+  searchreceiptinitiate:{
+    question:{
+      en_IN:'Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.'
+    },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
+    },
+
+
+  },
+  mobilelinkage:{
+    notLinked: {
+      en_IN: 'It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
+    },
   },
   searchparams:{
     question: {
       preamble: {
         en_IN: 'Please type and send the number of your option from the list given 👇 below:'
       }
-    }
-  },
-  mobilelinkage:{
-    notLinked: {
-      en_IN: 'It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
     },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
+    },
+
   },
   paraminput: {
     question: {
@@ -347,12 +371,18 @@ let messages = {
       en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
     }
   },
-  searchreceiptinitiate:{
-    question:{
-      en_IN:'Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.'
+  receiptslip:{
+    not_found:{
+      en_IN:'The {{searchparamoption}} :   {{paraminput}} +  is not found in our records. Please Check the details you have provided once again.'
     },
-
-  },
+    error:{
+      en_IN:'Sorry. Some error occurred on server.'
+    },
+    listofreceipts:{
+      en_IN:'Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234.\n\n'
+    },
+  }
+  
 };
 
 module.exports = receipts;
