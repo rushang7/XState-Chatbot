@@ -42,10 +42,56 @@ const bills = {
     personalBills: {
       id: 'personalBills',
       onEntry: assign((context, event) => {
-        let message = dialog.get_message(messages.personalBills, context.user.locale);
+        let bills = context.bills.pendingBills;
+        let message = '';
+        if(bills.length === 1) {
+          let bill = bills[0];
+          message = dialog.get_message(messages.personalBills.singleRecord, context.user.locale);
+          message = message.replace('{{service}}', bill.service);
+          message = message.replace('{{id}}', bill.id);
+          message = message.replace('{{secondaryInfo}}', bill.secondaryInfo);
+          message = message.replace('{{period}}', bill.period);
+          message = message.replace('{{dueAmount}}', bill.amount);
+          message = message.replace('{{dueDate}}', bill.dueDate);
+          message = message.replace('{{paymentLink}}', bill.paymentLink);
+        } else {
+          let services = bills.map(element => element.service);
+          let serviceSet = new Set(services);
+          if(services.length === serviceSet.size) {
+            message = dialog.get_message(messages.personalBills.multipleRecords, context.user.locale);
+            for(let i = 0; i < bills.length; i++) {
+              let bill = bills[i];
+              let billTemplate = dialog.get_message(messages.billSearchResults.multipleRecords.billTemplate, context.user.locale);
+              billTemplate = billTemplate.replace('{{service}}', bill.service);
+              billTemplate = billTemplate.replace('{{dueAmount}}', bill.dueAmount);
+              billTemplate = billTemplate.replace('{{dueDate}}', bill.dueDate);
+              billTemplate = billTemplate.replace('{{paymentLink}}', bill.paymentLink);
+
+              message += '\n\n';
+              message += (i + 1) + '. ';
+              message += billTemplate;
+            }
+          } else {
+            message = dialog.get_message(messages.personalBills.multipleRecordsSameService, context.user.locale);
+            for(let i = 0; i < bills.length; i++) {
+              let bill = bills[i];
+              let billTemplate = dialog.get_message(messages.billSearchResults.multipleRecordsSameService.billTemplate, context.user.locale);
+              billTemplate = billTemplate.replace('{{service}}', bill.service);
+              billTemplate = billTemplate.replace('{{id}}', bill.id);
+              billTemplate = billTemplate.replace('{{secondaryInfo}}', bill.secondaryInfo);
+              billTemplate = billTemplate.replace('{{dueAmount}}', bill.dueAmount);
+              billTemplate = billTemplate.replace('{{dueDate}}', bill.dueDate);
+              billTemplate = billTemplate.replace('{{paymentLink}}', bill.paymentLink);
+
+              message += '\n\n';
+              message += (i + 1) + '. ';
+              message += billTemplate;
+            }
+          }
+        }
         context.chatInterface.toUser(context.user, message);
       }),
-      always: 'searchBillInitiate'
+      always: '#searchBillInitiate'
     },
     searchBillInitiate: {
       id: 'searchBillInitiate',
@@ -217,7 +263,7 @@ const bills = {
           }),
           always: [
             {
-              target: '#listOfBills',
+              target: '#billSearchResults',
               cond: (context, event) => context.isValid
             },
             {
@@ -239,8 +285,8 @@ const bills = {
         }
       }
     },
-    listOfBills: {
-      id: 'listOfBills',
+    billSearchResults: {
+      id: 'billSearchResults',
       initial: 'fetch',
       states: {
         fetch: {
@@ -252,32 +298,149 @@ const bills = {
             },
             onDone: [
               {
-                cond: (context, event) => event.data.pendingBills,
-                actions: assign((context, event) => {
-                  let message = 'Your Water 🚰 and Sewerage bill against consumer number WS123456 for property in Azad Nagar, Amritsar for the period Apr-June 2020 is Rs. 630. \n\nPay before 25th July 2020 to avoid late payment charges. \n\nPayment Link: www.mseva.gov.in/cpay/WSbill/WS123456';
-                  context.chatInterface.toUser(context.user, message);
-                }),
-                target: '#searchBillInitiate'
+                cond: (context, event) => event.data === undefined || event.data.length === 0,
+                target: 'noRecords'
               },
               {
+                target: 'results',
                 actions: assign((context, event) => {
-                  let message = 'The ' + context.bills.slots.searchParamOption + ': ' + context.bills.slots.paramInput + ' is not found in our records. Please Check the details you have provided once again.';
-                  context.chatInterface.toUser(context.user, message);
-                }),
-                target: '#searchBillInitiate'
+                  context.bills.searchResults = event.data;
+                })
               }
             ]
           }
         },
+        noRecords: {
+          onEntry: assign((context, event) => {
+            let message = dialog.get_message(messages.billSearchResults.noRecords, context.user.locale);
+            let { searchOptions, messageBundle } = billService.getSearchOptionsAndMessageBundleForService(context.slots.bills.service);
+            message = message.replace('{{searchParamOption}}', dialog.get_message(messageBundle[context.slots.bills.searchParamOption], context.user.locale));
+            message = message.replace('{{paramInput}}', context.slots.bills.paramInput);
+            context.chatInterface.toUser(context.user, message);
+          }),
+          always: '#paramInputInitiate'
+        },
+        results: {
+          onEntry: assign((context, event) => {
+            let bills = context.bills.searchResults;
+            let message = '';
+            if(bills.length === 1) {
+              let bill = bills[0];
+              message = dialog.get_message(messages.billSearchResults.singleRecord, context.user.locale);
+              message = message.replace('{{service}}', bill.service);
+              message = message.replace('{{id}}', bill.id);
+              message = message.replace('{{secondaryInfo}}', bill.secondaryInfo);
+              message = message.replace('{{period}}', bill.period);
+              message = message.replace('{{dueAmount}}', bill.amount);
+              message = message.replace('{{dueDate}}', bill.dueDate);
+              message = message.replace('{{paymentLink}}', bill.paymentLink);
+            } else {
+              let services = bills.map(element => element.service);
+              let serviceSet = new Set(services);
+              if(services.length === serviceSet.size) {
+                message = dialog.get_message(messages.billSearchResults.multipleRecords, context.user.locale);
+                for(let i = 0; i < bills.length; i++) {
+                  let bill = bills[i];
+                  let billTemplate = dialog.get_message(messages.billSearchResults.multipleRecords.billTemplate, context.user.locale);
+                  billTemplate = billTemplate.replace('{{service}}', bill.service);
+                  billTemplate = billTemplate.replace('{{dueAmount}}', bill.dueAmount);
+                  billTemplate = billTemplate.replace('{{dueDate}}', bill.dueDate);
+                  billTemplate = billTemplate.replace('{{paymentLink}}', bill.paymentLink);
 
-      },
+                  message += '\n\n';
+                  message += (i + 1) + '. ';
+                  message += billTemplate;
+                }
+              } else {
+                message = dialog.get_message(messages.billSearchResults.multipleRecordsSameService, context.user.locale);
+                for(let i = 0; i < bills.length; i++) {
+                  let bill = bills[i];
+                  let billTemplate = dialog.get_message(messages.billSearchResults.multipleRecordsSameService.billTemplate, context.user.locale);
+                  billTemplate = billTemplate.replace('{{service}}', bill.service);
+                  billTemplate = billTemplate.replace('{{id}}', bill.id);
+                  billTemplate = billTemplate.replace('{{secondaryInfo}}', bill.secondaryInfo);
+                  billTemplate = billTemplate.replace('{{dueAmount}}', bill.dueAmount);
+                  billTemplate = billTemplate.replace('{{dueDate}}', bill.dueDate);
+                  billTemplate = billTemplate.replace('{{paymentLink}}', bill.paymentLink);
+
+                  message += '\n\n';
+                  message += (i + 1) + '. ';
+                  message += billTemplate;
+                }
+              }
+            }
+            context.chatInterface.toUser(context.user, message);
+          }),
+          always: '#searchBillInitiate'
+        }
+      }
+    },
+    paramInputInitiate: {
+      id: 'paramInputInitiate',
+      initial: 'question',
+      states: {
+        question: {
+          onEntry: assign((context, event) => {
+            let message = dialog.get_message(messages.paramInputInitiate.question, context.user.locale);
+            let { searchOptions, messageBundle } = billService.getSearchOptionsAndMessageBundleForService(context.slots.bills.service);
+            message = message.replace('{{searchParamOption}}', dialog.get_message(messageBundle[context.slots.bills.searchParamOption], context.user.locale));
+            context.chatInterface.toUser(context.user, message);
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            let messageText = event.message.input;
+            let parsed = parseInt(event.message.input.trim())
+            let isValid = parsed === 1;
+            context.message = {
+              isValid: isValid,
+              messageContent: event.message.input
+            };
+          }),
+          always: [
+            {
+              target: 'error',
+              cond: (context, event) => {
+                return ! context.message.isValid;
+              }
+            },
+            {
+              target: '#paramInput'
+            }
+          ]
+        },
+        error: {
+          onEntry: assign( (context, event) => {
+            let message = 'Sorry, I didn\'t understand';
+            context.chatInterface.toUser(context.user, message);
+          }),
+          always : 'question'
+        }
+      }
     }
   }
 };
 
 let messages = {
   personalBills: {
-    en_IN: 'Two bills found against your number:\n1. Water & Sewerage I Rs. 630 I Due on 25/06/20\nPayment Link: www.mseva.gov.in/cpay/WSbill/WS123456\n\n2. Property Tax I Rs. 1200 I Due on 30/09/20\nPayment Link: www.mseva.gov.in/cpay/tax/PT123456'
+    singleRecord: {
+      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}'
+    },
+    multipleRecords: {
+      en_IN: 'Following bills found against your mobile number:',
+      billTemplate: {
+        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+      }
+    },
+    multipleRecordsSameService: {
+      en_IN: 'Following bills found against your mobile number:',
+      billTemplate: {
+        en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+      }
+    }
   },
   noBills: {
     notLinked: {
@@ -314,8 +477,30 @@ let messages = {
       en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
     }
   },
-  listOfBills: {
-    en_IN: ''
+  billSearchResults: {
+    noRecords: {
+      en_IN: 'The {{searchParamOption}} : {{paramInput}} is not found in our records. Please Check the details you have provided once again.'
+    },
+    singleRecord: {
+      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}'
+    },
+    multipleRecords: {
+      en_IN: 'Following bills found:',
+      billTemplate: {
+        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+      }
+    },
+    multipleRecordsSameService: {
+      en_IN: 'Following bills found:',
+      billTemplate: {
+        en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+      }
+    }
+  },
+  paramInputInitiate: {
+    question: {
+      en_IN: 'Please type and send ‘*1*’ to Enter {{searchParamOption}} again. \nOr \'mseva\' to Go ⬅️ Back to the main menu.'
+    }
   }
 }
 

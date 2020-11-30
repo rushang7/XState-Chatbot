@@ -26,7 +26,7 @@ class DummyBillService {
   getSearchOptionsAndMessageBundleForService(service) {
     let messageBundle = {
       mobile: {
-        en_IN: 'Search 🔎 using another Mobile No.📱'
+        en_IN: 'Search 🔎 using Mobile No.📱'
       },
       connectionNumber: {
         en_IN: 'Search 🔎 using Connection No.'
@@ -82,7 +82,7 @@ class DummyBillService {
   }
 
   async fetchBillsForUser(user, locale) {
-    let randomUserBehaviour = parseInt(Math.random() * 4);
+    let randomUserBehaviour = parseInt(Math.random() * 5);
     console.log(randomUserBehaviour);
 
     let results = [
@@ -91,28 +91,36 @@ class DummyBillService {
         id: 'WS123456',
         secondaryInfo: 'Ajit Nagar,  Phagwara',
         dueAmount: '630',
-        dueDate: '25/06/20'
+        dueDate: '25/06/20',
+        period: 'Apr-June 2020',
+        paymentLink: 'https://mseva.org/pay/132'
       },
       {
         service: 'Property Tax',
         id: 'PT123456',
         secondaryInfo: 'Ajit Nagar,  Phagwara',
         dueAmount: '1500',
-        dueDate: '25/06/20'
+        dueDate: '25/06/20',
+        period: 'Apr-June 2020',
+        paymentLink: 'https://mseva.org/pay/132'
       },
       {
         service: 'Water & Sewerage',
         id: 'WS654321',
         secondaryInfo: 'Singh Colony,  Phagwara',
         dueAmount: '1200',
-        dueDate: '25/06/20'
+        dueDate: '25/06/20',
+        period: 'Apr-June 2020',
+        paymentLink: 'https://mseva.org/pay/132'
       },
       {
         service: 'Property Tax',
         id: 'PT123456',
         secondaryInfo: 'Singh Colony,  Phagwara',
         dueAmount: '1000',
-        dueDate: '25/06/20'
+        dueDate: '25/06/20',
+        period: 'Apr-June 2020',
+        paymentLink: 'https://mseva.org/pay/132'
       }
     ]
 
@@ -127,9 +135,16 @@ class DummyBillService {
         pendingBills: results,
         totalBills: 10
       }
-    } else  if(randomUserBehaviour === 2) {
+    } else if(randomUserBehaviour === 2) {
+      results = results.slice(0, 1);
+      return {
+        pendingBills: results,
+        totalBills: 10
+      }
+    } else  if(randomUserBehaviour === 3) {
       return {                        // mobile number not linked with any bills
-        totalBills: 0
+        totalBills: 0,
+        pendingBills: undefined
       }
     } else {
       return {
@@ -141,7 +156,8 @@ class DummyBillService {
 
   async fetchBillsForParam(user, service, paramOption, paramInput) {
       console.log(`Received params: ${user}, ${service}, ${paramOption}, ${paramInput}`);
-      return this.fetchBillsFor(user);
+      let billsForUser = await this.fetchBillsForUser(user);
+      return billsForUser.pendingBills;
   }
 
 }
