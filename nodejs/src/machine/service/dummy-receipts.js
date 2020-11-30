@@ -82,28 +82,117 @@ class DummyReceipts{
         }
         return true;
     }
-    async findreceipts(user){
-        let receipts = [
-            {
-                date: '23/10/2020',
-                service: 'WS',
-                charges: 'Rs. 100'
-            },
-            {
-                date: '23/10/2020',
-                service: 'PT',
-                charges: 'Rs. 100'
-            }
-        ]
+    async findreceipts(user,service){
+      let select=0;
+      let receipts =  [
+          {
+            service: 'Water & Sewerage',
+            id: 'WS123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount1: '630',
+            date1: '10/07/2019',
+            transactionNumber1:'TRNS1234',
+            amount2: '580',
+            date2: '15/10/2019',
+            transactionNumber2:'TRNS8765',
+            amount3: '620',
+            date3: '17/01/2020',
+            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/1234',
+          },
+          {
+            service: 'Property Tax',
+            id: 'PT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount1: '630',
+            date1: '10/07/2019',
+            transactionNumber1:'TRNS1234',
+            amount2: '580',
+            date2: '15/10/2019',
+            transactionNumber2:'TRNS8765',
+            amount3: '620',
+            date3: '17/01/2020',
+            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: 'Trade License Fees',
+            id: 'TLS654321',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount1: '630',
+            date1: '10/07/2019',
+            transactionNumber1:'TRNS1234',
+            amount2: '580',
+            date2: '15/10/2019',
+            transactionNumber2:'TRNS8765',
+            amount3: '620',
+            date3: '17/01/2020',
+            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: ' Fire NOC Fees',
+            id: 'FNCT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount1: '630',
+            date1: '10/07/2019',
+            transactionNumber1:'TRNS1234',
+            amount2: '580',
+            date2: '15/10/2019',
+            transactionNumber2:'TRNS8765',
+            amount3: '620',
+            date3: '17/01/2020',
+            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: '  Building Plan Scrutiny Fees ',
+            id: 'BPAT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount1: '630',
+            date1: '10/07/2019',
+            transactionNumber1:'TRNS1234',
+            amount2: '580',
+            date2: '15/10/2019',
+            transactionNumber2:'TRNS8765',
+            amount3: '620',
+            date3: '17/01/2020',
+            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          }
+      ]
 
-        let emptyReceipts = []
+      let emptyReceipts = []
 
+      if(service==='WS' && select===1){
+        receipts=receipts.slice(0,1);
+        return receipts;
+      }
+      else if(service === 'PT' && select===1){
+        receipts=receipts.slice(1,2);
+        return receipts;
+      }
+      else if(service === 'TL' && select===1){
+        receipts=receipts.slice(2,3);
+        return receipts;
+      }
+      else if(service === 'FNOC' && select===1){
+        receipts=receipts.slice(3,4);
+        return receipts;
+      }
+      else if(service === 'BPA' && select===1){
+        receipts=receipts.slice(4,5);
+        return receipts;
+      }
+      else if(select===1){
         return emptyReceipts;
+      }
     }
+    
     async fetchReceiptsForParam(user, service, searchParamOption, paraminput) {
         console.log(`Received params: ${user}, ${service}, ${searchParamOption}, ${paraminput}`);
-        return this.findreceipts(user);
+        return this.findreceipts(user,service);
     }
 
-}
+  }
 module.exports = new DummyReceipts();

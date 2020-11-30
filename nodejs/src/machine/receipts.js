@@ -51,7 +51,7 @@ const receipts = {
             }),
             always : [
               {
-                target: '#services'
+                target: 'question'
               }
             ]
           } // menu.error
@@ -67,7 +67,7 @@ const receipts = {
             }),
             invoke:{
               id:'receiptstatus',
-              src: (context) => dummyReceipts.findreceipts(context.user),
+              src: (context) => dummyReceipts.findreceipts(context.user,context.receipts.slots.service),
               onDone:[
                 {
                   target: '#receiptslip',
@@ -76,7 +76,8 @@ const receipts = {
                   },
                   actions: assign((context, event) => {
                     context.receipts.slots.personalizedreceipts = event.data;
-                  })
+                    console.log(context.receipts.slots.personalizedreceipts);
+                  }),
                 },
                 {
                   target:'#mobilelinkage',
@@ -149,20 +150,15 @@ const receipts = {
       },
       mobilelinkage:{
         id:'mobilelinkage',
-        initial:'mobilecheck',
-        states:{
-          mobilecheck:{
-            onEntry: assign((context, event) => {
-              let message1=dialog.get_message(messages.mobilelinkage.notLinked,context.user.locale);
-              context.chatInterface.toUser(context.user, message1);
-            }),
-            always:[
-              {
-                target:'#searchreceiptinitiate',
-              }
-            ]
-          },
-        },
+        onEntry: assign((context, event) => {
+          let message1=dialog.get_message(messages.mobilelinkage.notLinked,context.user.locale);
+          context.chatInterface.toUser(context.user, message1);
+        }),
+        always:[
+          {
+            target:'#searchreceiptinitiate',
+          }
+        ],
       },//mobilecheck
       searchparams:{
         id:'searchparams',
@@ -307,7 +303,25 @@ const receipts = {
           },
           listofreceipts:{
             onEntry: assign((context, event) => {
+              let receipts=context.receipts.slots.personalizedreceipts;
+              let receipt = receipts[0];
               let message=dialog.get_message(messages.receiptslip.listofreceipts,context.user.locale);
+              message = message.replace('{{service}}', receipt.service);
+              message = message.replace('{{id}}', receipt.id);
+              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+              message = message.replace('{{date1}}', receipt.date1);
+              message = message.replace('{{date2}}', receipt.date2);
+              message = message.replace('{{date3}}', receipt.date3);
+              message = message.replace('{{amount1}}', receipt.amount1);
+              message = message.replace('{{amount2}}', receipt.amount2);
+              message = message.replace('{{amount3}}', receipt.amount3);
+              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
+              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
+              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
+              message = message.replace('{{link}}', receipt.paymentLink);
+
+              
+              
               context.chatInterface.toUser(context.user,message);
             }),
             always:[
@@ -317,7 +331,8 @@ const receipts = {
             ]
           },
         },
-      },//receipts
+      },
+      //receipts
     }//receipts.states
 };
 
@@ -373,13 +388,13 @@ let messages = {
   },
   receiptslip:{
     not_found:{
-      en_IN:'The {{searchparamoption}} :   {{paraminput}} +  is not found in our records. Please Check the details you have provided once again.'
+      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
     },
     error:{
       en_IN:'Sorry. Some error occurred on server.'
     },
     listofreceipts:{
-      en_IN:'Your Water 🚰 and Sewerage last three payments receipts for consumer number WS12654321 against property in Azad Nagar, Amritsar are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1. 10/07/2019 - Rs. 630 - TRNS1234\nLink: www.mseva.gov.in/pay/tax1234\n\n2. 15/10/2019 - Rs. 580 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234\n\n3. 17/01/2020 - Rs. 620 - TRNS8765\nLink: www.mseva.gov.in/pay/tax1234.\n\n'
+      en_IN:'Your {{service}} last three payments receipts for consumer number {{id}} against property in  {{secondaryInfo}} are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1.  {{date1}} - Rs.  {{amount1}} -  {{transactionNumber1}}\nLink: www.mseva.gov.in/pay/tax1234\n\n2. {{date2}} - Rs. {{amount2}} - {{transactionNumber2}}\nLink: www.mseva.gov.in/pay/tax1234\n\n3. {{date3}} - Rs. {{amount3}} - {{transactionNumber3}}\nLink: {{paymentLink}}.\n\n'
     },
   }
   
