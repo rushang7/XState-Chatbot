@@ -83,7 +83,7 @@ class DummyReceipts{
         return true;
     }
     async findreceipts(user,service){
-      let select=1;
+      let select=0;
       let receipts =  [
           {
             service: 'Water & Sewerage',

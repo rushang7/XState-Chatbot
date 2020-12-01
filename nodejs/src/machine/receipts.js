@@ -147,7 +147,7 @@ const receipts = {
               message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
               message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
               message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
-              message = message.replace('{{link}}', receipt.paymentLink);
+              message = message.replace('{{paymentLink}}', receipt.paymentLink);
 
               
               
@@ -311,7 +311,7 @@ const receipts = {
             }),
             always:[
               {
-                target: '#receiptslip',
+                target: '#receiptsearchresults',
                 cond: (context, event) => {
                   return context.isValid;
                 }
@@ -336,6 +336,129 @@ const receipts = {
           },
         },
       },//parameterinput
+      receiptsearchresults:{
+        id:'receiptsearchresults',
+        initial:'fetch',
+        states:{
+          fetch:{
+            onEntry: assign((context, event) => {
+              console.log("Entered into receiptsearchresults");
+            }),
+            invoke:{
+              id: 'fetchReceiptsForParam',
+              src: (context, event) => {
+                let slots = context.receipts.slots;
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
+              },
+              onDone:[
+                {
+                  target: 'results',
+                  cond:(context,event)=>{
+                    return event.data.length>0
+                  },
+                  actions: assign((context, event) => {
+                    context.receipts.slots.searchresults = event.data;
+                    console.log(context.receipts.slots.searchresults);
+                  }),
+                },
+                {
+                  target:'norecords'
+                },
+              ],
+              onError: {
+                actions: assign((context, event) => {
+                  let message = messages.receiptsearchresults.error;
+                  context.chatInterface.toUser(context.user, message);
+                })
+              }  
+            
+            },
+          },
+          norecords:{
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.receiptsearchresults.norecords, context.user.locale);
+              let optionMessage = context.receipts.slots.searchParamOption;
+              let inputMessage = context.receipts.slots.paraminput;
+              message = message.replace('{{searchparamoption}}', optionMessage);
+              message = message.replace('{{paraminput}}', inputMessage);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always: '#paraminputinitiate',
+          },
+          results:{
+            onEntry: assign((context, event) => {
+              let receipts=context.receipts.slots.searchresults;
+              let receipt = receipts[0];
+              let message=dialog.get_message(messages.receiptsearchresults.results,context.user.locale);
+              message = message.replace('{{service}}', receipt.service);
+              message = message.replace('{{id}}', receipt.id);
+              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+              message = message.replace('{{date1}}', receipt.date1);
+              message = message.replace('{{date2}}', receipt.date2);
+              message = message.replace('{{date3}}', receipt.date3);
+              message = message.replace('{{amount1}}', receipt.amount1);
+              message = message.replace('{{amount2}}', receipt.amount2);
+              message = message.replace('{{amount3}}', receipt.amount3);
+              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
+              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
+              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
+              message = message.replace('{{paymentLink}}', receipt.paymentLink);
+
+              context.chatInterface.toUser(context.user,message);
+            }),
+            always:[
+              {
+                target:'#searchreceiptinitiate',
+              }
+            ]
+          },
+
+        }
+      },
+      paraminputinitiate:{
+        id:'paraminputinitiate',
+        initial:'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.paraminputinitiate.question, context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let messageText = event.message.input;
+              let parsed = parseInt(event.message.input.trim())
+              let isValid = parsed === 1;
+              context.message = {
+                isValid: isValid,
+                messageContent: event.message.input
+              };
+            }),
+            always: [
+              {
+                target: 'error',
+                cond: (context, event) => {
+                  return ! context.message.isValid;
+                }
+              },
+              {
+                target: '#searchparams'
+              }
+            ]
+          },
+          error: {
+            onEntry: assign( (context, event) => {
+              let message =dialog.get_message(messages.paraminputinitiate.error,context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always : 'question'
+          }
+        },
+      },
     }//receipts.states
 };
 
@@ -399,6 +522,26 @@ let messages = {
     listofreceipts:{
       en_IN:'Your {{service}} last three payments receipts for consumer number {{id}} against property in  {{secondaryInfo}} are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1.  {{date1}} - Rs.  {{amount1}} -  {{transactionNumber1}}\nLink: www.mseva.gov.in/pay/tax1234\n\n2. {{date2}} - Rs. {{amount2}} - {{transactionNumber2}}\nLink: www.mseva.gov.in/pay/tax1234\n\n3. {{date3}} - Rs. {{amount3}} - {{transactionNumber3}}\nLink: {{paymentLink}}.\n\n'
     },
+  },
+  receiptsearchresults:{
+    error:{
+      en_IN:'Sorry. Some error occurred on server.'
+    },
+    norecords:{
+      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
+    },
+    results:{
+      en_IN:'Your {{service}} last three payments receipts for consumer number {{id}} against property in  {{secondaryInfo}} are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1.  {{date1}} - Rs.  {{amount1}} -  {{transactionNumber1}}\nLink: www.mseva.gov.in/pay/tax1234\n\n2. {{date2}} - Rs. {{amount2}} - {{transactionNumber2}}\nLink: www.mseva.gov.in/pay/tax1234\n\n3. {{date3}} - Rs. {{amount3}} - {{transactionNumber3}}\nLink: {{paymentLink}}.\n\n'
+    },
+  },
+  paraminputinitiate: {
+    question: {
+      en_IN: 'Please type and send ‘1’ to search using other parameter Or ‘mseva’ to Go ⬅️ Back to main menu.'
+    },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
+    },
+
   }
   
 };
