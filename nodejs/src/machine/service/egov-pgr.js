@@ -42,13 +42,34 @@ class PGRService {
   
   async fetchFrequentComplaints() {
     let complaintTypes = await this.fetchMdmsData(config.rootTenantId, "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.order && @.active == true)].serviceCode");
-    let localisationPrefix = 'pgr.complaint.category.';
+    let localisationPrefix = 'SERVICEDEFS.';
     let messageBundle = {};
     for(let complaintType of complaintTypes) {
-      let message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
+      let message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType.toUpperCase());
       messageBundle[complaintType] = message;
     }
     return {complaintTypes, messageBundle};
+  }
+  async fetchComplaintCategories() {
+    let complaintCategories = await this.fetchMdmsData(config.rootTenantId, "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.active == true)].menuPath");
+    complaintCategories = [...new Set(complaintCategories)];
+    let localisationPrefix = 'SERVICEDEFS.';
+    let messageBundle = {};
+    for(let complaintCategory of complaintCategories) {
+      let message = localisationService.getMessageBundleForCode(localisationPrefix + complaintCategory.toUpperCase());
+      messageBundle[complaintCategory] = message;
+    }
+    return { complaintCategories, messageBundle };
+  }
+  async fetchComplaintItemsForCategory(category) {
+    let complaintItems = await this.fetchMdmsData(config.rootTenantId, "RAINMAKER-PGR", "ServiceDefs", "$.[?(@.active == true && @.menuPath == \"" + category + "\")].serviceCode");
+    let localisationPrefix = 'SERVICEDEFS.';
+    let messageBundle = {};
+    for(let complaintItem of complaintItems) {
+      let message = localisationService.getMessageBundleForCode(localisationPrefix + complaintItem.toUpperCase());
+      messageBundle[complaintItem] = message;
+    }
+    return { complaintItems, messageBundle };
   }
 
   async getCityAndLocalityForGeocode(geocode) {
