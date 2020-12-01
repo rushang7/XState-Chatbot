@@ -96,6 +96,83 @@ const receipts = {
           
         },
       },
+      receiptslip:{
+        id:'receiptslip',
+        initial:'start',
+        states:{
+          start:{
+            onEntry: assign((context, event) => {
+              console.log("Entered into receiptslip");
+            }),
+            invoke:{
+              id: 'fetchReceiptsForParam',
+              src: (context, event) => {
+                let slots = context.receipts.slots;
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
+              },
+              onDone:[
+                {
+                  cond:(context,event)=>{
+                    return event.data.length>0
+                  },
+                  target: 'listofreceipts',
+                },
+                {
+                  target:'#noreceipts'
+                },
+              ],
+              onError: {
+                actions: assign((context, event) => {
+                  let message = messages.receiptslip.error;
+                  context.chatInterface.toUser(context.user, message);
+                })
+              }  
+            
+            },
+          },
+          listofreceipts:{
+            onEntry: assign((context, event) => {
+              let receipts=context.receipts.slots.personalizedreceipts;
+              let receipt = receipts[0];
+              let message=dialog.get_message(messages.receiptslip.listofreceipts,context.user.locale);
+              message = message.replace('{{service}}', receipt.service);
+              message = message.replace('{{id}}', receipt.id);
+              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+              message = message.replace('{{date1}}', receipt.date1);
+              message = message.replace('{{date2}}', receipt.date2);
+              message = message.replace('{{date3}}', receipt.date3);
+              message = message.replace('{{amount1}}', receipt.amount1);
+              message = message.replace('{{amount2}}', receipt.amount2);
+              message = message.replace('{{amount3}}', receipt.amount3);
+              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
+              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
+              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
+              message = message.replace('{{link}}', receipt.paymentLink);
+
+              
+              
+              context.chatInterface.toUser(context.user,message);
+            }),
+            always:[
+              {
+                target:'#searchreceiptinitiate',
+              }
+            ]
+          },
+        },
+      },
+      noreceipts:{
+        id:'noreceipts',
+        onEntry: assign((context, event) => {
+          let message = dialog.get_message(messages.receiptslip.not_found, context.user.locale);
+          let optionMessage = context.receipts.slots.searchParamOption;
+          let inputMessage = context.receipts.slots.paraminput;
+          message = message.replace('{{searchparamoption}}', optionMessage);
+          message = message.replace('{{paraminput}}', inputMessage);
+          context.chatInterface.toUser(context.user, message);
+        }),
+        always:'#searchparams'
+      },
       searchreceiptinitiate:{
         id:'searchreceiptinitiate',
         initial:'question',
@@ -259,80 +336,6 @@ const receipts = {
           },
         },
       },//parameterinput
-      receiptslip:{
-        id:'receiptslip',
-        initial:'start',
-        states:{
-          start:{
-            onEntry: assign((context, event) => {
-              console.log("Entered into receiptslip");
-            }),
-            invoke:{
-              id: 'fetchReceiptsForParam',
-              src: (context, event) => {
-                let slots = context.receipts.slots;
-                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
-              },
-              onDone:[
-                {
-                  cond:(context,event)=>{
-                    return event.data.length>0
-                  },
-                  target: 'listofreceipts',
-                },
-                {
-                  actions: assign((context, event) => {
-                    let message = dialog.get_message(messages.receiptslip.not_found, context.user.locale);
-                    let optionMessage = context.receipts.slots.searchParamOption;
-                    let inputMessage = context.receipts.slots.paraminput;
-                    message = message.replace('{{searchparamoption}}', optionMessage);
-                    message = message.replace('{{paraminput}}', inputMessage);
-                    context.chatInterface.toUser(context.user, message);
-                  }),
-                  target:'#searchparams'
-                },
-              ],
-              onError: {
-                actions: assign((context, event) => {
-                  let message = messages.receiptslip.error;
-                  context.chatInterface.toUser(context.user, message);
-                })
-              }  
-            
-            },
-          },
-          listofreceipts:{
-            onEntry: assign((context, event) => {
-              let receipts=context.receipts.slots.personalizedreceipts;
-              let receipt = receipts[0];
-              let message=dialog.get_message(messages.receiptslip.listofreceipts,context.user.locale);
-              message = message.replace('{{service}}', receipt.service);
-              message = message.replace('{{id}}', receipt.id);
-              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
-              message = message.replace('{{date1}}', receipt.date1);
-              message = message.replace('{{date2}}', receipt.date2);
-              message = message.replace('{{date3}}', receipt.date3);
-              message = message.replace('{{amount1}}', receipt.amount1);
-              message = message.replace('{{amount2}}', receipt.amount2);
-              message = message.replace('{{amount3}}', receipt.amount3);
-              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
-              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
-              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
-              message = message.replace('{{link}}', receipt.paymentLink);
-
-              
-              
-              context.chatInterface.toUser(context.user,message);
-            }),
-            always:[
-              {
-                target:'#searchreceiptinitiate',
-              }
-            ]
-          },
-        },
-      },
-      //receipts
     }//receipts.states
 };
 

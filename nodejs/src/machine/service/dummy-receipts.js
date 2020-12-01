@@ -83,7 +83,7 @@ class DummyReceipts{
         return true;
     }
     async findreceipts(user,service){
-      let select=0;
+      let select=1;
       let receipts =  [
           {
             service: 'Water & Sewerage',
@@ -184,7 +184,7 @@ class DummyReceipts{
         receipts=receipts.slice(4,5);
         return receipts;
       }
-      else if(select===1){
+      else if(select===0){
         return emptyReceipts;
       }
     }
