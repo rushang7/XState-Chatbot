@@ -7,11 +7,7 @@ class DummyPGRService {
 
     async fetchCities() {
         let cities = this.cities.tenantInfo.map(el=>el.code);
-        let messageBundle = {};
-        for(let city of cities) {
-          let message = localisationService.getMessageBundleForCode(city);
-          messageBundle[city] = message;
-        }
+        let messageBundle = this.citiesMessageBundle;
         return {cities, messageBundle};
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
@@ -22,10 +18,14 @@ class DummyPGRService {
         return cityAndLocality;
     }
     async fetchComplaintItemsForCategory(category) {
-        return this.complaintCategoryToItemsMap[category];
+        let complaintItems = this.complaintCategoryToItemsMap[category];
+        let messageBundle = this.complaintTypesMessageBundle;
+        return { complaintItems, messageBundle };
     }
     async fetchComplaintCategories() {
-        return Object.keys(this.complaintCategoryToItemsMap);
+        let complaintCategories = Object.keys(this.complaintCategoryToItemsMap);
+        let messageBundle = this.complaintCategoriesMessageBundle;
+        return { complaintCategories, messageBundle };
     }
     async fetchFrequentComplaints() {
         let complaintTypes = [
@@ -34,12 +34,7 @@ class DummyPGRService {
             'GarbageNeedsTobeCleared',
             'BrokenWaterPipeOrLeakage'
         ];
-        let localisationPrefix = 'pgr.complaint.category.';
-        let messageBundle = {};
-        for(var complaintType of complaintTypes) {
-            var message = localisationService.getMessageBundleForCode(localisationPrefix + complaintType);
-            messageBundle[complaintType] = message;
-        }
+        let messageBundle = this.complaintTypesMessageBundle;
         return {complaintTypes, messageBundle};
     }
     async persistComplaint(bundle) {
@@ -371,6 +366,207 @@ class DummyPGRService {
                 this.complaintCategoryToItemsMap[el.menuPath] = [el.serviceCode];
             }
         });
+
+        this.citiesMessageBundle = {
+          "pb.jalandhar": {
+            en_IN : "Jalandhar",
+            hi_IN : "जालंधर"
+          },
+          "pb.amritsar": {
+            en_IN : "Amritsar",
+            hi_IN : "अमृतसर"
+          },
+          "pb.patankot": {
+            en_IN : "Patankot",
+            hi_IN : "पठानकोट"
+          },
+          "5": {
+            en_IN : "Nawanshahr",
+            hi_IN : "नवांशहर"
+          }
+        }
+
+        this.complaintTypesMessageBundle = {
+          NoStreetlight: {
+            en_IN : "Please install new streetlight",
+            hi_IN : "कृपया नई स्ट्रीटलाइट स्थापित करें"
+          },
+          StreetLightNotWorking: {
+            en_IN : "Streetlight not working",
+            hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
+          },
+          GarbageNeedsTobeCleared: {
+            en_IN : "Garbage not cleared",
+            hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
+          },
+          DamagedGarbageBin: {
+            en_IN : "Garbage bin damaged",
+            hi_IN : "कचरा बिन टूटा है"
+          },
+          BurningOfGarbage: {
+            en_IN : "Garbage being burnt",
+            hi_IN : "कचरा जलाया जा रहा है"
+          },
+          OverflowingOrBlockedDrain: {
+            en_IN : "Drain overflow / blocked",
+            hi_IN : "नाली अतिप्रवाह या अवरुद्ध है"
+          },
+          illegalDischargeOfSewage: {
+            en_IN : "Sewage illegal discharge",
+            hi_IN : "सीवेज का अवैध निर्वहन"
+          },
+          BlockOrOverflowingSewage: {
+            en_IN : "Sewage overflow / blocked",
+            hi_IN : "सीवेज अतिप्रवाह या अवरुद्ध है"
+          },
+          ShortageOfWater: {
+            en_IN : "Water shortage",
+            hi_IN : "पानी की कमी"
+          },
+          NoWaterSupply: {
+            en_IN : "No Water supply",
+            hi_IN : "पानी नहीं है"
+          },
+          DirtyWaterSupply: {
+            en_IN : "Water supply dirty",
+            hi_IN : "पानी गंदी है"
+          },
+          BrokenWaterPipeOrLeakage: {
+            en_IN : "Pipe broken / leaking",
+            hi_IN : "पानी का पाइप टूट या लीक होना"
+          },
+          WaterPressureisVeryLess: {
+            en_IN : "Low water pressure",
+            hi_IN : "कम पानी का दबाव"
+          },
+          DamagedRoad: {
+            en_IN : "Road bad condition",
+            hi_IN : "सड़क टूटी हुई है"
+          },
+          WaterLoggedRoad: {
+            en_IN : "Road waterlogged ",
+            hi_IN : "ड़क पर पानी जमा है"
+          },
+          ManholeCoverMissingOrDamaged: {
+            en_IN : "Manhole open / cover damaged",
+            hi_IN : "मैनहोल खुला है या कवर गायब है"
+          },
+          DamagedOrBlockedFootpath: {
+            en_IN : "Footpath bad condition / blocked",
+            hi_IN : "फुटपाथ टूटा या अवरुद्ध है"
+          },
+          ConstructionMaterialLyingOntheRoad: {
+            en_IN : "Construction material lying on road",
+            hi_IN : "निर्माण सामग्री सड़क पर पड़ी है"
+          },
+          RequestSprayingOrFoggingOperation: {
+            en_IN : "Request mosquito spraying",
+            hi_IN : "मच्छरों के लिए डरावना"
+          },
+          StrayAnimals: {
+            en_IN : "Stray animal menace",
+            hi_IN : "आवारा पशु खतरा"
+          },
+          DeadAnimals: {
+            en_IN : "Dead animal. Please remove.",
+            hi_IN : "मृत पशु। कृपया निकालें"
+          },
+          DirtyOrSmellyPublicToilets: {
+            en_IN : "Toilet dirty / smelly",
+            hi_IN : "टॉयलेट गंदा या बदबूदार"
+          },
+          PublicToiletIsDamaged: {
+            en_IN : "Toilet damaged",
+            hi_IN : "टॉयलेट टूट गया"
+          },
+          NoWaterOrElectricityinPublicToilet: {
+            en_IN : "No water / electricity in Toilet",
+            hi_IN : "टॉयलेट में पानी या बिजली नहीं"
+          },
+          IllegalShopsOnFootPath: {
+            en_IN : "Illegal shops on footpath",
+            hi_IN : "फुटपाथ पर अवैध दुकानें"
+          },
+          IllegalConstructions: {
+            en_IN : "Illegal constructions",
+            hi_IN : "अवैध निर्माण"
+          },
+          IllegalParking: {
+            en_IN : "Illegal parking",
+            hi_IN : "अवैध पार्किंग"
+          },
+          IllegalCuttingOfTrees: {
+            en_IN : "Illegal tree cutting",
+            hi_IN : "अवैध पेड़ की कटाई"
+          },
+          CuttingOrTrimmingOfTreeRequired: {
+            en_IN : "Request tree trimming / cutting",
+            hi_IN : "पेड़ की कटाई का अनुरोध करें"
+          },
+          OpenDefecation: {
+            en_IN : "Open defecation",
+            hi_IN : "खुले में शौच जाना"
+          },
+          ParkRequiresMaintenance: {
+            en_IN : "Request park maintenance",
+            hi_IN : "पार्क रखरखाव का अनुरोध करें"
+          },
+          Others: {
+            en_IN : "Something else",
+            hi_IN : "कुछ अन्य ..."
+          },
+        }
+
+        this.complaintCategoriesMessageBundle = {
+          StreetLights: {
+            en_IN : "Streetlights",
+            hi_IN : "सड़क की बत्तियाँ"
+          },
+          Garbage: {
+            en_IN : "Garbage",
+            hi_IN : "कचरा"
+          }, 
+          Drains: {
+            en_IN : "Drains",
+            hi_IN : "नालियों"
+          },
+          WaterandSewage: {
+            en_IN : "Water and Sewage",
+            hi_IN : "पानी और सीवेज"
+          },
+          RoadsAndFootpaths: {
+            en_IN : "Roads and Footpaths",
+            hi_IN : "सड़कें और फुटपाथ"
+          },
+          Mosquitos: {
+            en_IN : "Mosquitos",
+            hi_IN : "मच्छर"
+          },
+          Animals: {
+            en_IN : "Animals",
+            hi_IN : "जानवरों"
+          },
+          PublicToilets: {
+            en_IN : "Public Toilets",
+            hi_IN : "सार्वजनिक शौंचालय"
+          },
+          LandViolations: {
+            en_IN : "Land violations",
+            hi_IN : "भूमि का उल्लंघन"
+          },
+          Trees: {
+            en_IN : "Trees",
+            hi_IN : "पेड़"
+          },
+          OpenDefecation: {
+            en_IN : "Open defecation",
+            hi_IN : "खुले में शौच जाना"
+          },
+          Parks: {
+            en_IN : "Parks",
+            hi_IN : "पार्क"
+          }
+        }
     } // constructor
 }
 module.exports = new DummyPGRService();
