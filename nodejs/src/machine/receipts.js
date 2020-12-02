@@ -133,24 +133,35 @@ const receipts = {
           listofreceipts:{
             onEntry: assign((context, event) => {
               let receipts=context.receipts.slots.personalizedreceipts;
-              let receipt = receipts[0];
-              let message=dialog.get_message(messages.receiptslip.listofreceipts,context.user.locale);
-              message = message.replace('{{service}}', receipt.service);
-              message = message.replace('{{id}}', receipt.id);
-              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
-              message = message.replace('{{date1}}', receipt.date1);
-              message = message.replace('{{date2}}', receipt.date2);
-              message = message.replace('{{date3}}', receipt.date3);
-              message = message.replace('{{amount1}}', receipt.amount1);
-              message = message.replace('{{amount2}}', receipt.amount2);
-              message = message.replace('{{amount3}}', receipt.amount3);
-              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
-              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
-              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
-              message = message.replace('{{paymentLink}}', receipt.paymentLink);
-
-              
-              
+              let message='';
+              if(receipts.length===1){
+                let receipt = receipts[0];
+                let message=dialog.get_message(messages.receiptslip.listofreceipts.singleRecord,context.user.locale);
+                message = message.replace('{{service}}', receipt.service);
+                message = message.replace('{{id}}', receipt.id);
+                message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+                message = message.replace('{{date}}', receipt.date);
+                message = message.replace('{{amount}}', receipt.amount);
+                message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
+                message = message.replace('{{paymentLink}}', receipt.paymentLink);
+              }else {
+                message = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService, context.user.locale);
+                for(let i = 0; i < receipts.length; i++) {
+                  let receipt = receipts[i];
+                  let receiptTemplate = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
+                  receiptTemplate =receiptTemplate.replace('{{service}}', receipt.service);
+                  receiptTemplate = receiptTemplate.replace('{{id}}', receipt.id);
+                  receiptTemplate = receiptTemplate.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+                  receiptTemplate = receiptTemplate.replace('{{amount}}', receipt.amount);
+                  receiptTemplate = receiptTemplate.replace('{{date}}', receipt.date);
+                  receiptTemplate = receiptTemplate.replace('{{transactionNumber}}', receipt.transactionNumber);
+                  receiptTemplate = receiptTemplate.replace('{{paymentLink}}', receipt.paymentLink);
+    
+                  message += '\n\n';
+                  message += (i + 1) + '. ';
+                  message += receiptTemplate;
+                }
+              }
               context.chatInterface.toUser(context.user,message);
             }),
             always:[
@@ -229,6 +240,7 @@ const receipts = {
         id:'mobilelinkage',
         onEntry: assign((context, event) => {
           let message1=dialog.get_message(messages.mobilelinkage.notLinked,context.user.locale);
+          message1 = message1.replace('{{service}}',context.receipts.slots.service);
           context.chatInterface.toUser(context.user, message1);
         }),
         always:[
@@ -388,22 +400,35 @@ const receipts = {
           results:{
             onEntry: assign((context, event) => {
               let receipts=context.receipts.slots.searchresults;
-              let receipt = receipts[0];
-              let message=dialog.get_message(messages.receiptsearchresults.results,context.user.locale);
-              message = message.replace('{{service}}', receipt.service);
-              message = message.replace('{{id}}', receipt.id);
-              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
-              message = message.replace('{{date1}}', receipt.date1);
-              message = message.replace('{{date2}}', receipt.date2);
-              message = message.replace('{{date3}}', receipt.date3);
-              message = message.replace('{{amount1}}', receipt.amount1);
-              message = message.replace('{{amount2}}', receipt.amount2);
-              message = message.replace('{{amount3}}', receipt.amount3);
-              message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
-              message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
-              message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
-              message = message.replace('{{paymentLink}}', receipt.paymentLink);
-
+              let message='';
+              if(receipts.length===1){
+                let receipt = receipts[0];
+                let message=dialog.get_message(messages.receiptsearchresults.results.singleRecord,context.user.locale);
+                message = message.replace('{{service}}', receipt.service);
+                message = message.replace('{{id}}', receipt.id);
+                message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+                message = message.replace('{{date}}', receipt.date);
+                message = message.replace('{{amount}}', receipt.amount);
+                message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
+                message = message.replace('{{paymentLink}}', receipt.paymentLink);
+              }else {
+                message = dialog.get_message(messages.receiptsearchresults.results.multipleRecordsSameService, context.user.locale);
+                for(let i = 0; i < receipts.length; i++) {
+                  let receipt = receipts[i];
+                  let receiptTemplate = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
+                  receiptTemplate =receiptTemplate.replace('{{service}}', receipt.service);
+                  receiptTemplate = receiptTemplate.replace('{{id}}', receipt.id);
+                  receiptTemplate = receiptTemplate.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+                  receiptTemplate = receiptTemplate.replace('{{amount}}', receipt.amount);
+                  receiptTemplate = receiptTemplate.replace('{{date}}', receipt.date);
+                  receiptTemplate = receiptTemplate.replace('{{transactionNumber}}', receipt.transactionNumber);
+                  receiptTemplate = receiptTemplate.replace('{{paymentLink}}', receipt.paymentLink);
+    
+                  message += '\n\n';
+                  message += (i + 1) + '. ';
+                  message += receiptTemplate;
+                }
+              }
               context.chatInterface.toUser(context.user,message);
             }),
             always:[
@@ -412,6 +437,33 @@ const receipts = {
               }
             ]
           },
+          // results:{
+          //   onEntry: assign((context, event) => {
+          //     let receipts=context.receipts.slots.searchresults;
+          //     let receipt = receipts[0];
+          //     let message=dialog.get_message(messages.receiptsearchresults.results,context.user.locale);
+          //     message = message.replace('{{service}}', receipt.service);
+          //     message = message.replace('{{id}}', receipt.id);
+          //     message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+          //     message = message.replace('{{date1}}', receipt.date1);
+          //     message = message.replace('{{date2}}', receipt.date2);
+          //     message = message.replace('{{date3}}', receipt.date3);
+          //     message = message.replace('{{amount1}}', receipt.amount1);
+          //     message = message.replace('{{amount2}}', receipt.amount2);
+          //     message = message.replace('{{amount3}}', receipt.amount3);
+          //     message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
+          //     message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
+          //     message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
+          //     message = message.replace('{{paymentLink}}', receipt.paymentLink);
+
+          //     context.chatInterface.toUser(context.user,message);
+          //   }),
+          //   always:[
+          //     {
+          //       target:'#searchreceiptinitiate',
+          //     }
+          //   ]
+          // },
 
         }
       },
@@ -478,6 +530,25 @@ let messages = {
       en_IN: 'Sorry. Some error occurred on server!'
     },
   },
+  receiptslip:{
+    not_found:{
+      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
+    },
+    error:{
+      en_IN:'Sorry. Some error occurred on server.'
+    },
+    listofreceipts:{
+      singleRecord: {
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{secondaryInfo}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPayment Link: {{paymentLink}}\n\n'
+      },
+      multipleRecordsSameService: {
+        en_IN: 'Following Receipts found:',
+        receiptTemplate: {
+          en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
+        }
+      }
+    },
+  },
   searchreceiptinitiate:{
     question:{
       en_IN:'Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.'
@@ -490,7 +561,7 @@ let messages = {
   },
   mobilelinkage:{
     notLinked: {
-      en_IN: 'It seems the mobile number you are using is not linked with <Service_Name> service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
+      en_IN: 'It seems the mobile number you are using is not linked with {{service}} service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
     },
   },
   searchparams:{
@@ -512,17 +583,6 @@ let messages = {
       en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
     }
   },
-  receiptslip:{
-    not_found:{
-      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
-    },
-    error:{
-      en_IN:'Sorry. Some error occurred on server.'
-    },
-    listofreceipts:{
-      en_IN:'Your {{service}} last three payments receipts for consumer number {{id}} against property in  {{secondaryInfo}} are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1.  {{date1}} - Rs.  {{amount1}} -  {{transactionNumber1}}\nLink: www.mseva.gov.in/pay/tax1234\n\n2. {{date2}} - Rs. {{amount2}} - {{transactionNumber2}}\nLink: www.mseva.gov.in/pay/tax1234\n\n3. {{date3}} - Rs. {{amount3}} - {{transactionNumber3}}\nLink: {{paymentLink}}.\n\n'
-    },
-  },
   receiptsearchresults:{
     error:{
       en_IN:'Sorry. Some error occurred on server.'
@@ -531,7 +591,15 @@ let messages = {
       en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
     },
     results:{
-      en_IN:'Your {{service}} last three payments receipts for consumer number {{id}} against property in  {{secondaryInfo}} are given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\nLast three Payment Receipt Details:\n\n1.  {{date1}} - Rs.  {{amount1}} -  {{transactionNumber1}}\nLink: www.mseva.gov.in/pay/tax1234\n\n2. {{date2}} - Rs. {{amount2}} - {{transactionNumber2}}\nLink: www.mseva.gov.in/pay/tax1234\n\n3. {{date3}} - Rs. {{amount3}} - {{transactionNumber3}}\nLink: {{paymentLink}}.\n\n'
+      singleRecord: {
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{secondaryInfo}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPayment Link: {{paymentLink}}\n\n'
+      },
+      multipleRecordsSameService: {
+        en_IN: 'Following Receipts found:',
+        receiptTemplate: {
+          en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
+        }
+      }
     },
   },
   paraminputinitiate: {

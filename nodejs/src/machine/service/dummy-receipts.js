@@ -83,108 +83,191 @@ class DummyReceipts{
         return true;
     }
     async findreceipts(user,service){
+      let randomUserBehaviour = parseInt(Math.random() * 3 + 1);
+      console.log(randomUserBehaviour);
       let select=0;
       let receipts =  [
           {
             service: 'Water & Sewerage',
             id: 'WS123456',
             secondaryInfo: 'Azad Nagar, Amritsar',
-            amount1: '630',
-            date1: '10/07/2019',
-            transactionNumber1:'TRNS1234',
-            amount2: '580',
-            date2: '15/10/2019',
-            transactionNumber2:'TRNS8765',
-            amount3: '620',
-            date3: '17/01/2020',
-            transactionNumber3:'TRNS8765',
+            amount: '630',
+            date: '10/07/2019',
+            transactionNumber:'TRNS1234',
+            paymentLink: 'https://mseva.org/pay/1234',
+          },
+          {
+            service: 'Water & Sewerage',
+            id: 'WS123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '580',
+            date: '15/10/2019',
+            transactionNumber:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/1234',
+          },
+          {
+            service: 'Water & Sewerage',
+            id: 'WS123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '620',
+            date: '17/01/2020',
+            transactionNumber:'TRNS8765',
             paymentLink: 'https://mseva.org/pay/1234',
           },
           {
             service: 'Property Tax',
             id: 'PT123456',
             secondaryInfo: 'Azad Nagar, Amritsar',
-            amount1: '630',
-            date1: '10/07/2019',
-            transactionNumber1:'TRNS1234',
-            amount2: '580',
-            date2: '15/10/2019',
+            amount: '630',
+            date: '10/07/2019',
+            transactionNumber:'TRNS1234',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: 'Property Tax',
+            id: 'PT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '580',
+            date: '15/10/2019',
             transactionNumber2:'TRNS8765',
-            amount3: '620',
-            date3: '17/01/2020',
-            transactionNumber3:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: 'Property Tax',
+            id: 'PT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '620',
+            date: '17/01/2020',
+            transactionNumber:'TRNS8765',
             paymentLink: 'https://mseva.org/pay/132'
           },
           {
             service: 'Trade License Fees',
             id: 'TLS654321',
             secondaryInfo: 'Azad Nagar, Amritsar',
-            amount1: '630',
-            date1: '10/07/2019',
-            transactionNumber1:'TRNS1234',
-            amount2: '580',
-            date2: '15/10/2019',
-            transactionNumber2:'TRNS8765',
-            amount3: '620',
-            date3: '17/01/2020',
-            transactionNumber3:'TRNS8765',
+            amount: '630',
+            date: '10/07/2019',
+            transactionNumber:'TRNS1234',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: 'Trade License Fees',
+            id: 'TLS654321',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '580',
+            date: '15/10/2019',
+            transactionNumber:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: 'Trade License Fees',
+            id: 'TLS654321',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '620',
+            date: '17/01/2020',
+            transactionNumber:'TRNS8765',
             paymentLink: 'https://mseva.org/pay/132'
           },
           {
             service: ' Fire NOC Fees',
             id: 'FNCT123456',
             secondaryInfo: 'Azad Nagar, Amritsar',
-            amount1: '630',
-            date1: '10/07/2019',
-            transactionNumber1:'TRNS1234',
-            amount2: '580',
-            date2: '15/10/2019',
-            transactionNumber2:'TRNS8765',
-            amount3: '620',
-            date3: '17/01/2020',
-            transactionNumber3:'TRNS8765',
+            amount: '630',
+            date: '10/07/2019',
+            transactionNumber:'TRNS1234',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: ' Fire NOC Fees',
+            id: 'FNCT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',            
+            amount: '580',
+            date: '15/10/2019',
+            transactionNumber:'TRNS8765',            
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: ' Fire NOC Fees',
+            id: 'FNCT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '620',
+            date: '17/01/2020',
+            transactionNumber:'TRNS8765',
             paymentLink: 'https://mseva.org/pay/132'
           },
           {
             service: '  Building Plan Scrutiny Fees ',
             id: 'BPAT123456',
             secondaryInfo: 'Azad Nagar, Amritsar',
-            amount1: '630',
-            date1: '10/07/2019',
-            transactionNumber1:'TRNS1234',
-            amount2: '580',
-            date2: '15/10/2019',
-            transactionNumber2:'TRNS8765',
-            amount3: '620',
-            date3: '17/01/2020',
-            transactionNumber3:'TRNS8765',
+            amount: '630',
+            date: '10/07/2019',
+            transactionNumber:'TRNS1234',
             paymentLink: 'https://mseva.org/pay/132'
-          }
+          },
+          {
+            service: '  Building Plan Scrutiny Fees ',
+            id: 'BPAT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',            
+            amount: '580',
+            date: '15/10/2019',
+            transactionNumber:'TRNS8765',            
+            paymentLink: 'https://mseva.org/pay/132'
+          },
+          {
+            service: '  Building Plan Scrutiny Fees ',
+            id: 'BPAT123456',
+            secondaryInfo: 'Azad Nagar, Amritsar',
+            amount: '620',
+            date: '17/01/2020',
+            transactionNumber:'TRNS8765',
+            paymentLink: 'https://mseva.org/pay/132'
+          },
       ]
 
       let emptyReceipts = []
+      
 
-      if(service==='WS' && select===1){
+      if(service==='WS' && randomUserBehaviour === 1){
         receipts=receipts.slice(0,1);
         return receipts;
       }
-      else if(service === 'PT' && select===1){
-        receipts=receipts.slice(1,2);
+      else if(service==='WS' && randomUserBehaviour === 2){
+        receipts=receipts.slice(1,3);
         return receipts;
       }
-      else if(service === 'TL' && select===1){
-        receipts=receipts.slice(2,3);
-        return receipts;
-      }
-      else if(service === 'FNOC' && select===1){
+      else if(service === 'PT' && randomUserBehaviour===1){
         receipts=receipts.slice(3,4);
         return receipts;
       }
-      else if(service === 'BPA' && select===1){
-        receipts=receipts.slice(4,5);
+      else if(service === 'PT' && randomUserBehaviour===2){
+        receipts=receipts.slice(4,6);
         return receipts;
       }
-      else if(select===0){
+      else if(service === 'TL' && randomUserBehaviour===1){
+        receipts=receipts.slice(6,7);
+        return receipts;
+      }
+      else if(service === 'TL' && randomUserBehaviour===2){
+        receipts=receipts.slice(7,9);
+        return receipts;
+      }
+      else if(service === 'FNOC' && randomUserBehaviour===1){
+        receipts=receipts.slice(9,10);
+        return receipts;
+      }
+      else if(service === 'FNOC' && randomUserBehaviour===2){
+        receipts=receipts.slice(10,12);
+        return receipts;
+      }
+      else if(service === 'BPA' && randomUserBehaviour===1){
+        receipts=receipts.slice(12,13);
+        return receipts;
+      }
+      else if(service === 'BPA' && randomUserBehaviour===2){
+        receipts=receipts.slice(13,15);
+        return receipts;
+      }
+      else if(randomUserBehaviour===3){
         return emptyReceipts;
       }
     }
