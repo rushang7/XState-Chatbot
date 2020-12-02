@@ -314,9 +314,11 @@ const pgr =  {
                 onDone: {
                   actions: assign((context, event) => {
                     let { cities, messageBundle } = event.data;
-                    let preamble = "Click here to select your city"
+                    let preamble = dialog.get_message(messages.fileComplaint.city.question.preamble, context.user.locale);
+                    let link = pgrService.getCityExternalWebpageLink();
+                    let message = preamble + '\n' + link;
                     context.grammer = dialog.constructLiteralGrammer(cities, messageBundle, context.user.locale);
-                    context.chatInterface.toUser(context.user, `${preamble}`);
+                    context.chatInterface.toUser(context.user, message);
                   })
                 },
                 onError: {
@@ -351,24 +353,48 @@ const pgr =  {
           }
         },
         locality: {
-           // TODO - Rushang move to invoke pattern
           id: 'locality',
           initial: 'question',
           states: {
             question: {
-              onEntry: assign( (context, event) => {
-                let message = 'Please enter your locality'
-                context.chatInterface.toUser(context.user, message);
-              }),
+              invoke: {
+                id: 'fetchLocalities',
+                src: (context) => pgrService.fetchLocalities(context.slots.pgr.city),
+                onDone: {
+                  actions: assign((context, event) => {
+                    let { localities, messageBundle } = event.data;
+                    let preamble = dialog.get_message(messages.fileComplaint.locality.question.preamble, context.user.locale);
+                    let link = pgrService.getLocalityExternalWebpageLink(context.slots.pgr.city);
+                    let message = preamble + '\n' + link;
+                    context.grammer = dialog.constructLiteralGrammer(localities, messageBundle, context.user.locale);
+                    context.chatInterface.toUser(context.user, message);
+                  })
+                }
+              },
               on: {
-                USER_MESSAGE: [{target: 'process'}]
+                USER_MESSAGE: 'process'
               }
             },
             process: {
-              onEntry: assign((context, event) => {
-                context.slots.pgr["locality"] = event.message.input;
+              onEntry:  assign((context, event) => {
+                context.intention = dialog.get_intention(context.grammer, event) 
               }),
-              always: '#persistComplaint'
+              always : [
+                {
+                  target: '#persistComplaint',
+                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                  actions: assign((context, event) => context.slots.pgr["locality"] = context.intention)
+                },
+                {
+                  target: 'error',
+                }, 
+              ]
+            },
+            error: {
+              onEntry: assign( (context, event) => {
+                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+              }),
+              always:  'question',
             }
           }
         },
@@ -449,8 +475,30 @@ let messages = {
         en_IN :'If you are at the grievance site, please share your location. Otherwise type any character.',
         hi_IN : 'यदि आप शिकायत स्थल पर हैं, तो कृपया अपना स्थान साझा करें। अगर नहीं किसी भी चरित्र को टाइप करें।'
       }
-    } // geoLocation 
+    }, // geoLocation 
+    city: {
+      question: {
+        preamble: {
+          en_IN: 'Please select your city from the link given below. Tap on the link to search and select your city.',
+          hi_IN: 'कृपया नीचे दिए गए लिंक से अपने शहर का चयन करें। अपने शहर को खोजने और चुनने के लिए लिंक पर टैप करें।'
+        }
+      }
+    }, // city
+    locality: {
+      question: {
+        preamble: {
+          en_IN: 'Please select the locality of your complaint from the link below. Tap on the link to search and select a locality.',
+          hi_IN: 'कृपया नीचे दिए गए लिंक से अपनी शिकायत के इलाके का चयन करें। किसी इलाके को खोजने और चुनने के लिए लिंक पर टैप करें।'
+        }
+      }
+    }, // locality
+    persistComplaint: {
+      en_IN: 'Thank You! You have successfully filed a complaint through mSeva Punjab.\nYour Complaint No is : {{complaintNumber}}\nYou can view and track your complaint  through the link below:\n{{complaintLink}}\n\nPlease type and send “mseva” whenever you need my assistance.'
+    }
   }, // fileComplaint
+  trackComplaint: {
+
+  }
 }; // messages
 
 let grammer = {

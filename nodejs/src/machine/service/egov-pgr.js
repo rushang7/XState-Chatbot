@@ -88,21 +88,30 @@ class PGRService {
     return {cities, messageBundle};
   }
 
+  getCityExternalWebpageLink() {
+    return config.externalHost + config.cityExternalWebpagePath + '?tenantId=' + config.rootTenantId + '&phone=' + config.whatsAppBusinessNumber;
+  }
+
   async fetchLocalities(tenantId) {
     let moduleName = 'egov-location';
     let masterName = 'TenantBoundary';
     let filterPath = '$.[?(@.hierarchyType.code=="ADMIN")].boundary.children.*.children.*.children.*';
 
     let boundaryData = await this.fetchMdmsData(tenantId, moduleName, masterName, filterPath);
-    let localities = boundaryData.map(element => {
-      return {
-        code: element.code,
-        value: element.name
+    let localities = [];
+    let messageBundle = {};
+    for(let i = 0; i < boundaryData.length; i++) {
+      localities.push(boundaryData[i].code);
+      messageBundle[boundaryData[i].code] = {
+        en_IN: boundaryData[i].name
       }
-    });
-    return localities;
+    }
+    return { localities, messageBundle };
   }
 
+  getLocalityExternalWebpageLink(tenantId) {
+    return config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + config.whatsAppBusinessNumber;
+  }
 }
 
 module.exports = new PGRService();
