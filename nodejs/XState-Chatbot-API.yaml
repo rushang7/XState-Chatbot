@@ -106,7 +106,3 @@ components:
         slots:
           type: object
           description: Key-Value pair of user's response for a given state of the machine.
-servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/rushang7-eGov/XState-Chatbot/1.0.0
