@@ -37,7 +37,7 @@ const receipts = {
               },
 
               {
-                target: '#trackreceipts',
+                target: '#trackReceipts',
                 actions: assign((context, event) => {
                   context.receipts.slots.service = context.intention;
                 }),
@@ -57,20 +57,20 @@ const receipts = {
           } // menu.error
         }
       },//receiptsmenu
-      trackreceipts:{
-        id:'trackreceipts',
+      trackReceipts:{
+        id:'trackReceipts',
         initial:'start',
         states:{
           start:{
             onEntry: assign((context, event) => {
-              console.log("Entered into trackreceipts");
+              console.log("Entered into trackReceipts");
             }),
             invoke:{
               id:'receiptstatus',
               src: (context) => dummyReceipts.findreceipts(context.user,context.receipts.slots.service),
               onDone:[
                 {
-                  target: '#receiptslip',
+                  target: '#receiptSlip',
                   cond: (context, event) => {
                     return event.data.length>0;
                   },
@@ -80,13 +80,13 @@ const receipts = {
                   }),
                 },
                 {
-                  target:'#mobilelinkage',
+                  target:'#mobileLinkage',
                 }
     
               ],
               onError: {
                 actions: assign((context, event) => {
-                  let message = dialog.get_message(messages.trackreceipts.error,context.user.locale);
+                  let message = dialog.get_message(messages.trackReceipts.error,context.user.locale);
                   context.chatInterface.toUser(context.user, message);
                 })
               }
@@ -96,19 +96,19 @@ const receipts = {
           
         },
       },
-      receiptslip:{
-        id:'receiptslip',
+      receiptSlip:{
+        id:'receiptSlip',
         initial:'start',
         states:{
           start:{
             onEntry: assign((context, event) => {
-              console.log("Entered into receiptslip");
+              console.log("Entered into receiptSlip");
             }),
             invoke:{
               id: 'fetchReceiptsForParam',
               src: (context, event) => {
                 let slots = context.receipts.slots;
-                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paramInput);
               },
               onDone:[
                 {
@@ -118,12 +118,12 @@ const receipts = {
                   target: 'listofreceipts',
                 },
                 {
-                  target:'#noreceipts'
+                  target:'#noReceipts'
                 },
               ],
               onError: {
                 actions: assign((context, event) => {
-                  let message = messages.receiptslip.error;
+                  let message = messages.receiptSlip.error;
                   context.chatInterface.toUser(context.user, message);
                 })
               }  
@@ -136,7 +136,7 @@ const receipts = {
               let message='';
               if(receipts.length===1){
                 let receipt = receipts[0];
-                let message=dialog.get_message(messages.receiptslip.listofreceipts.singleRecord,context.user.locale);
+                let message=dialog.get_message(messages.receiptSlip.listofreceipts.singleRecord,context.user.locale);
                 message = message.replace('{{service}}', receipt.service);
                 message = message.replace('{{id}}', receipt.id);
                 message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
@@ -146,10 +146,10 @@ const receipts = {
                 message = message.replace('{{paymentLink}}', receipt.paymentLink);
                 context.chatInterface.toUser(context.user,message);
               }else {
-                message = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService, context.user.locale);
+                message = dialog.get_message(messages.receiptSlip.listofreceipts.multipleRecordsSameService, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
                   let receipt = receipts[i];
-                  let receiptTemplate = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
+                  let receiptTemplate = dialog.get_message(messages.receiptSlip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
                   receiptTemplate =receiptTemplate.replace('{{service}}', receipt.service);
                   receiptTemplate = receiptTemplate.replace('{{id}}', receipt.id);
                   receiptTemplate = receiptTemplate.replace('{{secondaryInfo}}', receipt.secondaryInfo);
@@ -168,31 +168,31 @@ const receipts = {
             }),
             always:[
               {
-                target:'#searchreceiptinitiate',
+                target:'#searchReceptInitiate',
               }
             ]
           },
         },
       },
-      noreceipts:{
-        id:'noreceipts',
+      noReceipts:{
+        id:'noReceipts',
         onEntry: assign((context, event) => {
-          let message = dialog.get_message(messages.receiptslip.not_found, context.user.locale);
+          let message = dialog.get_message(messages.receiptSlip.not_found, context.user.locale);
           let optionMessage = context.receipts.slots.searchParamOption;
-          let inputMessage = context.receipts.slots.paraminput;
+          let inputMessage = context.receipts.slots.paramInput;
           message = message.replace('{{searchparamoption}}', optionMessage);
-          message = message.replace('{{paraminput}}', inputMessage);
+          message = message.replace('{{paramInput}}', inputMessage);
           context.chatInterface.toUser(context.user, message);
         }),
-        always:'#searchparams'
+        always:'#searchParams'
       },
-      searchreceiptinitiate:{
-        id:'searchreceiptinitiate',
+      searchReceptInitiate:{
+        id:'searchReceptInitiate',
         initial:'question',
         states:{
           question:{
             onEntry: assign((context, event) => {
-              let message = dialog.get_message(messages.searchreceiptinitiate.question, context.user.locale);
+              let message = dialog.get_message(messages.searchReceptInitiate.question, context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -218,7 +218,7 @@ const receipts = {
                 }
               },
               {
-                target:'#searchparams',
+                target:'#searchParams',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }
@@ -227,7 +227,7 @@ const receipts = {
           },
           error: {
             onEntry: assign( (context, event) => {
-              let message = dialog.get_message(messages.searchreceiptinitiate.error,context.user.locale);
+              let message = dialog.get_message(messages.searchReceptInitiate.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : [
@@ -238,27 +238,27 @@ const receipts = {
           },
         },
       },
-      mobilelinkage:{
-        id:'mobilelinkage',
+      mobileLinkage:{
+        id:'mobileLinkage',
         onEntry: assign((context, event) => {
-          let message1=dialog.get_message(messages.mobilelinkage.notLinked,context.user.locale);
+          let message1=dialog.get_message(messages.mobileLinkage.notLinked,context.user.locale);
           message1 = message1.replace('{{service}}',context.receipts.slots.service);
           context.chatInterface.toUser(context.user, message1);
         }),
         always:[
           {
-            target:'#searchreceiptinitiate',
+            target:'#searchReceptInitiate',
           }
         ],
       },//mobilecheck
-      searchparams:{
-        id:'searchparams',
+      searchParams:{
+        id:'searchParams',
         initial:'question',
         states:{
           question:{
             onEntry:assign((context,event)=>{
               let { searchOptions, messageBundle } = dummyReceipts.getSearchOptionsAndMessageBundleForService(context.receipts.slots.service);
-              let preamble=dialog.get_message(messages.searchparams.question.preamble,context.user.locale);
+              let preamble=dialog.get_message(messages.searchParams.question.preamble,context.user.locale);
               let { prompt, grammer } = dialog.constructListPromptAndGrammer(searchOptions, messageBundle, context.user.locale);
               context.grammer = grammer;
               context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
@@ -277,7 +277,7 @@ const receipts = {
                 cond: (context, event) => context.intention === dialog.INTENTION_UNKOWN
               },
               {
-                target: '#paraminput',
+                target: '#paramInput',
                 actions: assign((context, event) => {
                   context.receipts.slots.searchParamOption = context.intention;
                 })
@@ -286,25 +286,25 @@ const receipts = {
           },
           error: {
             onEntry: assign( (context, event) => {
-              let message = dialog.get_message(messages.searchparams.error,context.user.locale);
+              let message = dialog.get_message(messages.searchParams.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : [
               {
-                target: '#searchparams'
+                target: '#searchParams'
               }
             ]
           },
         },
       },//serachparameter
-      paraminput:{
-        id:'paraminput',
+      paramInput:{
+        id:'paramInput',
         initial:'question',
         states:{
           question: {
             onEntry: assign((context, event) => {
               let { option, example } = dummyReceipts.getOptionAndExampleMessageBundle(context.receipts.slots.service,context.receipts.slots.searchParamOption);
-              let message = dialog.get_message(messages.paraminput.question, context.user.locale);
+              let message = dialog.get_message(messages.paramInput.question, context.user.locale);
               let optionMessage = dialog.get_message(option, context.user.locale);
               let exampleMessage = dialog.get_message(example, context.user.locale);
               message = message.replace('{{option}}', optionMessage);
@@ -317,15 +317,15 @@ const receipts = {
           },
           process:{
             onEntry: assign( (context, event) => {
-              let paraminput = event.message.input;
-              context.isValid = dummyReceipts.validateParamInput(context.receipts.slots.service, context.receipts.slots.searchParamOption, paraminput);
+              let paramInput = event.message.input;
+              context.isValid = dummyReceipts.validateparamInput(context.receipts.slots.service, context.receipts.slots.searchParamOption, paramInput);
               if(context.isValid) {
-                context.receipts.slots.paraminput = paraminput;
+                context.receipts.slots.paramInput = paramInput;
               }
             }),
             always:[
               {
-                target: '#receiptsearchresults',
+                target: '#receiptSearchResults',
                 cond: (context, event) => {
                   return context.isValid;
                 }
@@ -339,7 +339,7 @@ const receipts = {
           re_enter:{
             onEntry: assign((context, event) => {
               let { option, example } = dummyReceipts.getOptionAndExampleMessageBundle(context.receipts.slots.service,context.receipts.slots.searchParamOption);
-              let message = dialog.get_message(messages.paraminput.re_enter, context.user.locale);
+              let message = dialog.get_message(messages.paramInput.re_enter, context.user.locale);
               let optionMessage = dialog.get_message(option, context.user.locale);
               message = message.replace('{{option}}', optionMessage);
               context.chatInterface.toUser(context.user, message);
@@ -350,19 +350,19 @@ const receipts = {
           },
         },
       },//parameterinput
-      receiptsearchresults:{
-        id:'receiptsearchresults',
+      receiptSearchResults:{
+        id:'receiptSearchResults',
         initial:'fetch',
         states:{
           fetch:{
             onEntry: assign((context, event) => {
-              console.log("Entered into receiptsearchresults");
+              console.log("Entered into receiptSearchResults");
             }),
             invoke:{
               id: 'fetchReceiptsForParam',
               src: (context, event) => {
                 let slots = context.receipts.slots;
-                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paraminput);
+                return dummyReceipts.fetchReceiptsForParam(context.user, slots.service, slots.searchParamOption, slots.paramInput);
               },
               onDone:[
                 {
@@ -381,7 +381,7 @@ const receipts = {
               ],
               onError: {
                 actions: assign((context, event) => {
-                  let message = messages.receiptsearchresults.error;
+                  let message = messages.receiptSearchResults.error;
                   context.chatInterface.toUser(context.user, message);
                 })
               }  
@@ -390,14 +390,14 @@ const receipts = {
           },
           norecords:{
             onEntry: assign((context, event) => {
-              let message = dialog.get_message(messages.receiptsearchresults.norecords, context.user.locale);
+              let message = dialog.get_message(messages.receiptSearchResults.norecords, context.user.locale);
               let optionMessage = context.receipts.slots.searchParamOption;
-              let inputMessage = context.receipts.slots.paraminput;
+              let inputMessage = context.receipts.slots.paramInput;
               message = message.replace('{{searchparamoption}}', optionMessage);
-              message = message.replace('{{paraminput}}', inputMessage);
+              message = message.replace('{{paramInput}}', inputMessage);
               context.chatInterface.toUser(context.user, message);
             }),
-            always: '#paraminputinitiate',
+            always: '#paramInputInitiate',
           },
           results:{
             onEntry: assign((context, event) => {
@@ -405,7 +405,7 @@ const receipts = {
               let message='';
               if(receipts.length===1){
                 let receipt = receipts[0];
-                let message=dialog.get_message(messages.receiptsearchresults.results.singleRecord,context.user.locale);
+                let message=dialog.get_message(messages.receiptSearchResults.results.singleRecord,context.user.locale);
                 message = message.replace('{{service}}', receipt.service);
                 message = message.replace('{{id}}', receipt.id);
                 message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
@@ -415,10 +415,10 @@ const receipts = {
                 message = message.replace('{{paymentLink}}', receipt.paymentLink);
                 context.chatInterface.toUser(context.user,message);
               }else {
-                message = dialog.get_message(messages.receiptsearchresults.results.multipleRecordsSameService, context.user.locale);
+                message = dialog.get_message(messages.receiptSearchResults.results.multipleRecordsSameService, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
                   let receipt = receipts[i];
-                  let receiptTemplate = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
+                  let receiptTemplate = dialog.get_message(messages.receiptSlip.listofreceipts.multipleRecordsSameService.receiptTemplate, context.user.locale);
                   receiptTemplate =receiptTemplate.replace('{{service}}', receipt.service);
                   receiptTemplate = receiptTemplate.replace('{{id}}', receipt.id);
                   receiptTemplate = receiptTemplate.replace('{{secondaryInfo}}', receipt.secondaryInfo);
@@ -437,19 +437,19 @@ const receipts = {
             }),
             always:[
               {
-                target:'#searchreceiptinitiate',
+                target:'#searchReceptInitiate',
               }
             ]
           },
         }
       },
-      paraminputinitiate:{
-        id:'paraminputinitiate',
+      paramInputInitiate:{
+        id:'paramInputInitiate',
         initial:'question',
         states: {
           question: {
             onEntry: assign((context, event) => {
-              let message = dialog.get_message(messages.paraminputinitiate.question, context.user.locale);
+              let message = dialog.get_message(messages.paramInputInitiate.question, context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             on: {
@@ -474,13 +474,13 @@ const receipts = {
                 }
               },
               {
-                target: '#searchparams'
+                target: '#searchParams'
               }
             ]
           },
           error: {
             onEntry: assign( (context, event) => {
-              let message =dialog.get_message(messages.paraminputinitiate.error,context.user.locale);
+              let message =dialog.get_message(messages.paramInputInitiate.error,context.user.locale);
               context.chatInterface.toUser(context.user, message);
             }),
             always : 'question'
@@ -501,14 +501,14 @@ let messages = {
       en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
     },
   },
-  trackreceipts:{
+  trackReceipts:{
     error:{
       en_IN: 'Sorry. Some error occurred on server!'
     },
   },
-  receiptslip:{
+  receiptSlip:{
     not_found:{
-      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
+      en_IN:'The {{searchparamoption}} :   {{paramInput}}   is not found in our records. Please Check the details you have provided once again.'
     },
     error:{
       en_IN:'Sorry. Some error occurred on server.'
@@ -525,7 +525,7 @@ let messages = {
       }
     },
   },
-  searchreceiptinitiate:{
+  searchReceptInitiate:{
     question:{
       en_IN:'Please type and send ‘1’ to Search and View for past payments which are not linked to your mobile number.'
     },
@@ -535,12 +535,12 @@ let messages = {
 
 
   },
-  mobilelinkage:{
+  mobileLinkage:{
     notLinked: {
       en_IN: 'It seems the mobile number you are using is not linked with {{service}} service. Please visit ULB to link your account number with Service_Name. Still you can avail service by searching your account information.'
     },
   },
-  searchparams:{
+  searchParams:{
     question: {
       preamble: {
         en_IN: 'Please type and send the number of your option from the list given 👇 below:'
@@ -551,7 +551,7 @@ let messages = {
     },
 
   },
-  paraminput: {
+  paramInput: {
     question: {
       en_IN: 'Please Enter {{option}} to view the bill. {{example}}\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.'
     },
@@ -559,12 +559,12 @@ let messages = {
       en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
     }
   },
-  receiptsearchresults:{
+  receiptSearchResults:{
     error:{
       en_IN:'Sorry. Some error occurred on server.'
     },
     norecords:{
-      en_IN:'The {{searchparamoption}} :   {{paraminput}}   is not found in our records. Please Check the details you have provided once again.'
+      en_IN:'The {{searchparamoption}} :   {{paramInput}}   is not found in our records. Please Check the details you have provided once again.'
     },
     results:{
       singleRecord: {
@@ -578,7 +578,7 @@ let messages = {
       }
     },
   },
-  paraminputinitiate: {
+  paramInputInitiate: {
     question: {
       en_IN: 'Please type and send ‘1’ to search using other parameter Or ‘mseva’ to Go ⬅️ Back to main menu.'
     },

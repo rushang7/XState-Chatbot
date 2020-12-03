@@ -75,14 +75,14 @@ class DummyReceipts{
         }
         return { option, example };
     }
-    validateParamInput(service, searchParamOption, paramInput) {
+    validateparamInput(service, searchParamOption, paramInput) {
         if(searchParamOption === 'mobile') {
           let regexp = new RegExp('^[0-9]{10}$');
           return regexp.test(paramInput)
         }
         return true;
     }
-    async findreceipts(user,service){
+    async findreceipts(user,service){ 
       let randomUserBehaviour = parseInt(Math.random() * 3 + 1);
       console.log(randomUserBehaviour);
       let select=0;
