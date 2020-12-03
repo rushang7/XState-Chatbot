@@ -112,6 +112,11 @@ class PGRService {
   getLocalityExternalWebpageLink(tenantId) {
     return config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + config.whatsAppBusinessNumber;
   }
+
+  async persistComplaint(slots) {
+    
+  }
+  
 }
 
 module.exports = new PGRService();

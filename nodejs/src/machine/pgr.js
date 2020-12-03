@@ -399,35 +399,59 @@ const pgr =  {
           }
         },
         persistComplaint: {
-          // TODO - Rushang move to invoke pattern
           id: 'persistComplaint',
-          always: '#endstate',
-          onEntry: assign((context, event) => {
-            console.log(context.slots.pgr);
-            //make api call
-            console.log('Making api call to PGR Service');
-            let message = 'Complaint has been filed successfully {{number}}';
-            let number = '123';
-            message = message.replace('{{number}}', number);
-            context.chatInterface.toUser(context.user, message);
-            context.chatInterface.toUser(context.user, `Complaint Details: ${JSON.stringify(context.slots.pgr)}`);
-            context.slots.pgr = {}; // clear slots
-          })
+          invoke: {
+            id: 'persistComplaint',
+            src: (context) => pgrService.persistComplaint(context.slots.pgr),
+            onDone: {
+              target: '#endstate',
+              actions: assign((context, event) => {
+                let complaintDetails = event.data;
+                let message = dialog.get_message(messages.fileComplaint.persistComplaint, context.user.locale);
+                message = message.replace('{{complaintNumber}}', complaintDetails.complaintNumber);
+                message = message.replace('{{complaintLink}}', complaintDetails.complaintLink);
+                context.chatInterface.toUser(context.user, message);
+              })
+            }
+          }
         },
       }, // fileComplaint.states
     },  // fileComplaint
     trackComplaint: {
-       // TODO - Rushang move to invoke pattern
       id: 'trackComplaint',
-      always: '#endstate',
-      onEntry: assign( (context, event) => {
-        //make api call
-        console.log('Making an api call to PGR Service');
-        let message = 'Here are your recent complaints {{details}}';
-        let details = 'No. - 123, ...';
-        message = message.replace('{{details}}', details);
-        context.chatInterface.toUser(context.user, message);
-      })
+      invoke: {
+        id: 'fetchOpenComplaints',
+        src: (context) => pgrService.fetchOpenComplaints(context.user),
+        onDone: [
+          {
+            target: '#endstate',
+            cond: (context, event) => event.data.length > 0,
+            actions: assign((context, event) => {
+              let complaints = event.data;
+              let message = dialog.get_message(messages.trackComplaint.results.preamble, context.user.locale);
+              message += '\n';
+              for(let i = 0; i < complaints.length; i++) {
+                let template = dialog.get_message(messages.trackComplaint.results.complaintTemplate, context.user.locale);
+                template = template.replace('{{complaintType}}', complaints[i].complaintType);
+                template = template.replace('{{complaintId}}', complaints[i].complaintId);
+                template = template.replace('{{filedDate}}', complaints[i].filedDate);
+                template = template.replace('{{complaintStatus}}', complaints[i].complaintStatus);
+                template = template.replace('{{complaintLink}}', complaints[i].complaintLink);
+                message += '\n' + (i + 1) + '. ' + template;
+              }
+
+              context.chatInterface.toUser(context.user, message);
+            })
+          },
+          {
+            target: '#endstate',
+            actions: assign((context, event) => {
+              let message = dialog.get_message(messages.trackComplaint.noRecords, context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            })
+          }
+        ]
+      }
     } // trackComplaint
   } // pgr.states
 }; // pgr
@@ -497,7 +521,17 @@ let messages = {
     }
   }, // fileComplaint
   trackComplaint: {
-
+    noRecords: {
+      en_IN: 'There are no open complaints.\nPlease type and send mseva to go to the main menu options.'
+    },
+    results: {
+      preamble: {
+        en_IN: 'Your Open Complaints'
+      },
+      complaintTemplate: {
+        en_IN: '*{{complaintType}}*\nComplaint No: {{complaintId}}\nFiled Date: {{filedDate}}\nCurrent Complaint Status: *{{complaintStatus}}*\nTap on the link below to view the complaint\n{{complaintLink}}'
+      }
+    }
   }
 }; // messages
 
