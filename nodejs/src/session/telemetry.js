@@ -20,6 +20,7 @@ class Telemetry {
                 }
             });
         } catch(error) {
+            console.error("Telemetry Failure");
             console.error(error);
         }
     }
