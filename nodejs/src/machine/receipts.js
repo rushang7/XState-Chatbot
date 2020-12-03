@@ -144,6 +144,7 @@ const receipts = {
                 message = message.replace('{{amount}}', receipt.amount);
                 message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
                 message = message.replace('{{paymentLink}}', receipt.paymentLink);
+                context.chatInterface.toUser(context.user,message);
               }else {
                 message = dialog.get_message(messages.receiptslip.listofreceipts.multipleRecordsSameService, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
@@ -161,8 +162,9 @@ const receipts = {
                   message += (i + 1) + '. ';
                   message += receiptTemplate;
                 }
+                context.chatInterface.toUser(context.user,message);
               }
-              context.chatInterface.toUser(context.user,message);
+              
             }),
             always:[
               {
@@ -411,6 +413,7 @@ const receipts = {
                 message = message.replace('{{amount}}', receipt.amount);
                 message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
                 message = message.replace('{{paymentLink}}', receipt.paymentLink);
+                context.chatInterface.toUser(context.user,message);
               }else {
                 message = dialog.get_message(messages.receiptsearchresults.results.multipleRecordsSameService, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
@@ -428,8 +431,9 @@ const receipts = {
                   message += (i + 1) + '. ';
                   message += receiptTemplate;
                 }
+                context.chatInterface.toUser(context.user,message);
               }
-              context.chatInterface.toUser(context.user,message);
+              
             }),
             always:[
               {
@@ -437,34 +441,6 @@ const receipts = {
               }
             ]
           },
-          // results:{
-          //   onEntry: assign((context, event) => {
-          //     let receipts=context.receipts.slots.searchresults;
-          //     let receipt = receipts[0];
-          //     let message=dialog.get_message(messages.receiptsearchresults.results,context.user.locale);
-          //     message = message.replace('{{service}}', receipt.service);
-          //     message = message.replace('{{id}}', receipt.id);
-          //     message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
-          //     message = message.replace('{{date1}}', receipt.date1);
-          //     message = message.replace('{{date2}}', receipt.date2);
-          //     message = message.replace('{{date3}}', receipt.date3);
-          //     message = message.replace('{{amount1}}', receipt.amount1);
-          //     message = message.replace('{{amount2}}', receipt.amount2);
-          //     message = message.replace('{{amount3}}', receipt.amount3);
-          //     message = message.replace('{{transactionNumber1}}', receipt.transactionNumber1);
-          //     message = message.replace('{{transactionNumber2}}', receipt.transactionNumber2);
-          //     message = message.replace('{{transactionNumber3}}', receipt.transactionNumber3);
-          //     message = message.replace('{{paymentLink}}', receipt.paymentLink);
-
-          //     context.chatInterface.toUser(context.user,message);
-          //   }),
-          //   always:[
-          //     {
-          //       target:'#searchreceiptinitiate',
-          //     }
-          //   ]
-          // },
-
         }
       },
       paraminputinitiate:{
@@ -544,7 +520,7 @@ let messages = {
       multipleRecordsSameService: {
         en_IN: 'Following Receipts found:',
         receiptTemplate: {
-          en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
+          en_IN: ' {{service}} - {{id}} - {{secondaryInfo}} \n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
         }
       }
     },
@@ -597,7 +573,7 @@ let messages = {
       multipleRecordsSameService: {
         en_IN: 'Following Receipts found:',
         receiptTemplate: {
-          en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
+          en_IN: ' {{service}} - {{id}} - {{secondaryInfo}} \n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
         }
       }
     },
