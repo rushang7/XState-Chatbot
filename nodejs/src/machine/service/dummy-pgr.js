@@ -1,10 +1,45 @@
 const getCityAndLocality = require('./util/google-maps-util');
 const localisationService = require('../util/localisation-service');
+const config = require('../../env-variables');
 
 class DummyPGRService {
 
     // Please mark the method async if the actual app-service method would involve api calls
 
+    async fetchMdmsData(tenantId, moduleName, masterName, filterPath) {
+      var mdmsHost = config.mdmsHost;
+      var url = mdmsHost + 'egov-mdms-service/v1/_search';
+      var request = {
+        "RequestInfo": {},
+        "MdmsCriteria": {
+          "tenantId": tenantId,
+          "moduleDetails": [
+            {
+              "moduleName": moduleName,
+              "masterDetails": [
+                {
+                  "name": masterName,
+                  "filter": filterPath
+                }
+              ]
+            }
+          ]
+        }
+      };
+    
+      var options = {
+        method: 'POST',
+        body: JSON.stringify(request),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+      }
+    
+      let response = await fetch(url, options);
+      let data = await response.json()
+    
+      return data["MdmsRes"][moduleName][masterName];
+    }
     async fetchCities() {
         let cities = this.cities.tenantInfo.map(el=>el.code);
         let messageBundle = this.citiesMessageBundle;
