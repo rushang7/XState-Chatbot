@@ -29,6 +29,13 @@ const envVariables = {
 
     whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',
 
+    userServiceHost: process.env.userServiceHost || 'https://egov-micro-dev.egovernments.org/',
+    userServiceOAuthPath: process.env.userServiceOAuthPath || 'user/oauth/token',
+    userServiceCreateCitizenPath: process.env.userServiceCreateCitizenPath || 'user/citizen/_create',
+    userServiceUpdateProfilePath: process.env.userServiceUpdateProfilePath || 'user/profile/_update',
+    userServiceHardCodedPassword: process.env.userServiceHardCodedPassword || '123456',
+    userLoginAuthorizationHeader: process.env.userLoginAuthorizationHeader || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
+
     googleAPIKey: process.env.googleAPIKey || ''
 }
 
