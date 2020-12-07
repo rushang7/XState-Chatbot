@@ -85,7 +85,6 @@ class DummyReceipts{
     async findreceipts(user,service){ 
       let randomUserBehaviour = parseInt(Math.random() * 3 + 1);
       console.log(randomUserBehaviour);
-      let select=0;
       let receipts =  [
           {
             service: 'Water & Sewerage',
@@ -271,10 +270,78 @@ class DummyReceipts{
         return emptyReceipts;
       }
     }
-    
     async fetchReceiptsForParam(user, service, searchParamOption, paraminput) {
         console.log(`Received params: ${user}, ${service}, ${searchParamOption}, ${paraminput}`);
         return this.findreceipts(user,service);
+    }
+    async singleReceipt(user,service){
+      let receipts =  [
+        {
+          service: 'Water & Sewerage',
+          id: 'WS123456',
+          secondaryInfo: 'Azad Nagar, Amritsar',
+          amount: '630',
+          date: '10/07/2019',
+          transactionNumber:'TRNS1234',
+          paymentLink: 'https://mseva.org/pay/1234',
+        },
+        {
+          service: 'Property Tax',
+          id: 'PT123456',
+          secondaryInfo: 'Azad Nagar, Amritsar',
+          amount: '630',
+          date: '10/07/2019',
+          transactionNumber:'TRNS1234',
+          paymentLink: 'https://mseva.org/pay/132'
+        },
+        {
+          service: 'Trade License Fees',
+          id: 'TLS654321',
+          secondaryInfo: 'Azad Nagar, Amritsar',
+          amount: '630',
+          date: '10/07/2019',
+          transactionNumber:'TRNS1234',
+          paymentLink: 'https://mseva.org/pay/132'
+        },
+        {
+          service: ' Fire NOC Fees',
+          id: 'FNCT123456',
+          secondaryInfo: 'Azad Nagar, Amritsar',
+          amount: '630',
+          date: '10/07/2019',
+          transactionNumber:'TRNS1234',
+          paymentLink: 'https://mseva.org/pay/132'
+        },
+        {
+          service: '  Building Plan Scrutiny Fees ',
+          id: 'BPAT123456',
+          secondaryInfo: 'Azad Nagar, Amritsar',
+          amount: '630',
+          date: '10/07/2019',
+          transactionNumber:'TRNS1234',
+          paymentLink: 'https://mseva.org/pay/132'
+        },
+      ]
+      if(service==='WS'){
+      receipts=receipts.slice(0,1);
+      return receipts;
+      }
+      if(service === 'PT'){
+      receipts=receipts.slice(1,2);
+      return receipts;
+      }
+      if(service === 'TL'){
+      receipts=receipts.slice(2,3);
+      return receipts;
+      }
+      if(service === 'FNOC'){
+      receipts=receipts.slice(3,4);
+      return receipts;
+      }
+      if(service === 'BPA'){
+      receipts=receipts.slice(4,5);
+      return receipts;
+      }
     }
 
   }

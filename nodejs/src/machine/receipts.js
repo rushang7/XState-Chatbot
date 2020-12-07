@@ -134,6 +134,10 @@ const receipts = {
             onEntry: assign((context, event) => {
               let receipts=context.receipts.slots.personalizedreceipts;
               let message='';
+              let isValid = receipts.length === 1;
+              context.message = {
+                isValid: isValid,
+              };
               if(receipts.length===1){
                 let receipt = receipts[0];
                 let message=dialog.get_message(messages.receiptSlip.listofreceipts.singleRecord,context.user.locale);
@@ -169,6 +173,13 @@ const receipts = {
             always:[
               {
                 target:'#searchReceptInitiate',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+              {
+                target:'#singleReceipt',
+
               }
             ]
           },
@@ -403,6 +414,10 @@ const receipts = {
             onEntry: assign((context, event) => {
               let receipts=context.receipts.slots.searchresults;
               let message='';
+              let isValid = receipts.length === 1;
+              context.message = {
+                isValid: isValid,
+              };
               if(receipts.length===1){
                 let receipt = receipts[0];
                 let message=dialog.get_message(messages.receiptSearchResults.results.singleRecord,context.user.locale);
@@ -437,7 +452,13 @@ const receipts = {
             }),
             always:[
               {
-                target:'#searchReceptInitiate',
+                target:'#paramInputInitiate',
+                cond: (context, event) => {
+                  return  context.message.isValid;
+                }
+              },
+              {
+                target:'#singleReceipt'
               }
             ]
           },
@@ -474,7 +495,7 @@ const receipts = {
                 }
               },
               {
-                target: '#searchParams'
+                target: '#services'
               }
             ]
           },
@@ -487,6 +508,66 @@ const receipts = {
           }
         },
       },
+      singleReceipt:{
+        id:"singleReceipt",
+        initial:'start',
+        states:{
+          start:{
+            onEntry: assign((context, event) => {
+              console.log("Entered into singleReceipt");
+            }),
+            invoke:{
+              id: 'singleReceipt',
+              src: (context, event) => {
+                return dummyReceipts.singleReceipt(context.user,context.receipts.slots.service);
+              },
+              onDone:[
+                {
+                  target: 'receipt',
+                  actions: assign((context, event) => {
+                    context.receipts.slots.singleReceipt = event.data;
+                    console.log(context.receipts.slots.singleReceipt);
+                  }),
+                },
+              ],
+              onError: {
+                actions: assign((context, event) => {
+                  let message = messages.singleReceipt.error;
+                  context.chatInterface.toUser(context.user, message);
+                })
+              }  
+            
+            },
+          },
+          receipt:{
+            onEntry:assign((context,event)=>{
+              let receipts=context.receipts.slots.singleReceipt;
+              let message='';
+              receipt=receipts[0];
+              message=dialog.get_message(messages.singleReceipt.record,context.user.locale);
+              message = message.replace('{{service}}', receipt.service);
+              message = message.replace('{{id}}', receipt.id);
+              message = message.replace('{{secondaryInfo}}', receipt.secondaryInfo);
+              message = message.replace('{{date}}', receipt.date);
+              message = message.replace('{{amount}}', receipt.amount);
+              message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
+              message = message.replace('{{paymentLink}}', receipt.paymentLink);
+              context.chatInterface.toUser(context.user,message);
+
+            }),
+            always:[
+              {
+                target:'#paramInputInitiate',
+
+              }
+            ]
+
+          }
+        },
+
+
+        
+      }
     }//receipts.states
 };
 
@@ -518,7 +599,7 @@ let messages = {
         en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{secondaryInfo}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPayment Link: {{paymentLink}}\n\n'
       },
       multipleRecordsSameService: {
-        en_IN: 'Following Receipts found:',
+        en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
         receiptTemplate: {
           en_IN: ' {{service}} - {{id}} - {{secondaryInfo}} \n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
         }
@@ -571,7 +652,7 @@ let messages = {
         en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{secondaryInfo}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPayment Link: {{paymentLink}}\n\n'
       },
       multipleRecordsSameService: {
-        en_IN: 'Following Receipts found:',
+        en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
         receiptTemplate: {
           en_IN: ' {{service}} - {{id}} - {{secondaryInfo}} \n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPayment Link: {{paymentLink}}'
         }
@@ -586,7 +667,15 @@ let messages = {
       en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
     },
 
-  }
+  },
+  singleReceipt:{
+    error:{
+      en_IN:'Sorry. Some error occurred on server.'
+    },
+    record: {
+      en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{secondaryInfo}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPayment Link: {{paymentLink}}\n\n'
+    },
+  },
   
 };
 
