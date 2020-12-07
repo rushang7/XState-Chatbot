@@ -274,7 +274,7 @@ class DummyReceipts{
         console.log(`Received params: ${user}, ${service}, ${searchParamOption}, ${paraminput}`);
         return this.findreceipts(user,service);
     }
-    async singleReceipt(user,service){
+    async singleReceipt(user,service,receiptNumber){
       let receipts =  [
         {
           service: 'Water & Sewerage',

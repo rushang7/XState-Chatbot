@@ -172,13 +172,13 @@ const receipts = {
             }),
             always:[
               {
-                target:'#searchReceptInitiate',
+                target:'#paramInputInitiate',
                 cond: (context, event) => {
                   return  context.message.isValid;
                 }
               },
               {
-                target:'#singleReceipt',
+                target:'#receiptNumber',
 
               }
             ]
@@ -458,7 +458,7 @@ const receipts = {
                 }
               },
               {
-                target:'#singleReceipt'
+                target:'#receiptNumber'
               }
             ]
           },
@@ -508,6 +508,32 @@ const receipts = {
           }
         },
       },
+      receiptNumber:{
+        id:'receiptNumber',
+        initial:'question',
+        states: {
+          question: {
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.receiptNumber.question, context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let parsed = parseInt(event.message.input.trim());
+              context.receipts.slots.receiptNumber=parsed;
+            }),
+            always: [
+              {
+                target: '#singleReceipt'
+              }
+            ]
+          },
+        },
+      },
       singleReceipt:{
         id:"singleReceipt",
         initial:'start',
@@ -519,7 +545,7 @@ const receipts = {
             invoke:{
               id: 'singleReceipt',
               src: (context, event) => {
-                return dummyReceipts.singleReceipt(context.user,context.receipts.slots.service);
+                return dummyReceipts.singleReceipt(context.user,context.receipts.slots.service,context.receipts.slots.receiptNumber);
               },
               onDone:[
                 {
@@ -567,7 +593,7 @@ const receipts = {
 
 
         
-      }
+      },
     }//receipts.states
 };
 
@@ -661,12 +687,17 @@ let messages = {
   },
   paramInputInitiate: {
     question: {
-      en_IN: 'Please type and send ‘1’ to search using other parameter Or ‘mseva’ to Go ⬅️ Back to main menu.'
+      en_IN: 'Please type and send ‘1’ to Search and View payment receipt for other payments or services Or  mseva to Go ⬅️ Back to the main menu.'
     },
     error:{
       en_IN: 'Sorry, I didn\'t understand. Could please try again!.'
     },
 
+  },
+  receiptNumber:{
+    question: {
+      en_IN: 'Please type and send the number of your option from the list of receipts shown above: '
+    },
   },
   singleReceipt:{
     error:{
