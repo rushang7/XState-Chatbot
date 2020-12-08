@@ -7,6 +7,7 @@ class UserService {
   async getUserForMobileNumber(mobileNumber, tenantId) {
     let user = await this.loginOrCreateUser(mobileNumber, tenantId);
     user.userId = user.userInfo.uuid;
+    user.mobileNumber = mobileNumber;
     user.name = user.userInfo.name;
     user.locale = user.userInfo.locale;
     return user;
