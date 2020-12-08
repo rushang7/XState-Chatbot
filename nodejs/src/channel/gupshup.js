@@ -20,13 +20,15 @@ class GupShupWhatsAppProvider {
             input: input,
             type: type
         }
-        reformattedMessage.userId = requestBody.payload.sender.phone;
+        reformattedMessage.user = {
+            mobileNumber: requestBody.payload.sender.phone.slice(2)
+        };
 
         return reformattedMessage;
     }
 
     sendMessageToUser(user, message) {
-        let phone = user.uuid;
+        let phone = user.mobileNumber;
 
         let url = "https://api.gupshup.io/sm/api/v1/msg";
 
@@ -39,7 +41,7 @@ class GupShupWhatsAppProvider {
         
         urlSearchParams.append("channel", "whatsapp");
         urlSearchParams.append("source", "917834811114");
-        urlSearchParams.append("destination", phone);
+        urlSearchParams.append("destination", '91' + phone);
         urlSearchParams.append("src.name", "mSevaChatbot");
         urlSearchParams.append("message", message);
 
