@@ -1,5 +1,5 @@
-class ValueFirstChannelProvider {
+class ValueFirstWhatsAppProvider {
 
 }
 
-module.exports = new ValueFirstChannelProvider();
+module.exports = new ValueFirstWhatsAppProvider();
