@@ -32,13 +32,12 @@ const sevaMachine = Machine({
       initial: 'onboardingWelcome',
       states:{
         onboardingWelcome: {
-        id: 'onboardingWelcome',
-        onEntry: assign((context, event) => {
-          var message_english = dialog.get_message(messages.welcome, 'en_IN');
-          var message_hindi = dialog.get_message(messages.welcome, 'hi_IN');
-          context.chatInterface.toUser(context.user, `${message_english}\n\n${message_hindi}`);
-        }),
-        always: '#onboardingLocale'
+          id: 'onboardingWelcome',
+          onEntry: assign((context, event) => {
+            let message = 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through WhatsApp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।';
+            context.chatInterface.toUser(context.user, message);
+          }),
+          always: '#onboardingLocale'
         },
         onboardingLocale: {
           id: 'onboardingLocale',
@@ -118,11 +117,11 @@ const sevaMachine = Machine({
         if(context.user.name)
           message = message.replace('{{name}}', context.user.name);
         else 
-          message = message.replace('{{name}}', '');
+          message = message.replace(' {{name}}', '');
         context.chatInterface.toUser(context.user, message);
       }),
       always: '#sevamenu'
-    },    
+    },
     locale: {
       id: 'locale',
       initial: 'question',
@@ -146,18 +145,6 @@ const sevaMachine = Machine({
           always: '#welcome'
         }
       }
-    },
-    welcome: {
-      id: 'welcome',
-      onEntry: assign( (context, event, meta) => {
-        var message = dialog.get_message(messages.welcome, context.user.locale);
-        if(context.user.name)
-          message = message.replace('{{name}}', ' ' + context.user.name);
-        else 
-          message = message.replace('{{name}}', '');
-        context.chatInterface.toUser(context.user, message);
-      }),
-      always: '#sevamenu'
     },
     sevamenu : { // TODO rename to menu if you can figure out how to avoid name clash with seva's menu
       id: 'sevamenu',
@@ -242,8 +229,8 @@ let messages = {
     }
   },
   welcome: {
-    en_IN: 'Hi{{name}}, \nWelcome to mSeva Punjab 🙏. Now, using WhatsApp, you can:\n  - File a Complaint and Track its Status\n  - Pay your Bills.',
-    hi_IN: 'नमस्ते{{name}}\nmSeva पंजाब में आपका स्वागत है 🙏🏻। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे: \n  - आप शिकायत दर्ज कर सकते है \n  - बिल का भुगतान कर सकते है।'
+    en_IN: 'Hi {{name}}, \nWelcome to mSeva Punjab 🙏. Now, using WhatsApp, you can:\n  - File a Complaint and Track its Status\n  - Pay your Bills.',
+    hi_IN: 'नमस्ते {{name}}\nmSeva पंजाब में आपका स्वागत है 🙏। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे: \n  - आप शिकायत दर्ज कर सकते है \n  - बिल का भुगतान कर सकते है।'
   },
   sevamenu: {
     question: {
@@ -253,11 +240,11 @@ let messages = {
   },
   onboardingName: {
     en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".',
-    hi_IN: 'TODO'
+    hi_IN: 'आगे बढ़ने से पहले, अपने अनुभव को और व्यक्तिगत बनाने के लिए कृपया अपना नाम साझा करें।\nयदि आप अपना नाम साझा नहीं करना चाहते हैं, तो टाइप करें और "*No*" भेजें।'
   },
   onboardingThankYou: {
     en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
-    hi_EN: 'TODO'
+    hi_IN: 'विवरण के लिए आपका बहुत-बहुत धन्यवाद {{name}}, हम आपकी सेवा करके प्रसन्न हैं।'
   }
 }
 
