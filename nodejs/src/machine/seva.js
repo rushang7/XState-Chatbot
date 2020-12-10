@@ -200,7 +200,7 @@ const sevaMachine = Machine({
       always: 'start',
       // type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
       onEntry: assign((context, event) => {
-        context.chatInterface.toUser(context.user, "Goodbye. Say hi to start another conversation");
+        context.chatInterface.toUser(context.user, dialog.get_message(messages.endstate, context.user.locale));
       })
     },
     system_error: {
@@ -224,8 +224,8 @@ let messages = {
   },
   locale : {
     question: {
-      en_IN: "Please choose your preferred language\n1.English\n2. हिंदी",
-      hi_IN: "कृपया अपनी पसंदीदा भाषा चुनें\n1.English\n2. हिंदी"
+      en_IN: "Please choose your preferred language\n1. English\n2. हिंदी",
+      hi_IN: "कृपया अपनी पसंदीदा भाषा चुनें\n1. English\n2. हिंदी"
     }
   },
   welcome: {
@@ -234,8 +234,8 @@ let messages = {
   },
   sevamenu: {
     question: {
-      en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n5 to Change Language',
-      hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n5 भाषा बदलने के लिए'
+      en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n4 to Change Language',
+      hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n4 भाषा बदलने के लिए'
     }
   },
   onboardingName: {
@@ -245,6 +245,10 @@ let messages = {
   onboardingThankYou: {
     en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
     hi_IN: 'विवरण के लिए आपका बहुत-बहुत धन्यवाद {{name}}, हम आपकी सेवा करके प्रसन्न हैं।'
+  },
+  endstate: {
+    en_IN: 'Goodbye. Say hi to start another conversation',
+    hi_IN: 'अलविदा। एक और बातचीत शुरू करने के लिए नमस्ते कहें'
   }
 }
 
@@ -260,7 +264,7 @@ let grammer = {
       {intention: 'pgr', recognize: ['1','complaint']}, 
       {intention: 'bills', recognize: ['2', 'bill']},
       {intention: 'receipts', recognize: ['3','receipt']},
-      {intention: 'locale', recognize: ['5','language', 'english', 'hindi']}
+      {intention: 'locale', recognize: ['4','language', 'english', 'hindi']}
     ]
   }
 }

@@ -4,22 +4,22 @@ const dialog = require('./util/dialog');
 
 const pgr =  {
   id: 'pgr',
-  initial: 'menu',
+  initial: 'pgrmenu',
   states: {
-    menu : {
-      id: 'menu',
+    pgrmenu : {
+      id: 'pgrmenu',
       initial: 'question',
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
+            context.chatInterface.toUser(context.user, dialog.get_message(messages.pgrmenu.question, context.user.locale));
           }),
           on: {
-              USER_MESSAGE:'process'
+            USER_MESSAGE: 'process'
           }
-        }, // menu.question
+        }, // pgrmenu.question
         process: {
-          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event)),
+          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.pgrmenu.question, event)),
           always : [
             {
               target: '#fileComplaint',
@@ -33,13 +33,13 @@ const pgr =  {
               target: 'error'
             }
           ]
-        }, // menu.process
+        }, // pgrmenu.process
         error: {
           onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale))),
           always : 'question'
-        } // menu.error
-      }, // menu.states
-    }, // menu
+        } // pgrmenu.error
+      }, // pgrmenu.states
+    }, // pgrmenu
     fileComplaint: {
       id: 'fileComplaint',
       initial: 'type',
@@ -278,11 +278,9 @@ const pgr =  {
               states: {
                 question: {
                   onEntry: assign((context, event) => {
-                    // TODO - Rushang clean this?
-                    var message = 'Is this the correct location of the complaint?';
-                    message += '\nCity: ' + context.slots.pgr["city"];
-                    message += '\nLocality: ' + context.slots.pgr["locality"];
-                    message += '\nPlease send \'No\', if it isn\'t correct'
+                    let message = dialog.get_message(messages.fileComplaint.confirmLocation.question, context.user.locale);
+                    message = message.replace('{{city}}', context.slots.pgr['city']);
+                    message = message.replace('{{locality}}', context.slots.pgr['locality']);
                     context.chatInterface.toUser(context.user, message);
                   }),
                   on: {
@@ -291,6 +289,7 @@ const pgr =  {
                 },
                 process: {
                   onEntry: assign((context, event) => {
+                    // TODO: Generalised "disagree" intention
                     if(event.message.input.trim().toLowerCase() === 'no') {
                       context.slots.pgr["locationConfirmed"] = false;
                     } else {
@@ -477,7 +476,7 @@ const pgr =  {
 }; // pgr
 
 let messages = {
-  menu: {
+  pgrmenu: {
     question: {
       en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
       hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
@@ -520,6 +519,11 @@ let messages = {
         hi_IN : 'यदि आप शिकायत स्थल पर हैं, तो कृपया अपना स्थान साझा करें। अगर नहीं किसी भी चरित्र को टाइप करें।'
       }
     }, // geoLocation 
+    confirmLocation: {
+      question: {
+        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nLocality: {{locality}}\nPlease send "*No*", if it is incorrect'
+      }
+    },
     city: {
       question: {
         preamble: {
@@ -556,7 +560,7 @@ let messages = {
 }; // messages
 
 let grammer = {
-  menu: {
+  pgrmenu: {
     question: [
       {intention: 'file_new_complaint', recognize: ['1', 'file', 'new']},
       {intention: 'track_existing_complaints', recognize: ['2', 'track', 'existing']}
