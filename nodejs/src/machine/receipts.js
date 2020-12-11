@@ -162,6 +162,9 @@ const receipts = {
                   message += (i + 1) + '. ';
                   message += receiptTemplate;
                 }
+                let message1 = dialog.get_message(messages.receiptNumber.question, context.user.locale);
+                message += '\n\n';
+                message+=message1;
                 context.chatInterface.toUser(context.user,message);
               }
               
@@ -502,8 +505,7 @@ const receipts = {
         states: {
           question: {
             onEntry: assign((context, event) => {
-              let message = dialog.get_message(messages.receiptNumber.question, context.user.locale);
-              context.chatInterface.toUser(context.user, message);
+              
             }),
             on: {
               USER_MESSAGE: 'process'
