@@ -56,7 +56,7 @@ const receipts = {
             ]
           } // menu.error
         }
-      },//receiptsmenu
+      },//services
       trackReceipts:{
         id:'trackReceipts',
         initial:'start',
@@ -486,7 +486,7 @@ const receipts = {
                 }
               },
               {
-                target: '#services'
+                target: '#serviceMenu'
               }
             ]
           },
@@ -604,6 +604,56 @@ const receipts = {
 
 
         
+      },
+      serviceMenu: {
+        id: 'serviceMenu',
+        onEntry: assign((context, event) => {
+          context.receipts = {slots: {}};
+        }),
+        initial: 'question',
+        states:{
+          question:{
+            onEntry: assign((context, event) => {
+              let { services, messageBundle } = dummyReceipts.getSupportedServicesAndMessageBundle();
+              let preamble = dialog.get_message(messages.services.question.preamble, context.user.locale);
+              let { prompt, grammer } = dialog.constructListPromptAndGrammer(services, messageBundle, context.user.locale);
+              context.grammer = grammer;
+              context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+            }),
+            on: {
+              USER_MESSAGE:'process'
+            }
+          },//question
+          process:{
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event, true);
+            }),
+            always:[
+              {
+                target: 'error',
+                cond: (context, event) => context.intention === dialog.INTENTION_UNKOWN
+              },
+
+              {
+                target: '#searchParams',
+                actions: assign((context, event) => {
+                  context.receipts.slots.service = context.intention;
+                }),
+              }
+            ]
+          },
+          error: {
+            onEntry: assign( (context, event) => {
+              let message =dialog.get_message(messages.services.error,context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            }),
+            always : [
+              {
+                target: 'question'
+              }
+            ]
+          } // menu.error
+        }
       },
     }//receipts.states
 };
