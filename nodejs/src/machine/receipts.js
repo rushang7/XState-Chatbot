@@ -683,7 +683,7 @@ let messages = {
     },
     listofreceipts:{
       singleRecord: {
-        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nLink: {{receiptDocumentLink}}\n\n'
       },
       multipleRecordsSameService: {
         en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
@@ -736,7 +736,7 @@ let messages = {
     },
     results:{
       singleRecord: {
-        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nLink: {{receiptDocumentLink}}\n\n'
       },
       multipleRecordsSameService: {
         en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
@@ -765,12 +765,12 @@ let messages = {
       en_IN:'Sorry. Some error occurred on server.'
     },
     singleReceipt: {
-      en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
+      en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nLink: {{receiptDocumentLink}}\n\n'
     },
     multipleReceipts: {
       en_IN: 'Following Receipts found :',
       receiptTemplate: {
-        en_IN: ' {{service}} - {{id}} - {{locality}},{{city}} \n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPaymentLink: {{receiptDocumentLink}}'
+        en_IN: '{{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nLink: {{receiptDocumentLink}}'
       }
     }
     
