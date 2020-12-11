@@ -185,13 +185,9 @@ const receipts = {
         id:'noReceipts',
         onEntry: assign((context, event) => {
           let message = dialog.get_message(messages.receiptSlip.not_found, context.user.locale);
-          let optionMessage = context.receipts.slots.searchParamOption;
-          let inputMessage = context.receipts.slots.paramInput;
-          message = message.replace('{{searchparamoption}}', optionMessage);
-          message = message.replace('{{paramInput}}', inputMessage);
           context.chatInterface.toUser(context.user, message);
         }),
-        always:'#searchParams'
+        always:'#searchReceptInitiate'
       },
       searchReceptInitiate:{
         id:'searchReceptInitiate',
@@ -628,14 +624,14 @@ let messages = {
   },
   receiptSlip:{
     not_found:{
-      en_IN:'The {{searchparamoption}} :   {{paramInput}}   is not found in our records. Please Check the details you have provided once again.'
+      en_IN:'There are no records found linked to your mobile number'
     },
     error:{
       en_IN:'Sorry. Some error occurred on server.'
     },
     listofreceipts:{
       singleRecord: {
-        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nreceiptDocumentLink: {{receiptDocumentLink}}\n\n'
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
       },
       multipleRecordsSameService: {
         en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
@@ -688,7 +684,7 @@ let messages = {
     },
     results:{
       singleRecord: {
-        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nreceiptDocumentLink: {{receiptDocumentLink}}\n\n'
+        en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
       },
       multipleRecordsSameService: {
         en_IN: 'There are multiple records found . Select one record to proceed ahead. You can always come back and choose another record.',
@@ -717,12 +713,12 @@ let messages = {
       en_IN:'Sorry. Some error occurred on server.'
     },
     singleReceipt: {
-      en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nreceiptDocumentLink: {{receiptDocumentLink}}\n\n'
+      en_IN:'Your {{service}} payment receipt for consumer number {{id}} against property in  {{locality}},{{city}} is given 👇 below:\n\nClick on the link to view and download a copy of bill or payment receipt.\n\n {{date}} - Rs.  {{amount}} -  {{transactionNumber}}\nPaymentLink: {{receiptDocumentLink}}\n\n'
     },
     multipleReceipts: {
       en_IN: 'Following Receipts found :',
       receiptTemplate: {
-        en_IN: ' {{service}} - {{id}} - {{locality}},{{city}} \n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nreceiptDocumentLink: {{receiptDocumentLink}}'
+        en_IN: ' {{service}} - {{id}} - {{locality}},{{city}} \n {{date}} - Rs.  {{amount}} -  {{transactionNumber}} \nPaymentLink: {{receiptDocumentLink}}'
       }
     }
     
