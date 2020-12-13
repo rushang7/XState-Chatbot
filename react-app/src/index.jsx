@@ -36,8 +36,10 @@ class App extends React.Component {
         this.chatbotService = interpret(chatbotMachine.withContext ({  
             chatInterface: this,
             user: {
-                mobileNumber: "9284726483",
+                mobileNumber: "7391904467",
                 uuid: "81528b1a-5795-43a7-a6e2-8c64ff145c3d",
+                authToken: "ed79d5bb-8ef1-48d2-9d28-6fde9288701f",
+                tenantId: "pb.amritsar",
             },
             slots: {pgr: {}, bills: {}, receipts: {}}
         }));

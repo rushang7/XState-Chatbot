@@ -9,7 +9,7 @@ const envVariables = {
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
-    serviceProvider: process.env.serviceProvider || 'dummy',
+    serviceProvider: process.env.serviceProvider || 'eGov',
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
@@ -36,6 +36,8 @@ const envVariables = {
     userServiceHardCodedPassword: process.env.userServiceHardCodedPassword || '123456',
     userLoginAuthorizationHeader: process.env.userLoginAuthorizationHeader || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
+    billServiceHost: process.env.billServiceHost || 'http://localhost:3000/',
+    billServiceSearchPath: process.env.billServiceSearchPath || 'billing-service/bill/v2/_search',
     googleAPIKey: process.env.googleAPIKey || ''
 }
 
