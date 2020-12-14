@@ -8,20 +8,25 @@ class Telemetry {
             data: data
         }
 
-        var elasticSearchHost = "http://localhost:9200"; // config.elasticSearchHost;
-        var elasticSearchPath = "/test_index2/_doc";
-        var url = `${elasticSearchHost}${elasticSearchPath}` ;
-        try {
-            let response = await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(object),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-        } catch(error) {
-            console.error(error);
-        }
+        // TODO: Put object on a kafka queue
+
+        // console.log('Telemetry: ' + JSON.stringify(object));
+
+        // var elasticSearchHost = "http://localhost:9200"; // config.elasticSearchHost;
+        // var elasticSearchPath = "/test_index2/_doc";
+        // var url = `${elasticSearchHost}${elasticSearchPath}` ;
+        // try {
+        //     let response = await fetch(url, {
+        //         method: 'POST',
+        //         body: JSON.stringify(object),
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         }
+        //     });
+        // } catch(error) {
+        //     console.error("Telemetry Failure");
+        //     console.error(error);
+        // }
     }
 };
 

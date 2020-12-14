@@ -9,7 +9,7 @@ const envVariables = {
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
-    pgrServiceProvider: process.env.pgrServiceProvider || 'dummyPGR',
+    serviceProvider: process.env.serviceProvider || 'dummy',
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
@@ -28,6 +28,13 @@ const envVariables = {
     localityExternalWebpagePath: process.env.localityExternalWebpagePath || 'citizen/openlink/whatsapp/locality',
 
     whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',
+
+    userServiceHost: process.env.userServiceHost || 'https://egov-micro-dev.egovernments.org/',
+    userServiceOAuthPath: process.env.userServiceOAuthPath || 'user/oauth/token',
+    userServiceCreateCitizenPath: process.env.userServiceCreateCitizenPath || 'user/citizen/_create',
+    userServiceUpdateProfilePath: process.env.userServiceUpdateProfilePath || 'user/profile/_update',
+    userServiceHardCodedPassword: process.env.userServiceHardCodedPassword || '123456',
+    userLoginAuthorizationHeader: process.env.userLoginAuthorizationHeader || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
     googleAPIKey: process.env.googleAPIKey || ''
 }

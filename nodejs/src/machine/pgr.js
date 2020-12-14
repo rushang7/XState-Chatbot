@@ -4,22 +4,22 @@ const dialog = require('./util/dialog');
 
 const pgr =  {
   id: 'pgr',
-  initial: 'menu',
+  initial: 'pgrmenu',
   states: {
-    menu : {
-      id: 'menu',
+    pgrmenu : {
+      id: 'pgrmenu',
       initial: 'question',
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
+            context.chatInterface.toUser(context.user, dialog.get_message(messages.pgrmenu.question, context.user.locale));
           }),
           on: {
-              USER_MESSAGE:'process'
+            USER_MESSAGE: 'process'
           }
-        }, // menu.question
+        }, // pgrmenu.question
         process: {
-          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event)),
+          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.pgrmenu.question, event)),
           always : [
             {
               target: '#fileComplaint',
@@ -33,137 +33,38 @@ const pgr =  {
               target: 'error'
             }
           ]
-        }, // menu.process
+        }, // pgrmenu.process
         error: {
           onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale))),
           always : 'question'
-        } // menu.error
-      }, // menu.states
-    }, // menu
+        } // pgrmenu.error
+      }, // pgrmenu.states
+    }, // pgrmenu
     fileComplaint: {
       id: 'fileComplaint',
-      initial: 'complaintType',
+      initial: 'type',
       states: {
-        complaintType: {
-          id: 'complaintType',
-          initial: 'question',
+        type: {
+          id: 'type',
+          initial: 'complaintType',
           states: {
-            question: {
-              invoke: {
-                src: (context) => pgrService.fetchFrequentComplaints(),
-                id: 'fetchFrequentComplaints',
-                onDone: {
-                  actions: assign((context, event) => {
-                    let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
-                    let {complaintTypes, messageBundle} = event.data;
-                    let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintTypes, messageBundle, context.user.locale, true);
-                    context.grammer = grammer; // save the grammer in context to be used in next step
-                    context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                  }) 
-                },
-                onError: {
-                  target: '#system_error'
-                }
-              },
-              on: {
-                USER_MESSAGE: 'process'
-              }
-            }, //question
-            process: {
-              onEntry: assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event) 
-              }),
-              always: [
-                {
-                  target: '#complaintType2Step',
-                  cond: (context) => context.intention == dialog.INTENTION_MORE
-                },
-                {
-                  target: '#geoLocationSharingInfo',
-                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
-                  actions: assign((context, event) => {
-                    context.slots.pgr["complaint"]= context.intention;
-                  })
-                },
-                {
-                  target: 'error'
-                }
-              ]
-            }, // process
-            error: {
-              onEntry: assign( (context, event) => {
-                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
-              }),
-              always: 'question',
-            } // error
-          } // states of complaintType
-        }, // complaintType
-        complaintType2Step: {
-          id: 'complaintType2Step',
-          initial: 'complaintCategory',
-          states: {
-            complaintCategory: {
-              id: 'complaintCategory',
+            complaintType: {
+              id: 'complaintType',
               initial: 'question',
               states: {
                 question: {
-                  invoke:  {                  
-                    src: (context, event)=>pgrService.fetchComplaintCategories(),
-                    id: 'fetchComplaintCategories',
+                  invoke: {
+                    src: (context) => pgrService.fetchFrequentComplaints(),
+                    id: 'fetchFrequentComplaints',
                     onDone: {
                       actions: assign((context, event) => {
-                        let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
-                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCategories, context.user.locale);
+                        let preamble = dialog.get_message(messages.fileComplaint.complaintType.question.preamble, context.user.locale);
+                        let {complaintTypes, messageBundle} = event.data;
+                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintTypes, messageBundle, context.user.locale, true);
                         context.grammer = grammer; // save the grammer in context to be used in next step
                         context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                      }),
-                    }, 
-                    onError: {
-                      target: '#system_error'
-                    }
-                  },
-                  on: {
-                    USER_MESSAGE: 'process'
-                  }
-                }, //question
-                process: {
-                  onEntry: assign((context, event) => {
-                    context.intention = dialog.get_intention(context.grammer, event, true) 
-                  }),
-                  always: [
-                    {
-                      target: '#complaintItem',
-                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                      }) 
                     },
-                    {
-                      target: 'error'
-                    }
-                  ]
-                }, // process
-                error: {
-                  onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
-                  }),
-                  always:  'question',
-                } // error
-              } // states of complaintCategory
-            }, // complaintCategory
-            complaintItem: {
-              id: 'complaintItem',
-              initial: 'question',
-              states: {
-                question: {
-                  invoke:  {                  
-                    src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
-                    id: 'fetchComplaintItemsForCategory',
-                    onDone: {
-                      actions: assign((context, event) => {
-                        let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
-                        let {prompt, grammer} = dialog.constructListPromptAndGrammer(event.data, messages.complaintCodes, context.user.locale, false, true);
-                        context.grammer = grammer; // save the grammer in context to be used in next step
-                        context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
-                      })
-                    }, 
                     onError: {
                       target: '#system_error'
                     }
@@ -178,11 +79,11 @@ const pgr =  {
                   }),
                   always: [
                     {
-                      target: '#complaintCategory',
-                      cond: (context) => context.intention == dialog.INTENTION_GOBACK
+                      target: '#complaintType2Step',
+                      cond: (context) => context.intention == dialog.INTENTION_MORE
                     },
                     {
-                      target: '#geoLocationSharingInfo',
+                      target: '#location',
                       cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
                       actions: assign((context, event) => {
                         context.slots.pgr["complaint"]= context.intention;
@@ -197,214 +98,385 @@ const pgr =  {
                   onEntry: assign( (context, event) => {
                     context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
                   }),
-                  always:  'question',
+                  always: 'question',
                 } // error
-              } // states of complaintItem
-            }, // complaintItem
-          } // states of complaintType2Step
-        }, // complaintType2Step
-        geoLocationSharingInfo: {
-          id: 'geoLocationSharingInfo',
-          onEntry: assign( (context, event) => {
-            context.chatInterface.toUser(context.user, '_Informational Image_');
-          }),
-          always: 'geoLocation'
+              } // states of complaintType
+            }, // complaintType
+            complaintType2Step: {
+              id: 'complaintType2Step',
+              initial: 'complaintCategory',
+              states: {
+                complaintCategory: {
+                  id: 'complaintCategory',
+                  initial: 'question',
+                  states: {
+                    question: {
+                      invoke:  {                  
+                        src: (context, event)=>pgrService.fetchComplaintCategories(),
+                        id: 'fetchComplaintCategories',
+                        onDone: {
+                          actions: assign((context, event) => {
+                            let { complaintCategories, messageBundle } = event.data;
+                            let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
+                            let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintCategories, messageBundle, context.user.locale);
+                            context.grammer = grammer; // save the grammer in context to be used in next step
+                            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                          }),
+                        }, 
+                        onError: {
+                          target: '#system_error'
+                        }
+                      },
+                      on: {
+                        USER_MESSAGE: 'process'
+                      }
+                    }, //question
+                    process: {
+                      onEntry: assign((context, event) => {
+                        context.intention = dialog.get_intention(context.grammer, event, true) 
+                      }),
+                      always: [
+                        {
+                          target: '#complaintItem',
+                          cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+                        },
+                        {
+                          target: 'error'
+                        }
+                      ]
+                    }, // process
+                    error: {
+                      onEntry: assign( (context, event) => {
+                        context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                      }),
+                      always:  'question',
+                    } // error
+                  } // states of complaintCategory
+                }, // complaintCategory
+                complaintItem: {
+                  id: 'complaintItem',
+                  initial: 'question',
+                  states: {
+                    question: {
+                      invoke:  {                  
+                        src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
+                        id: 'fetchComplaintItemsForCategory',
+                        onDone: {
+                          actions: assign((context, event) => {
+                            let { complaintItems, messageBundle } = event.data;
+                            let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
+                            let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintItems, messageBundle, context.user.locale, false, true);
+                            context.grammer = grammer; // save the grammer in context to be used in next step
+                            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                          })
+                        }, 
+                        onError: {
+                          target: '#system_error'
+                        }
+                      },
+                      on: {
+                        USER_MESSAGE: 'process'
+                      }
+                    }, //question
+                    process: {
+                      onEntry: assign((context, event) => {
+                        context.intention = dialog.get_intention(context.grammer, event) 
+                      }),
+                      always: [
+                        {
+                          target: '#complaintCategory',
+                          cond: (context) => context.intention == dialog.INTENTION_GOBACK
+                        },
+                        {
+                          target: '#location',
+                          cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                          actions: assign((context, event) => {
+                            context.slots.pgr["complaint"]= context.intention;
+                          })
+                        },
+                        {
+                          target: 'error'
+                        }
+                      ]
+                    }, // process
+                    error: {
+                      onEntry: assign( (context, event) => {
+                        context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                      }),
+                      always:  'question',
+                    } // error
+                  } // states of complaintItem
+                }, // complaintItem
+              } // states of complaintType2Step
+            }, // complaintType2Step
+          }
         },
-        geoLocation: {
-          id: 'geoLocation',
-          initial: 'question',
-          states : {
-            question: {
+        location: {
+          id: 'location',
+          initial: 'geoLocationSharingInfo',
+          states: {
+            geoLocationSharingInfo: {
+              id: 'geoLocationSharingInfo',
               onEntry: assign( (context, event) => {
-                let message = dialog.get_message(messages.fileComplaint.geoLocation.question, context.user.locale)
-                context.chatInterface.toUser(context.user, message);
+                context.chatInterface.toUser(context.user, '_Informational Image_');
               }),
-              on: {
-                USER_MESSAGE: 'process'
+              always: 'geoLocation'
+            },
+            geoLocation: {
+              id: 'geoLocation',
+              initial: 'question',
+              states : {
+                question: {
+                  onEntry: assign( (context, event) => {
+                    let message = dialog.get_message(messages.fileComplaint.geoLocation.question, context.user.locale)
+                    context.chatInterface.toUser(context.user, message);
+                  }),
+                  on: {
+                    USER_MESSAGE: 'process'
+                  }
+                },
+                process: {
+                  invoke: {
+                    id: 'getCityAndLocality',
+                    src: (context, event) => {
+                      if(event.message.type === 'location') {
+                        context.slots.pgr.geocode = event.message.input;
+                        return pgrService.getCityAndLocalityForGeocode(event.message.input);
+                      }
+                      return Promise.resolve({});
+                    },
+                    onDone: [
+                      {
+                        target: '#confirmLocation',
+                        cond: (context, event) => event.data.city,
+                        actions: assign((context, event) => {
+                          context.slots.pgr["city"]= event.data.city;
+                          context.slots.pgr["locality"] = event.data.locality;
+                        })
+                      },
+                      {
+                        target: '#city',
+                        actions: assign((context, event) => {
+                          console.log('qwe');
+                        })
+                      }
+                    ],
+                    onError: {
+                      target: '#city',
+                      actions: assign((context, event) => {
+                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+                        context.chatInterface.toUser(context.user, message); // TODO - Rushang - message should say, "we are going to try different approach"
+                      })
+                    }
+                  }
+                }
               }
             },
-            process: {
-              invoke: {
-                id: 'getCityAndLocality',
-                src: (context, event) => {
-                  if(event.message.type === 'location') {
-                    context.slots.pgr.geocode = event.message.input;
-                    return pgrService.getCityAndLocalityForGeocode(event.message.input);
+            confirmLocation: {
+              id: 'confirmLocation',
+              initial: 'question',
+              states: {
+                question: {
+                  onEntry: assign((context, event) => {
+                    let message = dialog.get_message(messages.fileComplaint.confirmLocation.question, context.user.locale);
+                    message = message.replace('{{city}}', context.slots.pgr['city']);
+                    message = message.replace('{{locality}}', context.slots.pgr['locality']);
+                    context.chatInterface.toUser(context.user, message);
+                  }),
+                  on: {
+                    USER_MESSAGE: 'process'
                   }
-                  return Promise.resolve({});
                 },
-                onDone: [
-                  {
-                    target: '#confirmLocation',
-                    cond: (context, event) => event.data.city,
-                    actions: assign((context, event) => {
-                      context.slots.pgr["city"]= event.data.city;
-                      context.slots.pgr["locality"] = event.data.locality;
-                    })
+                process: {
+                  onEntry: assign((context, event) => {
+                    // TODO: Generalised "disagree" intention
+                    if(event.message.input.trim().toLowerCase() === 'no') {
+                      context.slots.pgr["locationConfirmed"] = false;
+                    } else {
+                      context.slots.pgr["locationConfirmed"] = true;
+                    }
+                  }),
+                  always: [
+                    {
+                      target: '#persistComplaint',
+                      cond: (context, event) => context.slots.pgr["locationConfirmed"]  && context.slots.pgr["locality"]
+                    },
+                    {
+                      target: '#locality',
+                      cond: (context, event) => context.slots.pgr["locationConfirmed"] 
+                    },
+                    {
+                      target: '#city'
+                    }
+                  ]
+                }
+              }
+            },
+            city: {
+              id: 'city',
+              initial: 'question',
+              states: {
+                question: {
+                  invoke: {
+                    id: 'fetchCities',
+                    src: (context, event) => pgrService.fetchCities(),
+                    onDone: {
+                      actions: assign((context, event) => {
+                        let { cities, messageBundle } = event.data;
+                        let preamble = dialog.get_message(messages.fileComplaint.city.question.preamble, context.user.locale);
+                        let link = pgrService.getCityExternalWebpageLink();
+                        let message = preamble + '\n' + link;
+                        context.grammer = dialog.constructLiteralGrammer(cities, messageBundle, context.user.locale);
+                        context.chatInterface.toUser(context.user, message);
+                      })
+                    },
+                    onError: {
+                      target: '#system_error'
+                    }
                   },
-                  {
-                    target: '#city',
-                    actions: assign((context, event) => {
-                      console.log('qwe');
-                    })
+                  on: {
+                    USER_MESSAGE: 'process'
                   }
-                ],
-                onError: {
-                  target: '#city',
-                  actions: assign((context, event) => {
-                    let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                    context.chatInterface.toUser(context.user, message); // TODO - Rushang - message should say, "we are going to try different approach"
-                  })
+                },
+                process: {
+                  onEntry:  assign((context, event) => {
+                    context.intention = dialog.get_intention(context.grammer, event) 
+                  }),
+                  always : [
+                    {
+                      target: '#locality',
+                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                      actions: assign((context, event) => context.slots.pgr["city"] = context.intention)    
+                    },
+                    {
+                      target: 'error',
+                    }, 
+                  ]
+                },
+                error: {
+                  onEntry: assign( (context, event) => {
+                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                  }),
+                  always:  'question',
                 }
               }
+            },
+            locality: {
+              id: 'locality',
+              initial: 'question',
+              states: {
+                question: {
+                  invoke: {
+                    id: 'fetchLocalities',
+                    src: (context) => pgrService.fetchLocalities(context.slots.pgr.city),
+                    onDone: {
+                      actions: assign((context, event) => {
+                        let { localities, messageBundle } = event.data;
+                        let preamble = dialog.get_message(messages.fileComplaint.locality.question.preamble, context.user.locale);
+                        let link = pgrService.getLocalityExternalWebpageLink(context.slots.pgr.city);
+                        let message = preamble + '\n' + link;
+                        context.grammer = dialog.constructLiteralGrammer(localities, messageBundle, context.user.locale);
+                        context.chatInterface.toUser(context.user, message);
+                      })
+                    }
+                  },
+                  on: {
+                    USER_MESSAGE: 'process'
+                  }
+                },
+                process: {
+                  onEntry:  assign((context, event) => {
+                    context.intention = dialog.get_intention(context.grammer, event) 
+                  }),
+                  always : [
+                    {
+                      target: '#persistComplaint',
+                      cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
+                      actions: assign((context, event) => context.slots.pgr["locality"] = context.intention)
+                    },
+                    {
+                      target: 'error',
+                    }, 
+                  ]
+                },
+                error: {
+                  onEntry: assign( (context, event) => {
+                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                  }),
+                  always:  'question',
+                }
+              }
+            },
+            landmark: {
+              // come here when user 1) did not provide geolocation or 2) did not confirm geolocation - either because google maps got it wrong or if there was a google api error 
+
             }
           }
         },
-        confirmLocation: {
-          id: 'confirmLocation',
-          initial: 'question',
-          states: {
-            question: {
-              onEntry: assign((context, event) => {
-                // TODO - Rushang clean this?
-                var message = 'Is this the correct location of the complaint?';
-                message += '\nCity: ' + context.slots.pgr["city"];
-                message += '\nLocality: ' + context.slots.pgr["locality"];
-                message += '\nPlease send \'No\', if it isn\'t correct'
-                context.chatInterface.toUser(context.user, message);
-              }),
-              on: {
-                USER_MESSAGE: 'process'
-              }
-            },
-            process: {
-              onEntry: assign((context, event) => {
-                if(event.message.input.trim().toLowerCase() === 'no') {
-                  context.slots.pgr["locationConfirmed"] = false;
-                } else {
-                  context.slots.pgr["locationConfirmed"] = true;
-                }
-              }),
-              always: [
-                {
-                  target: '#persistComplaint',
-                  cond: (context, event) => context.slots.pgr["locationConfirmed"]  && context.slots.pgr["locality"]
-                },
-                {
-                  target: '#locality',
-                  cond: (context, event) => context.slots.pgr["locationConfirmed"] 
-                },
-                {
-                  target: '#city'
-                }
-              ]
-            }
-          }
-        },
-        city: {
-          id: 'city',
-          initial: 'question',
-          states: {
-            question: {
-              invoke: {
-                id: 'fetchCities',
-                src: (context, event) => pgrService.fetchCities(),
-                onDone: {
-                  actions: assign((context, event) => {
-                    let preamble = "Click here to select your city"
-                    context.grammer = dialog.constructLiteralGrammer(event.data, messages.cities, context.user.locale);
-                    context.chatInterface.toUser(context.user, `${preamble}`);
-                  })
-                },
-                onError: {
-                  target: '#system_error'
-                }
-              },
-              on: {
-                USER_MESSAGE: 'process'
-              }
-            },
-            process: {
-              onEntry:  assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event) 
-              }),
-              always : [
-                {
-                  target: '#locality',
-                  cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
-                  actions: assign((context, event) => context.slots.pgr["city"] = context.intention)    
-                },
-                {
-                  target: 'error',
-                }, 
-              ]
-            },
-            error: {
-              onEntry: assign( (context, event) => {
-                context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
-              }),
-              always:  'question',
-            }
-          }
-        },
-        locality: {
-           // TODO - Rushang move to invoke pattern
-          id: 'locality',
-          initial: 'question',
-          states: {
-            question: {
-              onEntry: assign( (context, event) => {
-                let message = 'Please enter your locality'
-                context.chatInterface.toUser(context.user, message);
-              }),
-              on: {
-                USER_MESSAGE: [{target: 'process'}]
-              }
-            },
-            process: {
-              onEntry: assign((context, event) => {
-                context.slots.pgr["locality"] = event.message.input;
-              }),
-              always: '#persistComplaint'
-            }
-          }
+        other: {
+          // get other info
+
         },
         persistComplaint: {
-          // TODO - Rushang move to invoke pattern
           id: 'persistComplaint',
-          always: '#endstate',
-          onEntry: assign((context, event) => {
-            console.log(context.slots.pgr);
-            //make api call
-            console.log('Making api call to PGR Service');
-            let message = 'Complaint has been filed successfully {{number}}';
-            let number = '123';
-            message = message.replace('{{number}}', number);
-            context.chatInterface.toUser(context.user, message);
-            context.chatInterface.toUser(context.user, `Complaint Details: ${JSON.stringify(context.slots.pgr)}`);
-            context.slots.pgr = {}; // clear slots
-          })
+          invoke: {
+            id: 'persistComplaint',
+            src: (context) => pgrService.persistComplaint(context.slots.pgr),
+            onDone: {
+              target: '#endstate',
+              actions: assign((context, event) => {
+                let complaintDetails = event.data;
+                let message = dialog.get_message(messages.fileComplaint.persistComplaint, context.user.locale);
+                message = message.replace('{{complaintNumber}}', complaintDetails.complaintNumber);
+                message = message.replace('{{complaintLink}}', complaintDetails.complaintLink);
+                context.chatInterface.toUser(context.user, message);
+              })
+            }
+          }
         },
       }, // fileComplaint.states
     },  // fileComplaint
     trackComplaint: {
-       // TODO - Rushang move to invoke pattern
       id: 'trackComplaint',
-      always: '#endstate',
-      onEntry: assign( (context, event) => {
-        //make api call
-        console.log('Making an api call to PGR Service');
-        let message = 'Here are your recent complaints {{details}}';
-        let details = 'No. - 123, ...';
-        message = message.replace('{{details}}', details);
-        context.chatInterface.toUser(context.user, message);
-      })
+      invoke: {
+        id: 'fetchOpenComplaints',
+        src: (context) => pgrService.fetchOpenComplaints(context.user),
+        onDone: [
+          {
+            target: '#endstate',
+            cond: (context, event) => event.data.length > 0,
+            actions: assign((context, event) => {
+              let complaints = event.data;
+              let message = dialog.get_message(messages.trackComplaint.results.preamble, context.user.locale);
+              message += '\n';
+              for(let i = 0; i < complaints.length; i++) {
+                let template = dialog.get_message(messages.trackComplaint.results.complaintTemplate, context.user.locale);
+                template = template.replace('{{complaintType}}', complaints[i].complaintType);
+                template = template.replace('{{complaintId}}', complaints[i].complaintId);
+                template = template.replace('{{filedDate}}', complaints[i].filedDate);
+                template = template.replace('{{complaintStatus}}', complaints[i].complaintStatus);
+                template = template.replace('{{complaintLink}}', complaints[i].complaintLink);
+                message += '\n' + (i + 1) + '. ' + template;
+              }
+
+              context.chatInterface.toUser(context.user, message);
+            })
+          },
+          {
+            target: '#endstate',
+            actions: assign((context, event) => {
+              let message = dialog.get_message(messages.trackComplaint.noRecords, context.user.locale);
+              context.chatInterface.toUser(context.user, message);
+            })
+          }
+        ]
+      }
     } // trackComplaint
   } // pgr.states
 }; // pgr
 
 let messages = {
-  menu: {
+  pgrmenu: {
     question: {
       en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
       hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
@@ -446,210 +518,49 @@ let messages = {
         en_IN :'If you are at the grievance site, please share your location. Otherwise type any character.',
         hi_IN : 'यदि आप शिकायत स्थल पर हैं, तो कृपया अपना स्थान साझा करें। अगर नहीं किसी भी चरित्र को टाइप करें।'
       }
-    } // geoLocation 
-  }, // fileComplaint
-  cities: {
-    "pb.jalandhar": {
-      en_IN : "Jalandhar",
-      hi_IN : "जालंधर"
+    }, // geoLocation 
+    confirmLocation: {
+      question: {
+        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nLocality: {{locality}}\nPlease send "*No*", if it is incorrect'
+      }
     },
-    "pb.amritsar": {
-      en_IN : "Amritsar",
-      hi_IN : "अमृतसर"
-    },
-    "pb.patankot": {
-      en_IN : "Patankot",
-      hi_IN : "पठानकोट"
-    },
-    "5": {
-      en_IN : "Nawanshahr",
-      hi_IN : "नवांशहर"
+    city: {
+      question: {
+        preamble: {
+          en_IN: 'Please select your city from the link given below. Tap on the link to search and select your city.',
+          hi_IN: 'कृपया नीचे दिए गए लिंक से अपने शहर का चयन करें। अपने शहर को खोजने और चुनने के लिए लिंक पर टैप करें।'
+        }
+      }
+    }, // city
+    locality: {
+      question: {
+        preamble: {
+          en_IN: 'Please select the locality of your complaint from the link below. Tap on the link to search and select a locality.',
+          hi_IN: 'कृपया नीचे दिए गए लिंक से अपनी शिकायत के इलाके का चयन करें। किसी इलाके को खोजने और चुनने के लिए लिंक पर टैप करें।'
+        }
+      }
+    }, // locality
+    persistComplaint: {
+      en_IN: 'Thank You! You have successfully filed a complaint through mSeva Punjab.\nYour Complaint No is : {{complaintNumber}}\nYou can view and track your complaint  through the link below:\n{{complaintLink}}\n\nPlease type and send “mseva” whenever you need my assistance.'
     }
-  },
-  complaintCodes: {
-    NoStreetlight: {
-      en_IN : "Please install new streetlight",
-      hi_IN : "कृपया नई स्ट्रीटलाइट स्थापित करें"
+  }, // fileComplaint
+  trackComplaint: {
+    noRecords: {
+      en_IN: 'There are no open complaints.\nPlease type and send mseva to go to the main menu options.'
     },
-    StreetLightNotWorking: {
-      en_IN : "Streetlight not working",
-      hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
-    },
-    GarbageNeedsTobeCleared: {
-      en_IN : "Garbage not cleared",
-      hi_IN : "स्ट्रीटलाइट काम नहीं कर रही है"
-    },
-    DamagedGarbageBin: {
-      en_IN : "Garbage bin damaged",
-      hi_IN : "कचरा बिन टूटा है"
-    },
-    BurningOfGarbage: {
-      en_IN : "Garbage being burnt",
-      hi_IN : "कचरा जलाया जा रहा है"
-    },
-    OverflowingOrBlockedDrain: {
-      en_IN : "Drain overflow / blocked",
-      hi_IN : "नाली अतिप्रवाह या अवरुद्ध है"
-    },
-    illegalDischargeOfSewage: {
-      en_IN : "Sewage illegal discharge",
-      hi_IN : "सीवेज का अवैध निर्वहन"
-    },
-    BlockOrOverflowingSewage: {
-      en_IN : "Sewage overflow / blocked",
-      hi_IN : "सीवेज अतिप्रवाह या अवरुद्ध है"
-    },
-    ShortageOfWater: {
-      en_IN : "Water shortage",
-      hi_IN : "पानी की कमी"
-    },
-    NoWaterSupply: {
-      en_IN : "No Water supply",
-      hi_IN : "पानी नहीं है"
-    },
-    DirtyWaterSupply: {
-      en_IN : "Water supply dirty",
-      hi_IN : "पानी गंदी है"
-    },
-    BrokenWaterPipeOrLeakage: {
-      en_IN : "Pipe broken / leaking",
-      hi_IN : "पानी का पाइप टूट या लीक होना"
-    },
-    WaterPressureisVeryLess: {
-      en_IN : "Low water pressure",
-      hi_IN : "कम पानी का दबाव"
-    },
-    DamagedRoad: {
-      en_IN : "Road bad condition",
-      hi_IN : "सड़क टूटी हुई है"
-    },
-    WaterLoggedRoad: {
-      en_IN : "Road waterlogged ",
-      hi_IN : "ड़क पर पानी जमा है"
-    },
-    ManholeCoverMissingOrDamaged: {
-      en_IN : "Manhole open / cover damaged",
-      hi_IN : "मैनहोल खुला है या कवर गायब है"
-    },
-    DamagedOrBlockedFootpath: {
-      en_IN : "Footpath bad condition / blocked",
-      hi_IN : "फुटपाथ टूटा या अवरुद्ध है"
-    },
-    ConstructionMaterialLyingOntheRoad: {
-      en_IN : "Construction material lying on road",
-      hi_IN : "निर्माण सामग्री सड़क पर पड़ी है"
-    },
-    RequestSprayingOrFoggingOperation: {
-      en_IN : "Request mosquito spraying",
-      hi_IN : "मच्छरों के लिए डरावना"
-    },
-    StrayAnimals: {
-      en_IN : "Stray animal menace",
-      hi_IN : "आवारा पशु खतरा"
-    },
-    DeadAnimals: {
-      en_IN : "Dead animal. Please remove.",
-      hi_IN : "मृत पशु। कृपया निकालें"
-    },
-    DirtyOrSmellyPublicToilets: {
-      en_IN : "Toilet dirty / smelly",
-      hi_IN : "टॉयलेट गंदा या बदबूदार"
-    },
-    PublicToiletIsDamaged: {
-      en_IN : "Toilet damaged",
-      hi_IN : "टॉयलेट टूट गया"
-    },
-    NoWaterOrElectricityinPublicToilet: {
-      en_IN : "No water / electricity in Toilet",
-      hi_IN : "टॉयलेट में पानी या बिजली नहीं"
-    },
-    IllegalShopsOnFootPath: {
-      en_IN : "Illegal shops on footpath",
-      hi_IN : "फुटपाथ पर अवैध दुकानें"
-    },
-    IllegalConstructions: {
-      en_IN : "Illegal constructions",
-      hi_IN : "अवैध निर्माण"
-    },
-    IllegalParking: {
-      en_IN : "Illegal parking",
-      hi_IN : "अवैध पार्किंग"
-    },
-    IllegalCuttingOfTrees: {
-      en_IN : "Illegal tree cutting",
-      hi_IN : "अवैध पेड़ की कटाई"
-    },
-    CuttingOrTrimmingOfTreeRequired: {
-      en_IN : "Request tree trimming / cutting",
-      hi_IN : "पेड़ की कटाई का अनुरोध करें"
-    },
-    OpenDefecation: {
-      en_IN : "Open defecation",
-      hi_IN : "खुले में शौच जाना"
-    },
-    ParkRequiresMaintenance: {
-      en_IN : "Request park maintenance",
-      hi_IN : "पार्क रखरखाव का अनुरोध करें"
-    },
-    Others: {
-      en_IN : "Something else",
-      hi_IN : "कुछ अन्य ..."
-    },
-  },
-  complaintCategories: {
-    StreetLights: {
-      en_IN : "Streetlights",
-      hi_IN : "सड़क की बत्तियाँ"
-    },
-    Garbage: {
-      en_IN : "Garbage",
-      hi_IN : "कचरा"
-    }, 
-    Drains: {
-      en_IN : "Drains",
-      hi_IN : "नालियों"
-    },
-    WaterandSewage: {
-      en_IN : "Water and Sewage",
-      hi_IN : "पानी और सीवेज"
-    },
-    RoadsAndFootpaths: {
-      en_IN : "Roads and Footpaths",
-      hi_IN : "सड़कें और फुटपाथ"
-    },
-    Mosquitos: {
-      en_IN : "Mosquitos",
-      hi_IN : "मच्छर"
-    },
-    Animals: {
-      en_IN : "Animals",
-      hi_IN : "जानवरों"
-    },
-    PublicToilets: {
-      en_IN : "Public Toilets",
-      hi_IN : "सार्वजनिक शौंचालय"
-    },
-    LandViolations: {
-      en_IN : "Land violations",
-      hi_IN : "भूमि का उल्लंघन"
-    },
-    Trees: {
-      en_IN : "Trees",
-      hi_IN : "पेड़"
-    },
-    OpenDefecation: {
-      en_IN : "Open defecation",
-      hi_IN : "खुले में शौच जाना"
-    },
-    Parks: {
-      en_IN : "Parks",
-      hi_IN : "पार्क"
-    },
+    results: {
+      preamble: {
+        en_IN: 'Your Open Complaints'
+      },
+      complaintTemplate: {
+        en_IN: '*{{complaintType}}*\nComplaint No: {{complaintId}}\nFiled Date: {{filedDate}}\nCurrent Complaint Status: *{{complaintStatus}}*\nTap on the link below to view the complaint\n{{complaintLink}}'
+      }
+    }
   }
 }; // messages
 
 let grammer = {
-  menu: {
+  pgrmenu: {
     question: [
       {intention: 'file_new_complaint', recognize: ['1', 'file', 'new']},
       {intention: 'track_existing_complaints', recognize: ['2', 'track', 'existing']}

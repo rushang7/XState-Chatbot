@@ -493,7 +493,7 @@ let messages = {
     multipleRecordsSameService: {
       en_IN: 'Following bills found:',
       billTemplate: {
-        en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+        en_IN: '{{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
       }
     }
   },

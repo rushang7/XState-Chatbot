@@ -9,6 +9,7 @@ import * as marked from 'marked';
 
 function MessageTemplate(props) {
     let message = props.item.text;
+    // console.log(message);
     message = message.replaceAll('\n', '<br/>');
     let htmlToinsert = { __html: message };
     return (
@@ -44,19 +45,26 @@ class App extends React.Component {
         this.chatbotService.start();
     }
 
-    toUser = (user, message) => {
-        let botMessage = {
-            author: {
-                id: 0
-            },
-            text: message
-        };
-        this.setState(prevState => ({
-            messages: [
-                ...prevState.messages,
-                botMessage
-            ]
-        }));
+    toUser = (user, outputMessages) => {
+        if(!Array.isArray(outputMessages)) {
+            let message = outputMessages;
+            outputMessages = [ message ];
+            console.warn('Output array had to be constructed. Remove the use of deeprecated function from the code. \ndialog.sendMessage() function should be used to send any message instead of any previously used methods.');
+        }
+        for(let message of outputMessages) {
+            let botMessage = {
+                author: {
+                    id: 0
+                },
+                text: message
+            };
+            this.setState(prevState => ({
+                messages: [
+                    ...prevState.messages,
+                    botMessage
+                ]
+            }));
+        }
     }
 
     fromUser = (event) => {
