@@ -58,6 +58,16 @@ function constructLiteralGrammer(keys, message_bundle, locale) {
   });
   return grammer;
 }
+function sendMessage(context, message, immediate = true) {
+  if(!context.output) {
+    context.output = [];
+  }
+  context.output.push(message);
+  if(immediate) {
+    context.chatInterface.toUser(context.user, context.output);
+    context.output = [];
+  }
+}
 
 let global_messages = {
   error: {
@@ -84,4 +94,4 @@ let global_messages = {
   },
 }
 
-module.exports = {get_message, get_intention, INTENTION_UNKOWN, INTENTION_MORE, INTENTION_GOBACK, global_messages, constructListPromptAndGrammer, constructLiteralGrammer};
+module.exports = {get_message, get_intention, INTENTION_UNKOWN, INTENTION_MORE, INTENTION_GOBACK, global_messages, constructListPromptAndGrammer, constructLiteralGrammer, sendMessage};

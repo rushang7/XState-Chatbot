@@ -10,7 +10,7 @@ const sevaMachine = Machine({
   on: {
     USER_RESET: {
       target: 'sevamenu',
-      actions: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(messages.reset, context.user.locale)))
+      actions: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(messages.reset, context.user.locale), false))
     }
   },
   states: {
@@ -35,7 +35,7 @@ const sevaMachine = Machine({
           id: 'onboardingWelcome',
           onEntry: assign((context, event) => {
             let message = 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through WhatsApp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।';
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: '#onboardingLocale'
         },
@@ -47,7 +47,7 @@ const sevaMachine = Machine({
               onEntry: assign((context, event) => {
                 let message = 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी';
                 context.grammer = grammer.locale.question;
-                context.chatInterface.toUser(context.user, message);
+                dialog.sendMessage(context, message, true);
               }),
               on: {
                 USER_MESSAGE: 'process'
@@ -74,7 +74,7 @@ const sevaMachine = Machine({
             question: {
               onEntry: assign((context, event) => {
                 let message = dialog.get_message(messages.onboardingName, context.user.locale);
-                context.chatInterface.toUser(context.user, message);
+                dialog.sendMessage(context, message);
               }),
               on: {
                 USER_MESSAGE: 'process'
@@ -104,7 +104,7 @@ const sevaMachine = Machine({
           onEntry: assign((context, event) => {
             var message = dialog.get_message(messages.onboardingThankYou, context.user.locale);
             message = message.replace('{{name}}', context.user.name);
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: '#welcome'
         },
@@ -118,7 +118,7 @@ const sevaMachine = Machine({
           message = message.replace('{{name}}', context.user.name);
         else 
           message = message.replace(' {{name}}', '');
-        context.chatInterface.toUser(context.user, message);
+        dialog.sendMessage(context, message, false);
       }),
       always: '#sevamenu'
     },
@@ -128,7 +128,7 @@ const sevaMachine = Machine({
       states: {
         question: {
           onEntry: assign((context, event) => {
-            context.chatInterface.toUser(context.user, dialog.get_message(messages.locale.question, context.user.locale));
+            dialog.sendMessage(context, dialog.get_message(messages.locale.question, context.user.locale));
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -139,7 +139,7 @@ const sevaMachine = Machine({
             context.user.locale  = dialog.get_intention(grammer.locale.question, event, true);
             if (context.user.locale === dialog.INTENTION_UNKOWN) {
               context.user.locale = 'en_IN';
-              context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));      
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));
             }
           }),
           always: '#welcome'
@@ -152,10 +152,10 @@ const sevaMachine = Machine({
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, dialog.get_message(messages.sevamenu.question, context.user.locale));
+            dialog.sendMessage(context, dialog.get_message(messages.sevamenu.question, context.user.locale), true);
           }),
           on: {
-              USER_MESSAGE: 'process'
+            USER_MESSAGE: 'process'
           }
         },
         process: {
@@ -186,7 +186,7 @@ const sevaMachine = Machine({
         }, // sevamenu.process
         error: {
           onEntry: assign( (context, event) => {
-            context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
           }),
           always : 'question'
         }, // sevamenu.error 
@@ -200,7 +200,7 @@ const sevaMachine = Machine({
       always: 'start',
       // type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
       onEntry: assign((context, event) => {
-        context.chatInterface.toUser(context.user, dialog.get_message(messages.endstate, context.user.locale));
+        dialog.sendMessage(context, dialog.get_message(messages.endstate, context.user.locale));
       })
     },
     system_error: {
@@ -209,7 +209,7 @@ const sevaMachine = Machine({
         target: '#welcome',
         actions: assign((context, event) => {
           let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-          context.chatInterface.toUser(context.user, message);
+          dialog.sendMessage(context, message, false);
           context.chatInterface.system_error(event.data);
         })
       }
