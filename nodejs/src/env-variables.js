@@ -9,7 +9,7 @@ const envVariables = {
 
     whatsAppProvider: process.env.whatsAppProvider || 'console',
 
-    serviceProvider: process.env.serviceProvider || 'eGov',
+    serviceProvider: process.env.serviceProvider || 'dummy',
 
     repoProvider: process.env.repoProvider || 'PostgreSQL',
 
