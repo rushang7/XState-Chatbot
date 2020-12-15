@@ -32,9 +32,10 @@ const bills = {
           }
         ],
         onError: {
+          target: 'searchBillInitiate',
           actions: assign((context, event) => {
-            let message = 'Sorry. Some error occurred on server';
-            context.chatInterface.toUser(context.user, message);
+            let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
+            dialog.sendMessage(context, message, false);
           })
         }
       }
@@ -89,7 +90,7 @@ const bills = {
             }
           }
         }
-        context.chatInterface.toUser(context.user, message);
+        dialog.sendMessage(context, message, false);
       }),
       always: '#searchBillInitiate'
     },
@@ -100,7 +101,7 @@ const bills = {
         question: {
           onEntry: assign((context, event) => {
             let message = dialog.get_message(messages.searchBillInitiate.question, context.user.locale);
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -131,7 +132,7 @@ const bills = {
         error: {
           onEntry: assign( (context, event) => {
             let message = 'Sorry, I didn\'t understand';
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always : 'question'
         }
@@ -142,11 +143,10 @@ const bills = {
       onEntry: assign( (context, event) => {
         if(context.totalBills === 0) {
           let message = dialog.get_message(messages.noBills.notLinked, context.user.locale);
-          context.chatInterface.toUser(context.user, message);
         } else {
           let message = dialog.get_message(messages.noBills.noPending, context.user.locale);
-          context.chatInterface.toUser(context.user, message);
         }
+        dialog.sendMessage(context, message, false);
       }),
       always: 'billServices'
     },
@@ -160,7 +160,7 @@ const bills = {
             let preamble = dialog.get_message(messages.billServices.question.preamble, context.user.locale);
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(services, messageBundle, context.user.locale);
             context.grammer = grammer;
-            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+            dialog.sendMessage(context, `${preamble}${prompt}`);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -186,7 +186,7 @@ const bills = {
         error: {
           onEntry: assign((context, event) => {
             let message = 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.';
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: 'question'
         }
@@ -202,7 +202,7 @@ const bills = {
             let preamble = dialog.get_message(messages.searchParamOptions.question.preamble, context.user.locale);
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(searchOptions, messageBundle, context.user.locale);
             context.grammer = grammer;
-            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+            dialog.sendMessage(context, `${preamble}${prompt}`);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -228,7 +228,7 @@ const bills = {
         error: {
           onEntry: assign((context, event) => {
             let message = 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.';
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: 'question'
         }
@@ -246,7 +246,7 @@ const bills = {
             let exampleMessage = dialog.get_message(example, context.user.locale);
             message = message.replace('{{option}}', optionMessage);
             message = message.replace('{{example}}', exampleMessage);
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -277,7 +277,7 @@ const bills = {
             let message = dialog.get_message(messages.paramInput.re_enter, context.user.locale);
             let optionMessage = dialog.get_message(option, context.user.locale);
             message = message.replace('{{option}}', optionMessage);
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -316,7 +316,7 @@ const bills = {
             let { searchOptions, messageBundle } = billService.getSearchOptionsAndMessageBundleForService(context.slots.bills.service);
             message = message.replace('{{searchParamOption}}', dialog.get_message(messageBundle[context.slots.bills.searchParamOption], context.user.locale));
             message = message.replace('{{paramInput}}', context.slots.bills.paramInput);
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: '#paramInputInitiate'
         },
@@ -369,7 +369,7 @@ const bills = {
                 }
               }
             }
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always: '#searchBillInitiate'
         }
@@ -384,7 +384,7 @@ const bills = {
             let message = dialog.get_message(messages.paramInputInitiate.question, context.user.locale);
             let { searchOptions, messageBundle } = billService.getSearchOptionsAndMessageBundleForService(context.slots.bills.service);
             message = message.replace('{{searchParamOption}}', dialog.get_message(messageBundle[context.slots.bills.searchParamOption], context.user.locale));
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -415,7 +415,7 @@ const bills = {
         error: {
           onEntry: assign( (context, event) => {
             let message = 'Sorry, I didn\'t understand';
-            context.chatInterface.toUser(context.user, message);
+            dialog.sendMessage(context, message, false);
           }),
           always : 'question'
         }
