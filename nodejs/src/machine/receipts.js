@@ -20,13 +20,12 @@ const receipts = {
               let preamble = dialog.get_message(messages.services.question.preamble, context.user.locale);
               let { prompt, grammer } = dialog.constructListPromptAndGrammer(services, messageBundle, context.user.locale);
               context.grammer = grammer;
-              //context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
               dialog.sendMessage(context, `${preamble}${prompt}` , true);
             }),
             on: {
               USER_MESSAGE:'process'
             }
-          },//question
+          },
           process:{
             onEntry: assign((context, event) => {
               context.intention = dialog.get_intention(context.grammer, event, true);
@@ -48,17 +47,16 @@ const receipts = {
           error: {
             onEntry: assign( (context, event) => {
               let message =dialog.get_message(messages.services.error,context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
-              dialog.sendMessage(context, message);
+              dialog.sendMessage(context, message,false);
             }),
             always : [
               {
                 target: 'question'
               }
             ]
-          } // menu.error
+          } 
         }
-      },//services
+      },
       trackReceipts:{
         id:'trackReceipts',
         initial:'start',
@@ -90,8 +88,12 @@ const receipts = {
                 actions: assign((context, event) => {
                   let message = dialog.get_message(messages.trackReceipts.error,context.user.locale);
                   dialog.sendMessage(context, message, false);
-                  //context.chatInterface.toUser(context.user, message);
-                })
+                }),
+                always : [
+                  {
+                    target: '#services'
+                  }
+                ]
               }
             }
 
@@ -129,7 +131,12 @@ const receipts = {
                   let message = messages.receiptSlip.error;
                   //context.chatInterface.toUser(context.user, message);
                   dialog.sendMessage(context, message, false);
-                })
+                }),
+                always : [
+                  {
+                    target: '#services'
+                  }
+                ]
               }  
             
             },
@@ -153,7 +160,6 @@ const receipts = {
                 message = message.replace('{{amount}}', receipt.amount);
                 message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
                 message = message.replace('{{receiptDocumentLink}}', receipt.receiptDocumentLink);
-                //context.chatInterface.toUser(context.user,message);
                 dialog.sendMessage(context, message, false);
               }else {
                 message = dialog.get_message(messages.receiptSlip.listofreceipts.multipleRecordsSameService, context.user.locale);
@@ -170,8 +176,7 @@ const receipts = {
                 let message1 = dialog.get_message(messages.receiptNumber.question, context.user.locale);
                 message += '\n\n';
                 message+=message1;
-                //context.chatInterface.toUser(context.user,message);
-                dialog.sendMessage(context, message, false);
+                dialog.sendMessage(context, message, true);
               }
               
             }),
@@ -195,7 +200,7 @@ const receipts = {
         onEntry: assign((context, event) => {
           let message = dialog.get_message(messages.receiptSlip.not_found, context.user.locale);
           //context.chatInterface.toUser(context.user, message);
-          dialog.sendMessage(context, message, true);
+          dialog.sendMessage(context, message, false);
         }),
         always:'#searchReceptInitiate'
       },
@@ -206,7 +211,6 @@ const receipts = {
           question:{
             onEntry: assign((context, event) => {
               let message = dialog.get_message(messages.searchReceptInitiate.question, context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message, true);
             }),
             on: {
@@ -242,7 +246,6 @@ const receipts = {
           error: {
             onEntry: assign( (context, event) => {
               let message = dialog.get_message(messages.searchReceptInitiate.error,context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message, false);
             }),
             always : [
@@ -277,7 +280,6 @@ const receipts = {
               let preamble=dialog.get_message(messages.searchParams.question.preamble,context.user.locale);
               let { prompt, grammer } = dialog.constructListPromptAndGrammer(searchOptions, messageBundle, context.user.locale);
               context.grammer = grammer;
-              //context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
               dialog.sendMessage(context, `${preamble}${prompt}` , true);
             }),
             on:{
@@ -304,9 +306,7 @@ const receipts = {
           error: {
             onEntry: assign( (context, event) => {
               let message = dialog.get_message(messages.searchParams.error,context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , false);
-              
             }),
             always : [
               {
@@ -328,7 +328,6 @@ const receipts = {
               let exampleMessage = dialog.get_message(example, context.user.locale);
               message = message.replace('{{option}}', optionMessage);
               message = message.replace('{{example}}', exampleMessage);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , true);
             }),
             on: {
@@ -362,8 +361,7 @@ const receipts = {
               let message = dialog.get_message(messages.paramInput.re_enter, context.user.locale);
               let optionMessage = dialog.get_message(option, context.user.locale);
               message = message.replace('{{option}}', optionMessage);
-              //context.chatInterface.toUser(context.user, message);
-              dialog.sendMessage(context, message );
+              dialog.sendMessage(context, message , true);
             }),
             on: {
               USER_MESSAGE: 'process'
@@ -403,9 +401,13 @@ const receipts = {
               onError: {
                 actions: assign((context, event) => {
                   let message = messages.receiptSearchResults.error;
-                  //context.chatInterface.toUser(context.user, message);
                   dialog.sendMessage(context, message , false);
-                })
+                }),
+                always : [
+                  {
+                    target: '#services',
+                  }
+                ]
               }  
             
             },
@@ -417,7 +419,6 @@ const receipts = {
               let inputMessage = context.receipts.slots.paramInput;
               message = message.replace('{{searchparamoption}}', optionMessage);
               message = message.replace('{{paramInput}}', inputMessage);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , false);
             }),
             always: '#paramInputInitiate',
@@ -441,8 +442,7 @@ const receipts = {
                 message = message.replace('{{amount}}', receipt.amount);
                 message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
                 message = message.replace('{{receiptDocumentLink}}', receipt.receiptDocumentLink);
-                //context.chatInterface.toUser(context.user,message);
-                dialog.sendMessage(context, message );
+                dialog.sendMessage(context, message , false);
               }else {
                 message = dialog.get_message(messages.receiptSearchResults.results.multipleRecordsSameService, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
@@ -455,8 +455,7 @@ const receipts = {
                   message += (i + 1) + '. ';
                   message += receiptTemplate;
                 }
-                //context.chatInterface.toUser(context.user,message);
-                dialog.sendMessage(context, message );
+                dialog.sendMessage(context, message ,true);
               }
               
             }),
@@ -481,7 +480,6 @@ const receipts = {
           question: {
             onEntry: assign((context, event) => {
               let message = dialog.get_message(messages.paramInputInitiate.question, context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , true);
             }),
             on: {
@@ -513,7 +511,6 @@ const receipts = {
           error: {
             onEntry: assign( (context, event) => {
               let message =dialog.get_message(messages.paramInputInitiate.error,context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , false);
             }),
             always : 'question'
@@ -569,9 +566,13 @@ const receipts = {
               onError: {
                 actions: assign((context, event) => {
                   let message = messages.multipleRecordReceipt.error;
-                  //context.chatInterface.toUser(context.user, message);
                   dialog.sendMessage(context, message , false);
-                })
+                }),
+                always : [
+                  {
+                    target: 'services'
+                  }
+                ]
               }  
             
             },
@@ -591,8 +592,7 @@ const receipts = {
                 message = message.replace('{{amount}}', receipt.amount);
                 message = message.replace('{{transactionNumber}}', receipt.transactionNumber);
                 message = message.replace('{{receiptDocumentLink}}', receipt.receiptDocumentLink);
-                //context.chatInterface.toUser(context.user,message);
-                dialog.sendMessage(context, message , true);
+                dialog.sendMessage(context, message , false);
               }else {
                 message = dialog.get_message(messages.multipleRecordReceipt.multipleReceipts, context.user.locale);
                 for(let i = 0; i < receipts.length; i++) {
@@ -612,7 +612,7 @@ const receipts = {
                   message += receiptTemplate;
                 }
                 //context.chatInterface.toUser(context.user,message);
-                dialog.sendMessage(context, message , true);
+                dialog.sendMessage(context, message , false);
               }
 
             }),
@@ -642,13 +642,12 @@ const receipts = {
               let preamble = dialog.get_message(messages.services.question.preamble, context.user.locale);
               let { prompt, grammer } = dialog.constructListPromptAndGrammer(services, messageBundle, context.user.locale);
               context.grammer = grammer;
-              //context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
               dialog.sendMessage(context, `${preamble}${prompt}` , true);
             }),
             on: {
               USER_MESSAGE:'process'
             }
-          },//question
+          },
           process:{
             onEntry: assign((context, event) => {
               context.intention = dialog.get_intention(context.grammer, event, true);
@@ -670,7 +669,6 @@ const receipts = {
           error: {
             onEntry: assign( (context, event) => {
               let message =dialog.get_message(messages.services.error,context.user.locale);
-              //context.chatInterface.toUser(context.user, message);
               dialog.sendMessage(context, message , false);
             }),
             always : [
@@ -678,7 +676,7 @@ const receipts = {
                 target: 'question'
               }
             ]
-          } // menu.error
+          } 
         }
       },
     }//receipts.states
