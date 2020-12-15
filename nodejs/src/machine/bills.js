@@ -141,10 +141,11 @@ const bills = {
     noBills: {
       id: 'noBills',
       onEntry: assign( (context, event) => {
+        let message;
         if(context.totalBills === 0) {
-          let message = dialog.get_message(messages.noBills.notLinked, context.user.locale);
+          message = dialog.get_message(messages.noBills.notLinked, context.user.locale);
         } else {
-          let message = dialog.get_message(messages.noBills.noPending, context.user.locale);
+          message = dialog.get_message(messages.noBills.noPending, context.user.locale);
         }
         dialog.sendMessage(context, message, false);
       }),
