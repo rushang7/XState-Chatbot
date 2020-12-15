@@ -36,9 +36,13 @@ const envVariables = {
     userServiceHardCodedPassword: process.env.userServiceHardCodedPassword || '123456',
     userLoginAuthorizationHeader: process.env.userLoginAuthorizationHeader || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
-    billServiceHost: process.env.billServiceHost || 'http://localhost:3000/',
+    billServiceHost: process.env.billServiceHost || 'https://egov-micro-dev.egovernments.org/',
     billServiceSearchPath: process.env.billServiceSearchPath || 'billing-service/bill/v2/_search',
-    googleAPIKey: process.env.googleAPIKey || ''
+    googleAPIKey: process.env.googleAPIKey || '',
+
+    valueFirstUsername: process.env.VALUEFIRST_USERNAME || 'demo',
+    valueFirstPassword: process.env.VALUEFIRST_PASSWORD || 'demo',
+    valueFirstURL: process.env.VALUEFIRST_SEND_MESSAGE_URL || 'https://api.myvaluefirst.com/psms/servlet/psms.JsonEservice'
 }
 
 module.exports = envVariables;

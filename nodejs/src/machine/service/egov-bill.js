@@ -114,8 +114,6 @@ class BillService {
   }
 
   async fetchBillsForUser(user, locale) {
-    console.log(JSON.stringify(user));
-    //let randomUserBehaviour = parseInt(Math.random() * 5);
 
     let requestBody = {
       RequestInfo: {
@@ -123,13 +121,13 @@ class BillService {
       }
     };
 
-    let billUrl = config.billServiceHost + config.billServiceSearchPath + '?tenantId=' + user.tenantId;
+    let billUrl = config.billServiceHost + config.billServiceSearchPath + '?tenantId=pb.amritsar';
 
 
     if(user.hasOwnProperty('paramOption') && (user.paramOption!=null) ){
       billUrl+='&';
       if(user.paramOption=='mobile')
-        billUrl +='mobileNumbe='+user.paramInput;
+        billUrl +='mobileNumber='+user.paramInput;
       else
         billUrl +=user.paramOption+'='+user.paramInput;
       
@@ -159,10 +157,9 @@ class BillService {
       pendingBillSize=results.length;
       
     } else {
-      console.error('Error n fetching the bill');
+      console.error('Error in fetching the bill');
       return undefined;
     }
-    
 
     if(totalBillSize==0){
       return {                        

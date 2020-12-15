@@ -21,6 +21,7 @@
         "pg-promise": "^10.7.0",
         "request": "^2.88.0",
         "url-search-params-polyfill": "^8.1.0",
+        "urlencode": "^1.1.0",
         "xstate": "^4.13.0"
     },
     "devDependencies": {}
