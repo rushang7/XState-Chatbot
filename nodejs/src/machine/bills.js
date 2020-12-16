@@ -295,7 +295,7 @@ const bills = {
             id: 'fetchBillsForParam',
             src: (context, event) => {
               let slots = context.slots.bills;
-              return billService.fetchBillsForParam(context.user, slots.service, slots.searchParamOptions, slots.paramInput);
+              return billService.fetchBillsForParam(context.user, slots.service, slots.searchParamOption, slots.paramInput);
             },
             onDone: [
               {
