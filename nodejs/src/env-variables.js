@@ -29,6 +29,8 @@ const envVariables = {
 
     whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',
 
+    googleAPIKey: process.env.googleAPIKey || '',
+
     userServiceHost: process.env.userServiceHost || 'https://egov-micro-dev.egovernments.org/',
     userServiceOAuthPath: process.env.userServiceOAuthPath || 'user/oauth/token',
     userServiceCreateCitizenPath: process.env.userServiceCreateCitizenPath || 'user/citizen/_create',
@@ -38,7 +40,6 @@ const envVariables = {
 
     billServiceHost: process.env.billServiceHost || 'https://egov-micro-dev.egovernments.org/',
     billServiceSearchPath: process.env.billServiceSearchPath || 'billing-service/bill/v2/_search',
-    googleAPIKey: process.env.googleAPIKey || '',
 
     valueFirstUsername: process.env.VALUEFIRST_USERNAME || 'demo',
     valueFirstPassword: process.env.VALUEFIRST_PASSWORD || 'demo',

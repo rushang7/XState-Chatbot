@@ -2,6 +2,7 @@ const { Machine, assign } = require('xstate');
 const pgr = require('./pgr');
 const bills = require('./bills');
 const receipts = require('./receipts');
+const userProfileService = require('./service/egov-user-profile');
 const dialog = require('./util/dialog.js');
 
 const sevaMachine = Machine({
@@ -34,7 +35,7 @@ const sevaMachine = Machine({
         onboardingWelcome: {
           id: 'onboardingWelcome',
           onEntry: assign((context, event) => {
-            let message = 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through WhatsApp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।';
+            let message = messages.onboarding.onboardingWelcome;
             dialog.sendMessage(context, message, false);
           }),
           always: '#onboardingLocale'
@@ -45,7 +46,7 @@ const sevaMachine = Machine({
           states: {
             question: {
               onEntry: assign((context, event) => {
-                let message = 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी';
+                let message = messages.onboarding.onboardingLocale.question;
                 context.grammer = grammer.locale.question;
                 dialog.sendMessage(context, message, true);
               }),
@@ -56,7 +57,6 @@ const sevaMachine = Machine({
             process: {
               onEntry: assign((context, event) => {
                 context.intention = dialog.get_intention(context.grammer, event, true);
-                console.log(context.intention);
                 if(context.intention != dialog.INTENTION_UNKOWN) {
                   context.user.locale = context.intention;
                 } else {
@@ -69,11 +69,22 @@ const sevaMachine = Machine({
         },
         onboardingName: {
           id: 'onboardingName',
-          initial: 'question',
+          initial: 'preCondition',
           states: {
+            preCondition: {
+              always: [
+                {
+                  target: '#onboardingThankYou',
+                  cond: (context) => context.user.name 
+                },
+                {
+                  target: 'question'
+                }
+              ]
+            },
             question: {
               onEntry: assign((context, event) => {
-                let message = dialog.get_message(messages.onboardingName, context.user.locale);
+                let message = dialog.get_message(messages.onboarding.onboardingName.question, context.user.locale);
                 dialog.sendMessage(context, message);
               }),
               on: {
@@ -82,7 +93,7 @@ const sevaMachine = Machine({
             },
             process: {
               onEntry: assign((context, event) => {
-                let name = event.message.input.trim();
+                let name = dialog.get_input(event, false);
                 if(name.toLowerCase() != 'no') {
                   context.user.name = name;
                 }
@@ -101,12 +112,21 @@ const sevaMachine = Machine({
         },
         onboardingThankYou: {
           id: 'onboardingThankYou',
-          onEntry: assign((context, event) => {
-            var message = dialog.get_message(messages.onboardingThankYou, context.user.locale);
-            message = message.replace('{{name}}', context.user.name);
-            dialog.sendMessage(context, message, false);
-          }),
-          always: '#welcome'
+          invoke: {
+            id: 'updateUserProfile',
+            src: (context, event) => userProfileService.updateUser(context.user, context.tenantId),
+            onDone: {
+              target: '#welcome',
+              actions: assign((context, event) => {
+                let message = dialog.get_message(messages.onboarding.onboardingThankYou, context.user.locale);
+                message = message.replace('{{name}}', context.user.name);
+                dialog.sendMessage(context, message, false);
+              })
+            },
+            onError: {
+              target: '#welcome'
+            }
+          }
         },
       }
     },
@@ -135,14 +155,24 @@ const sevaMachine = Machine({
           }
         },
         process: {
-          onEntry: assign((context, event) => {
-            context.user.locale  = dialog.get_intention(grammer.locale.question, event, true);
-            if (context.user.locale === dialog.INTENTION_UNKOWN) {
-              context.user.locale = 'en_IN';
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));
+          invoke: {
+            id: 'updateUserLocale',
+            src: (context, event) => {
+              if (context.user.locale === dialog.INTENTION_UNKOWN) {
+                context.user.locale = 'en_IN';
+                dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));
+              } else {
+                context.user.locale = dialog.get_intention(grammer.locale.question, event, true);
+                return userProfileService.updateUser(context.user, context.tenantId);
+              }
+            },
+            onDone: {
+              target: '#welcome'
+            },
+            onError: {
+              target: '#welcome'
             }
-          }),
-          always: '#welcome'
+          }
         }
       }
     },
@@ -222,6 +252,22 @@ let messages = {
     en_IN: 'Ok. Let\'s start over.',
     hi_IN: 'ठीक। फिर से शुरू करते हैं।'
   },
+  onboarding: {
+    onboardingWelcome: 'Welcome to mSeva Punjab. Now you can file a complaint and track it’s status, you can also Pay your bills through WhatsApp. \n\nmSeva पंजाब में आपका स्वागत🙏🏻 है। अब आप WhatsApp द्वारा कई सुविधाओं का लाभ ले सकते है जैसे शिकायत दर्ज करना, बिल का भुगतान करना।',
+    onboardingLocale: {
+      question: 'Please Select the Language of your choice from the list given below:\n\nनीचे दिए गए पर्याय में से आपकी पसंदीदा भाषा का चयन करें।\n\n1. English\n2. हिंदी'
+    },
+    onboardingName: {
+      question: {
+        en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".',
+        hi_IN: 'आगे बढ़ने से पहले, अपने अनुभव को और व्यक्तिगत बनाने के लिए कृपया अपना नाम साझा करें।\nयदि आप अपना नाम साझा नहीं करना चाहते हैं, तो टाइप करें और "*No*" भेजें।'
+      }      
+    }, 
+    onboardingThankYou: {
+      en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
+      hi_IN: 'विवरण के लिए आपका बहुत-बहुत धन्यवाद {{name}}, हम आपकी सेवा करके प्रसन्न हैं।'
+    }  
+  },
   locale : {
     question: {
       en_IN: "Please choose your preferred language\n1. English\n2. हिंदी",
@@ -237,14 +283,6 @@ let messages = {
       en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n4 to Change Language',
       hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n4 भाषा बदलने के लिए'
     }
-  },
-  onboardingName: {
-    en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".',
-    hi_IN: 'आगे बढ़ने से पहले, अपने अनुभव को और व्यक्तिगत बनाने के लिए कृपया अपना नाम साझा करें।\nयदि आप अपना नाम साझा नहीं करना चाहते हैं, तो टाइप करें और "*No*" भेजें।'
-  },
-  onboardingThankYou: {
-    en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
-    hi_IN: 'विवरण के लिए आपका बहुत-बहुत धन्यवाद {{name}}, हम आपकी सेवा करके प्रसन्न हैं।'
   },
   endstate: {
     en_IN: 'Goodbye. Say hi to start another conversation',
