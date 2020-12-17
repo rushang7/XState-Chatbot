@@ -25,6 +25,7 @@ class UserService {
   async loginUser(mobileNumber, tenantId) {
     let data = new URLSearchParams();
     data.append('grant_type', 'password');
+    data.append('scope', 'read');
     data.append('password', config.userServiceHardCodedPassword);
     data.append('userType', 'CITIZEN');
 

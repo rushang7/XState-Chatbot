@@ -4,22 +4,22 @@ const dialog = require('./util/dialog');
 
 const pgr =  {
   id: 'pgr',
-  initial: 'menu',
+  initial: 'pgrmenu',
   states: {
-    menu : {
-      id: 'menu',
+    pgrmenu : {
+      id: 'pgrmenu',
       initial: 'question',
       states: {
         question: {
           onEntry: assign( (context, event) => {
-              context.chatInterface.toUser(context.user, dialog.get_message(messages.menu.question, context.user.locale));
+            dialog.sendMessage(context, dialog.get_message(messages.pgrmenu.question, context.user.locale));
           }),
           on: {
-              USER_MESSAGE:'process'
+            USER_MESSAGE: 'process'
           }
-        }, // menu.question
+        }, // pgrmenu.question
         process: {
-          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.menu.question, event)),
+          onEntry: assign((context, event) => context.intention = dialog.get_intention(grammer.pgrmenu.question, event)),
           always : [
             {
               target: '#fileComplaint',
@@ -33,13 +33,13 @@ const pgr =  {
               target: 'error'
             }
           ]
-        }, // menu.process
+        }, // pgrmenu.process
         error: {
-          onEntry: assign( (context, event) => context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale))),
+          onEntry: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false)),
           always : 'question'
-        } // menu.error
-      }, // menu.states
-    }, // menu
+        } // pgrmenu.error
+      }, // pgrmenu.states
+    }, // pgrmenu
     fileComplaint: {
       id: 'fileComplaint',
       initial: 'type',
@@ -62,7 +62,7 @@ const pgr =  {
                         let {complaintTypes, messageBundle} = event.data;
                         let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintTypes, messageBundle, context.user.locale, true);
                         context.grammer = grammer; // save the grammer in context to be used in next step
-                        context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                        dialog.sendMessage(context, `${preamble}${prompt}`);
                       }) 
                     },
                     onError: {
@@ -96,7 +96,7 @@ const pgr =  {
                 }, // process
                 error: {
                   onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                    dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
                   }),
                   always: 'question',
                 } // error
@@ -120,7 +120,7 @@ const pgr =  {
                             let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
                             let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintCategories, messageBundle, context.user.locale);
                             context.grammer = grammer; // save the grammer in context to be used in next step
-                            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                            dialog.sendMessage(context, `${preamble}${prompt}`);
                           }),
                         }, 
                         onError: {
@@ -147,7 +147,7 @@ const pgr =  {
                     }, // process
                     error: {
                       onEntry: assign( (context, event) => {
-                        context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                        dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
                       }),
                       always:  'question',
                     } // error
@@ -167,7 +167,7 @@ const pgr =  {
                             let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.item.question.preamble, context.user.locale);
                             let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintItems, messageBundle, context.user.locale, false, true);
                             context.grammer = grammer; // save the grammer in context to be used in next step
-                            context.chatInterface.toUser(context.user, `${preamble}${prompt}`);
+                            dialog.sendMessage(context, `${preamble}${prompt}`);
                           })
                         }, 
                         onError: {
@@ -201,7 +201,7 @@ const pgr =  {
                     }, // process
                     error: {
                       onEntry: assign( (context, event) => {
-                        context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                        dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
                       }),
                       always:  'question',
                     } // error
@@ -218,7 +218,7 @@ const pgr =  {
             geoLocationSharingInfo: {
               id: 'geoLocationSharingInfo',
               onEntry: assign( (context, event) => {
-                context.chatInterface.toUser(context.user, '_Informational Image_');
+                dialog.sendMessage(context, '_Informational Image_', false);
               }),
               always: 'geoLocation'
             },
@@ -229,7 +229,7 @@ const pgr =  {
                 question: {
                   onEntry: assign( (context, event) => {
                     let message = dialog.get_message(messages.fileComplaint.geoLocation.question, context.user.locale)
-                    context.chatInterface.toUser(context.user, message);
+                    dialog.sendMessage(context, message);
                   }),
                   on: {
                     USER_MESSAGE: 'process'
@@ -262,11 +262,7 @@ const pgr =  {
                       }
                     ],
                     onError: {
-                      target: '#city',
-                      actions: assign((context, event) => {
-                        let message = dialog.get_message(dialog.global_messages.system_error, context.user.locale);
-                        context.chatInterface.toUser(context.user, message); // TODO - Rushang - message should say, "we are going to try different approach"
-                      })
+                      target: '#city'
                     }
                   }
                 }
@@ -278,12 +274,10 @@ const pgr =  {
               states: {
                 question: {
                   onEntry: assign((context, event) => {
-                    // TODO - Rushang clean this?
-                    var message = 'Is this the correct location of the complaint?';
-                    message += '\nCity: ' + context.slots.pgr["city"];
-                    message += '\nLocality: ' + context.slots.pgr["locality"];
-                    message += '\nPlease send \'No\', if it isn\'t correct'
-                    context.chatInterface.toUser(context.user, message);
+                    let message = dialog.get_message(messages.fileComplaint.confirmLocation.question, context.user.locale);
+                    message = message.replace('{{city}}', context.slots.pgr['city']);
+                    message = message.replace('{{locality}}', context.slots.pgr['locality']);
+                    dialog.sendMessage(context, message);
                   }),
                   on: {
                     USER_MESSAGE: 'process'
@@ -291,6 +285,7 @@ const pgr =  {
                 },
                 process: {
                   onEntry: assign((context, event) => {
+                    // TODO: Generalised "disagree" intention
                     if(event.message.input.trim().toLowerCase() === 'no') {
                       context.slots.pgr["locationConfirmed"] = false;
                     } else {
@@ -328,7 +323,7 @@ const pgr =  {
                         let link = pgrService.getCityExternalWebpageLink();
                         let message = preamble + '\n' + link;
                         context.grammer = dialog.constructLiteralGrammer(cities, messageBundle, context.user.locale);
-                        context.chatInterface.toUser(context.user, message);
+                        dialog.sendMessage(context, message);
                       })
                     },
                     onError: {
@@ -356,7 +351,7 @@ const pgr =  {
                 },
                 error: {
                   onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                    dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
                   }),
                   always:  'question',
                 }
@@ -377,7 +372,7 @@ const pgr =  {
                         let link = pgrService.getLocalityExternalWebpageLink(context.slots.pgr.city);
                         let message = preamble + '\n' + link;
                         context.grammer = dialog.constructLiteralGrammer(localities, messageBundle, context.user.locale);
-                        context.chatInterface.toUser(context.user, message);
+                        dialog.sendMessage(context, message);
                       })
                     }
                   },
@@ -402,7 +397,7 @@ const pgr =  {
                 },
                 error: {
                   onEntry: assign( (context, event) => {
-                    context.chatInterface.toUser(context.user, dialog.get_message(dialog.global_messages.error.retry, context.user.locale));
+                    dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
                   }),
                   always:  'question',
                 }
@@ -430,7 +425,7 @@ const pgr =  {
                 let message = dialog.get_message(messages.fileComplaint.persistComplaint, context.user.locale);
                 message = message.replace('{{complaintNumber}}', complaintDetails.complaintNumber);
                 message = message.replace('{{complaintLink}}', complaintDetails.complaintLink);
-                context.chatInterface.toUser(context.user, message);
+                dialog.sendMessage(context, message, false);
               })
             }
           }
@@ -460,14 +455,14 @@ const pgr =  {
                 message += '\n' + (i + 1) + '. ' + template;
               }
 
-              context.chatInterface.toUser(context.user, message);
+              dialog.sendMessage(context, message, false);
             })
           },
           {
             target: '#endstate',
             actions: assign((context, event) => {
               let message = dialog.get_message(messages.trackComplaint.noRecords, context.user.locale);
-              context.chatInterface.toUser(context.user, message);
+              dialog.sendMessage(context, message, false);
             })
           }
         ]
@@ -477,7 +472,7 @@ const pgr =  {
 }; // pgr
 
 let messages = {
-  menu: {
+  pgrmenu: {
     question: {
       en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
       hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
@@ -520,6 +515,11 @@ let messages = {
         hi_IN : 'यदि आप शिकायत स्थल पर हैं, तो कृपया अपना स्थान साझा करें। अगर नहीं किसी भी चरित्र को टाइप करें।'
       }
     }, // geoLocation 
+    confirmLocation: {
+      question: {
+        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nLocality: {{locality}}\nPlease send "*No*", if it is incorrect'
+      }
+    },
     city: {
       question: {
         preamble: {
@@ -556,7 +556,7 @@ let messages = {
 }; // messages
 
 let grammer = {
-  menu: {
+  pgrmenu: {
     question: [
       {intention: 'file_new_complaint', recognize: ['1', 'file', 'new']},
       {intention: 'track_existing_complaints', recognize: ['2', 'track', 'existing']}

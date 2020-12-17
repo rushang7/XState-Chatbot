@@ -38,7 +38,11 @@ const envVariables = {
 
     billServiceHost: process.env.BILL_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
     billServiceSearchPath: process.env.BILL_SERVICE_SEARCH_PATH || 'billing-service/bill/v2/_search',
-    googleAPIKey: process.env.GOOGLE_APIKEY || '',
+    googleAPIKey: process.env.GOOGLE_API_KEY || '',
+
+    valueFirstUsername: process.env.VALUEFIRST_USERNAME || 'demo',
+    valueFirstPassword: process.env.VALUEFIRST_PASSWORD || 'demo',
+    valueFirstURL: process.env.VALUEFIRST_SEND_MESSAGE_URL || 'https://api.myvaluefirst.com/psms/servlet/psms.JsonEservice'
 }
 
 module.exports = envVariables;
