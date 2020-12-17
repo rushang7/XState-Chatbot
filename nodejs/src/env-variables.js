@@ -37,6 +37,10 @@ const envVariables = {
     userLoginAuthorizationHeader: process.env.USER_LOGIN_AUTHORIZATION_HEADER || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
     googleAPIKey: process.env.GOOGLE_APIKEY || ''
+
+    valueFirstUsername: process.env.VALUEFIRST_USERNAME || 'demo',
+    valueFirstPassword: process.env.VALUEFIRST_PASSWORD || 'demo',
+    valueFirstURL: process.env.VALUEFIRST_SEND_MESSAGE_URL || 'https://api.myvaluefirst.com/psms/servlet/psms.JsonEservice'
 }
 
 module.exports = envVariables;

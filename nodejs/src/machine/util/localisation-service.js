@@ -5,11 +5,13 @@ class LocalisationService {
 
     async init() {
         this.messages = {}
-        const supportedLocales = config.supportedLocales.split(',');
-        supportedLocales.forEach(async (locale, index) => {
-            locale = locale.trim();
-            var codeToMessages = {};
-            var messages = await this.fetchMessagesForLocale(locale, config.rootTenantId);
+        this.supportedLocales = config.supportedLocales.split(',');
+        for(let i = 0; i < this.supportedLocales.length; i++) {
+            this.supportedLocales[i] = this.supportedLocales[i].trim();
+        }
+        this.supportedLocales.forEach(async (locale, index) => {
+            let codeToMessages = {};
+            let messages = await this.fetchMessagesForLocale(locale, config.rootTenantId);
             messages.forEach((record, index) => {
                 const code =  record['code'];
                 const message = record['message'];
@@ -27,6 +29,26 @@ class LocalisationService {
         var messageBundle = {};
         for(var locale in this.messages) {
             messageBundle[locale] = this.messages[locale][code];
+        }
+        return messageBundle;
+    }
+
+    async getMessagesForCodesAndTenantId(codes, tenantId) {
+        let messageBundle = {};
+        for(let code of codes) {
+            messageBundle[code] = {}
+        }
+        for(let locale of this.supportedLocales) {
+            let codeToMessages = {};
+            let messages = await this.fetchMessagesForLocale(locale, tenantId);
+            messages.forEach((record, index) => {
+                const code =  record['code'];
+                const message = record['message'];
+                codeToMessages[code] = message;
+            });
+            for(let code of codes) {
+                messageBundle[code][locale] = codeToMessages[code];
+            }
         }
         return messageBundle;
     }

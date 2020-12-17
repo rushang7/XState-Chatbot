@@ -57,13 +57,22 @@ class DummyPGRService {
   
       let boundaryData = await this.fetchMdmsData(tenantId, moduleName, masterName, filterPath);
       let localities = [];
-      let messageBundle = {};
       for(let i = 0; i < boundaryData.length; i++) {
         localities.push(boundaryData[i].code);
-        messageBundle[boundaryData[i].code] = {
-          en_IN: boundaryData[i].name
-        }
       }
+      let localitiesLocalisationCodes = [];
+      for(let locality of localities) {
+        let localisationCode = tenantId.replace('.', '_').toUpperCase() + '_ADMIN_' + locality;
+        localitiesLocalisationCodes.push(localisationCode);
+      }
+      let localisedMessages = await localisationService.getMessagesForCodesAndTenantId(localitiesLocalisationCodes, tenantId);
+      console.log(localisedMessages);
+      let messageBundle = {};
+      for(let locality of localities) {
+        let localisationCode = tenantId.replace('.', '_').toUpperCase() + '_ADMIN_' + locality;
+        messageBundle[locality] = localisedMessages[localisationCode]
+      }
+      console.log(messageBundle);
       return { localities, messageBundle };
     }
     getLocalityExternalWebpageLink(tenantId) {
@@ -95,7 +104,7 @@ class DummyPGRService {
         return {complaintTypes, messageBundle};
     }
     async persistComplaint(bundle) {
-      console.log(`Saving complaint ${bundle} to database`);
+      console.log('Saving complaint to service: ' + JSON.stringify(bundle));
       return {
         complaintNumber: '04/11/2020/081479',
         complaintLink: 'https://mseva.org/complaint/132'
