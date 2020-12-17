@@ -36,7 +36,9 @@ const envVariables = {
     userServiceHardCodedPassword: process.env.USER_SERVICE_HARDCODED_PASSWORD || '123456',
     userLoginAuthorizationHeader: process.env.USER_LOGIN_AUTHORIZATION_HEADER || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
-    googleAPIKey: process.env.GOOGLE_APIKEY || ''
+    billServiceHost: process.env.BILL_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    billServiceSearchPath: process.env.BILL_SERVICE_SEARCH_PATH || 'billing-service/bill/v2/_search',
+    googleAPIKey: process.env.GOOGLE_APIKEY || '',
 }
 
 module.exports = envVariables;
