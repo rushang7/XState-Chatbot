@@ -3,7 +3,9 @@ const fetch = require("node-fetch");
 require('url-search-params-polyfill');
 const urlencode = require('urlencode');
 
-var valueFirstTextMessageRequestBody = "{\"@VER\":\"1.2\",\"USER\":{\"@USERNAME\":\"\",\"@PASSWORD\":\"\",\"@UNIXTIMESTAMP\":\"\"},\"DLR\":{\"@URL\":\"\"},\"SMS\":[{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@PROPERTY\":\"0\",\"@MSGTYPE\": \"2\",\"@ID\":\"1\",\"ADDRESS\":[{\"@FROM\":\"\",\"@TO\":\"\",\"@SEQ\":\"\",\"@TAG\":\"\"}]}]}";
+let valueFirstRequestBody = "{\"@VER\":\"1.2\",\"USER\":{\"@USERNAME\":\"\",\"@PASSWORD\":\"\",\"@UNIXTIMESTAMP\":\"\"},\"DLR\":{\"@URL\":\"\"},\"SMS\":[]}";
+
+let textMessageBody = "{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@TEMPLATEINFO\":\"\",\"@PROPERTY\":\"0\",\"@ID\":\"\",\"ADDRESS\":[{\"@FROM\":\"\",\"@TO\":\"\",\"@SEQ\":\"\",\"@TAG\":\"\"}]}";
 
 class ValueFirstWhatsAppProvider {
 
@@ -70,36 +72,38 @@ class ValueFirstWhatsAppProvider {
         return reformattedMessage;
     }
 
-    getTransformedResponse(user, message){
-        var requestBody;
+    getTransformedResponse(user, messages){
         let userMobile = user.mobileNumber;
-        let type;
-
-        if(user.type && user.type==="image")
-            type="image";
-        else
-            type="text";
-
         let fromMobileNumber=config.whatsAppBusinessNumber;
-
         if(!fromMobileNumber)
             console.error("Receipient number can not be empty");
 
-        if(type==="text"){
-            requestBody = JSON.parse(valueFirstTextMessageRequestBody);
-            let encodedMessage=urlencode(message,'utf8');
-            requestBody["SMS"][0]["@TEXT"]=encodedMessage;
-        }
+        let requestBody = JSON.parse(valueFirstRequestBody);
+        requestBody["USER"]["@USERNAME"] = config.valueFirstUsername;
+        requestBody["USER"]["@PASSWORD"] = config.valueFirstPassword;
 
-        else if(type==="image"){
-            //to do
+        for(let i = 0; i < messages.length; i++) {
+            let message = messages[i];
+            let type;
+            if(message.type && message.type==="image")
+                type="image";
+            else    
+                type="text";
+            
+            let messageBody;
+            if(type === 'text') {
+                messageBody = JSON.parse(textMessageBody);
+                let encodedMessage=urlencode(message, 'utf8');
+                messageBody['@TEXT'] = encodedMessage;
+            } else {
+                // TODO for non-textual messages
+            }
+            messageBody["ADDRESS"][0]["@FROM"] = fromMobileNumber;
+            messageBody["ADDRESS"][0]["@TO"] = '91' + userMobile;
+
+            requestBody["SMS"].push(messageBody);
         }
         
-        requestBody["SMS"][0]["ADDRESS"][0]["@FROM"]=fromMobileNumber;
-        requestBody["SMS"][0]["ADDRESS"][0]["@TO"]="91"+userMobile;
-        requestBody["USER"]["@USERNAME"]=config.valueFirstUsername;
-        requestBody["USER"]["@PASSWORD"]=config.valueFirstPassword;
-
         return requestBody;
     }
 
@@ -127,7 +131,7 @@ class ValueFirstWhatsAppProvider {
     
     processMessageFromUser(req) {
         let reformattedMessage = {}
-        let requestBody = req.body;
+        let requestBody = req.query;
         var requestValidation=this.isValid(requestBody);
 
         if(requestValidation)
@@ -136,9 +140,9 @@ class ValueFirstWhatsAppProvider {
         return reformattedMessage;
     }
 
-    sendMessageToUser(user, message) {
+    sendMessageToUser(user, messages) {
         let requestBody = {};
-        requestBody = this.getTransformedResponse(user, message);
+        requestBody = this.getTransformedResponse(user, messages);
         this.sendMessage(requestBody);       
     }
 
