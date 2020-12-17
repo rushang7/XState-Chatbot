@@ -1,45 +1,44 @@
 const os = require('os');
 
 const envVariables = {
-    serviceId : process.env.name || 'xstate-chatbot-server',
-    ver : process.env.version || '0.0.1',
+    serviceId : process.env.NAME || 'xstate-chatbot-server',
+    ver : process.env.VERSION || '0.0.1',
 
-    port: process.env.service_port || 8080,
-    contextPath : process.env.contextPath || '/',
+    port: process.env.SERVICE_PORT || 8080,
+    contextPath : process.env.CONTEXT_PATH || '/',
 
-    whatsAppProvider: process.env.whatsAppProvider || 'console',
+    whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'console',
 
-    serviceProvider: process.env.serviceProvider || 'dummy',
+    serviceProvider: process.env.SERVICE_PROVIDER || 'dummy',
 
-    repoProvider: process.env.repoProvider || 'PostgreSQL',
+    repoProvider: process.env.REPO_PROVIDER || 'PostgreSQL',
 
-    mdmsHost: process.env.mdmsHost || 'https://egov-micro-dev.egovernments.org/',
+    mdmsHost: process.env.MDMS_HOST || 'https://egov-micro-dev.egovernments.org/',
 
-    localisationServiceHost: process.env.localisationServiceHost || 'https://egov-micro-dev.egovernments.org/',
-    localisationServiceSearchPath: process.env.localisationServiceSearchPath || 'localization/messages/v1/_search',
+    localisationServiceHost: process.env.LOCALISATION_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    localisationServiceSearchPath: process.env.LOCALISATION_SERVICE_SEARCH_PATH || 'localization/messages/v1/_search',
 
-    rootTenantId: process.env.rootTenantId || 'pb',
+    rootTenantId: process.env.ROOT_TENANTID || 'pb',
 
-    supportedLocales: process.env.supportedLocales || 'en_IN,hi_IN',
+    supportedLocales: process.env.SUPPORTED_LOCALES || 'en_IN,hi_IN',
 
-    externalHost: process.env.externalHost || 'https://egov-micro-dev.egovernments.org/',
+    externalHost: process.env.EXTERNAL_HOST || 'https://egov-micro-dev.egovernments.org/',
 
-    cityExternalWebpagePath: process.env.cityExternalWebpagePath || 'citizen/openlink/whatsapp/city',
-    localityExternalWebpagePath: process.env.localityExternalWebpagePath || 'citizen/openlink/whatsapp/locality',
+    cityExternalWebpagePath: process.env.CITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/city',
+    localityExternalWebpagePath: process.env.LOCALITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/locality',
 
-    whatsAppBusinessNumber : process.env.whatsAppBusinessNumber || '917834811114',
+    whatsAppBusinessNumber : process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
 
-    googleAPIKey: process.env.googleAPIKey || '',
+    userServiceHost: process.env.USER_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    userServiceOAuthPath: process.env.USER_SERVICE_OAUTH_PATH || 'user/oauth/token',
+    userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZEN_PATH || 'user/citizen/_create',
+    userServiceUpdateProfilePath: process.env.USER_SERVICE_UPDATE_PROFILE_PATH || 'user/profile/_update',
+    userServiceHardCodedPassword: process.env.USER_SERVICE_HARDCODED_PASSWORD || '123456',
+    userLoginAuthorizationHeader: process.env.USER_LOGIN_AUTHORIZATION_HEADER || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
-    userServiceHost: process.env.userServiceHost || 'https://egov-micro-dev.egovernments.org/',
-    userServiceOAuthPath: process.env.userServiceOAuthPath || 'user/oauth/token',
-    userServiceCreateCitizenPath: process.env.userServiceCreateCitizenPath || 'user/citizen/_create',
-    userServiceUpdateProfilePath: process.env.userServiceUpdateProfilePath || 'user/profile/_update',
-    userServiceHardCodedPassword: process.env.userServiceHardCodedPassword || '123456',
-    userLoginAuthorizationHeader: process.env.userLoginAuthorizationHeader || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
-
-    billServiceHost: process.env.billServiceHost || 'https://egov-micro-dev.egovernments.org/',
-    billServiceSearchPath: process.env.billServiceSearchPath || 'billing-service/bill/v2/_search',
+    billServiceHost: process.env.BILL_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    billServiceSearchPath: process.env.BILL_SERVICE_SEARCH_PATH || 'billing-service/bill/v2/_search',
+    googleAPIKey: process.env.GOOGLE_API_KEY || '',
 
     valueFirstUsername: process.env.VALUEFIRST_USERNAME || 'demo',
     valueFirstPassword: process.env.VALUEFIRST_PASSWORD || 'demo',
