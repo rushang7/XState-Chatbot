@@ -24,16 +24,16 @@ const envVariables = {
 
     externalHost: process.env.EXTERNAL_HOST || 'https://egov-micro-dev.egovernments.org/',
 
-    cityExternalWebpagePath: process.env.CITY_EXTERNAL_WEBPAGEPATH || 'citizen/openlink/whatsapp/city',
-    localityExternalWebpagePath: process.env.LOCALITY_EXTERNAL_WEBPAGEPATH || 'citizen/openlink/whatsapp/locality',
+    cityExternalWebpagePath: process.env.CITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/city',
+    localityExternalWebpagePath: process.env.LOCALITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/locality',
 
     whatsAppBusinessNumber : process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
 
     userServiceHost: process.env.USER_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
-    userServiceOAuthPath: process.env.USER_SERVICEO_AUTHPATH || 'user/oauth/token',
-    userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZENPATH || 'user/citizen/_create',
-    userServiceUpdateProfilePath: process.env.USER_SERVICE_UPDATE_PROFILEPATH || 'user/profile/_update',
-    userServiceHardCodedPassword: process.env.USER_SERVICE_HARDCODEDPASSWORD || '123456',
+    userServiceOAuthPath: process.env.USER_SERVICE_OAUTH_PATH || 'user/oauth/token',
+    userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZEN_PATH || 'user/citizen/_create',
+    userServiceUpdateProfilePath: process.env.USER_SERVICE_UPDATE_PROFILE_PATH || 'user/profile/_update',
+    userServiceHardCodedPassword: process.env.USER_SERVICE_HARDCODED_PASSWORD || '123456',
     userLoginAuthorizationHeader: process.env.USER_LOGIN_AUTHORIZATION_HEADER || 'Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0',
 
     googleAPIKey: process.env.GOOGLE_APIKEY || ''
