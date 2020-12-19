@@ -32,6 +32,12 @@ class SessionManager {
             saveState = this.removeUserDataFromState(saveState);
             await chatStateRepository.insertNewState(userId, true, JSON.stringify(saveState));
         } 
+        
+        if(reformattedMessage.extraInfo && reformattedMessage.extraInfo.missedCall==true){
+                if(chatState._event.name != 'xstate.init')
+                    return;
+        }
+            
         service = this.getChatServiceFor(chatState, user);
         
         let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';

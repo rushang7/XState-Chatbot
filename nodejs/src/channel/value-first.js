@@ -2,6 +2,7 @@ const config = require('../env-variables');
 const fetch = require("node-fetch");
 require('url-search-params-polyfill');
 const urlencode = require('urlencode');
+const { parse } = require('querystring');
 
 let valueFirstRequestBody = "{\"@VER\":\"1.2\",\"USER\":{\"@USERNAME\":\"\",\"@PASSWORD\":\"\",\"@UNIXTIMESTAMP\":\"\"},\"DLR\":{\"@URL\":\"\"},\"SMS\":[]}";
 
@@ -10,23 +11,38 @@ let textMessageBody = "{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@TEMPL
 class ValueFirstWhatsAppProvider {
 
     checkForMissedCallNotification(requestBody){
-        //to do
+        if(requestBody.vmn_tollfree)
+            return true;
+        
         return false;
     }
 
     getMissedCallValues(requestBody){
-        //to do
+        let reformattedMessage={};
+        
+        reformattedMessage.message = {
+            input: "missedCall",
+            type: "text"
+        }
+        reformattedMessage.user = {
+            mobileNumber: requestBody.mobile_number.slice(2)
+        };
+        reformattedMessage.extraInfo = {
+            recipient: config.whatsAppBusinessNumber,
+            missedCall: true
+        };
+        return reformattedMessage;
     }
 
     getUserMessage(requestBody){
         let reformattedMessage={};
-        let type = requestBody.message.type;
+        let type = requestBody.media_type;
         let input;
         if(type === "location") {
             let location = requestBody.message.location;
             input = '(' + location.latitude + ',' + location.longitude + ')';
         } else {
-            input = requestBody.message.input;
+            input = requestBody.text;
         }
 
         reformattedMessage.message = {
@@ -34,7 +50,7 @@ class ValueFirstWhatsAppProvider {
             type: type
         }
         reformattedMessage.user = {
-            mobileNumber: requestBody.user.mobileNumber.slice(2)
+            mobileNumber: requestBody.from.slice(2)
         };
 
         return reformattedMessage;
@@ -46,7 +62,7 @@ class ValueFirstWhatsAppProvider {
             if(this.checkForMissedCallNotification(requestBody)) // validation for misscall
                 return true;
             
-            let type = requestBody.message.type;
+            let type = requestBody.media_type;
 
             if(type==="text" || type==="image")
                 return true;
@@ -74,7 +90,7 @@ class ValueFirstWhatsAppProvider {
 
     getTransformedResponse(user, messages){
         let userMobile = user.mobileNumber;
-        let fromMobileNumber=config.whatsAppBusinessNumber;
+        let fromMobileNumber = config.whatsAppBusinessNumber;
         if(!fromMobileNumber)
             console.error("Receipient number can not be empty");
 
@@ -132,6 +148,10 @@ class ValueFirstWhatsAppProvider {
     processMessageFromUser(req) {
         let reformattedMessage = {}
         let requestBody = req.query;
+
+        if(Object.keys(requestBody).length === 0)
+            requestBody  = req.body; 
+            
         var requestValidation=this.isValid(requestBody);
 
         if(requestValidation)
