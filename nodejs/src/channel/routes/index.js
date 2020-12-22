@@ -4,9 +4,9 @@ const express = require('express'),
     sessionManager = require('../../session/session-manager'),
     channelProvider = require('../');
 
-router.post('/message', (req, res) =>  {
+router.post('/message', async (req, res) =>  {
     try {
-        let reformattedMessage = channelProvider.processMessageFromUser(req);
+        let reformattedMessage = await channelProvider.processMessageFromUser(req);
         sessionManager.fromUser(reformattedMessage);
     } catch(e) {
         console.log(e);
