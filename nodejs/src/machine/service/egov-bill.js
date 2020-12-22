@@ -193,35 +193,34 @@ class BillService {
   }
   
   async getShortenedURL(finalPath)
-  {
-    var urlshortnerhost = config.UrlShortnerHost;
-    var url = urlshortnerhost + '/egov-url-shortening/shortener';
-    var request = {};
-    request.url = finalPath;
-    var options = {
-      method: "POST",
-      body: JSON.stringify(request),
-      headers:{
-        'Content-Type': 'application/json'
-      }
+{
+  var urlshortnerHost = config.UrlShortnerHost;
+  var url = urlshortnerHost + '/egov-url-shortening/shortener';
+  var request = {};
+  request.url = finalPath; 
+  var options = {
+    method: 'POST',
+    body: JSON.stringify(request),
+    headers: {
+      'Content-Type': 'application/json'
     }
-    let response = await fetch(url,options);
-    let data = await response.text();
-    return data;
   }
+  let response = await fetch(url, options);
+  let data = await response.text();
+  return data;
+}
 
   async getPaymentLink(consumerCode,tenantId,businessService)
   {
     var UIHost = config.uiappHost;
     var paymentPath = config.msgpaylink;
-    paymentPath.replace("consumercode",consumerCode);
-    paymentPath.replace("tenantId",tenantId);
-    paymentPath.replace("businessservice",businessService);
+    paymentPath.replace(/\$consumercode/g,consumerCode);
+    paymentPath.replace(/\$tenantId/g,tenantId);
+    paymentPath.replace(/\$businessservice/g,businessService);
     var finalPath = UIHost + paymentPath;
     var link = await this.getShortenedURL(finalPath);
     return link;
   }
 
 }
-
 module.exports = new BillService();
