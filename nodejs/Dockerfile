@@ -1,11 +1,17 @@
-FROM node:10
+FROM egovio/alpine-node-builder-10:yarn
 
-WORKDIR /usr/app
-COPY package*.json ./
+ARG WORK_DIR
+ENV npm_config_cache=/tmp
+WORKDIR /app
+
+COPY ${WORK_DIR} .
 
 RUN npm install
 
-COPY . .
+# set your port
+ENV PORT 8080
+# expose the port to outside world
+#EXPOSE  8080
 
-EXPOSE 8080
-CMD [ "node", "src/app.js" ]
+# start command as per package.json
+CMD ["npm", "start"]
