@@ -191,8 +191,42 @@ class BillService {
       let billsForUser = await this.fetchBillsForUser(user);
       return billsForUser.pendingBills;
   }
-    
+  
+  async getShortenedURL(finalPath)
+  {
+    var urlshortnerhost = config.UrlShortnerHost;
+    var url = urlshortnerhost + '/egov-url-shortening/shortener';
+    var request = {};
+    request.url = finalPath;
+    var options = {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    }
+    let response = await fetch(url,options);
+    let data = await response.text();
+    return data;
+  }
 
+  async getPaymentLink(consumerCode,tenantId,businessService)
+  {
+    var UIHost = config.uiappHost;
+    var paymentPath = config.msgpaylink;
+    paymentPath.replace("consumercode",consumerCode);
+    paymentPath.replace("tenantId",tenantId);
+    paymentPath.replace("businessservice",businessService);
+    var finalPath = UIHost + paymentPath;
+    var link = await this.getShortenedURL(finalPath);
+    return link;
+  }
+
+  async fetchData()
+  {
+    var res = await this.getPaymentLink("PB-TL-2020-05-14-006180","pb.amritsar","TL");
+    return res;
+  }
 }
 
 module.exports = new BillService();
