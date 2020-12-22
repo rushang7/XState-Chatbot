@@ -11,7 +11,7 @@ const envVariables = {
 
     serviceProvider: process.env.SERVICE_PROVIDER || 'dummy',
 
-    repoProvider: process.env.REPO_PROVIDER || 'In-Memory',
+    repoProvider: process.env.REPO_PROVIDER || 'PostgreSQL',
 
     mdmsHost: process.env.MDMS_HOST || 'https://egov-micro-dev.egovernments.org/',
 

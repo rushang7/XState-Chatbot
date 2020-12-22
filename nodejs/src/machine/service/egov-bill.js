@@ -222,11 +222,6 @@ class BillService {
     return link;
   }
 
-  async fetchData()
-  {
-    var res = await this.getPaymentLink("PB-TL-2020-05-14-006180","pb.amritsar","TL");
-    return res;
-  }
 }
 
 module.exports = new BillService();
