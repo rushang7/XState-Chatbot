@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const getCityAndLocality = require('./util/google-maps-util');
 const localisationService = require('../util/localisation-service');
 const config = require('../../env-variables');

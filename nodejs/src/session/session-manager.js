@@ -35,7 +35,7 @@ class SessionManager {
         service = this.getChatServiceFor(chatState, user);
         
         let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';
-        service.send(event, { message: reformattedMessage.message });
+        service.send(event, reformattedMessage );
     }
     async toUser(user, outputMessages) {
         channelProvider.sendMessageToUser(user, outputMessages);
