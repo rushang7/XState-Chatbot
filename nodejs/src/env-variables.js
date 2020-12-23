@@ -54,7 +54,7 @@ const envVariables = {
     UrlShortnerHost: process.env.URL_SHORTNER_HOST || 'https://egov-micro-dev.egovernments.org',
     UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener',
 
-    Service: process.env.SERVCIE_LIST || 'WS, PT, TL, FIRENOC, BPA',
+    billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
 
     //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
     //paylink: process.env.PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
