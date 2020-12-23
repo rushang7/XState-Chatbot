@@ -28,7 +28,7 @@ const envVariables = {
     localityExternalWebpagePath: process.env.LOCALITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/locality',
 
     whatsAppBusinessNumber : process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
-
+    
     userServiceHost: process.env.USER_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
     userServiceOAuthPath: process.env.USER_SERVICE_OAUTH_PATH || 'user/oauth/token',
     userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZEN_PATH || 'user/citizen/_create',
@@ -52,7 +52,12 @@ const envVariables = {
     msgpaylink: process.env.MSG_PAY_LINK || 'citizen/withoutAuth/egov-common/pay?consumerCode=$consumercode&tenantId=$tenantId&businessService=$businessservice',
 
     UrlShortnerHost: process.env.URL_SHORTNER_HOST || 'https://egov-micro-dev.egovernments.org',
-    UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener'
+    UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener',
+
+    Service: process.env.SERVCIE_LIST || 'WS, PT, TL, FIRENOC, BPA',
+
+    //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
+    //paylink: process.env.PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
 }
 
 module.exports = envVariables;

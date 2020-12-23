@@ -3,7 +3,9 @@ const fetch = require("node-fetch");
 class BillService {
 
   getSupportedServicesAndMessageBundle() {
-    let services = [ 'WS', 'PT', 'TL', 'FIRENOC', 'BPA' ];
+    let services = config.Service;
+    let trimservices = services.trim();
+    let splitservices = trimservices.split(",");
     let messageBundle = {
       WS: {
         en_IN: 'Water and Sewerage Bill'
@@ -21,8 +23,8 @@ class BillService {
         en_IN: 'Building Plan Scrutiny Fees'
       }
     }
-
-    return { services, messageBundle };
+    
+    return { splitservices, messageBundle };
   }
 
   getSearchOptionsAndMessageBundleForService(service) {
