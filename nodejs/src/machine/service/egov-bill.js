@@ -2,10 +2,19 @@ const config = require('../../env-variables');
 const fetch = require("node-fetch");
 class BillService {
 
+  trimArr(arr)
+  {
+    for(i=0;i<arr.length;i++)
+    {
+      arr[i] = arr[i].replace(/\s\s*/, '').replace(/\s\s*/, '');
+    }
+    return arr;
+  }
+
   getSupportedServicesAndMessageBundle() {
     let services = config.Service;
-    let trimservices = services.trim();
-    let splitservices = trimservices.split(",");
+    let splitservices = services.split(",");
+    let trimservices = trimArray(splitservices);
     let messageBundle = {
       WS: {
         en_IN: 'Water and Sewerage Bill'
@@ -24,7 +33,7 @@ class BillService {
       }
     }
     
-    return { splitservices, messageBundle };
+    return { trimservices, messageBundle };
   }
 
   getSearchOptionsAndMessageBundleForService(service) {
