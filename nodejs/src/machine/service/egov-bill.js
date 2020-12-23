@@ -2,8 +2,17 @@ const config = require('../../env-variables');
 const fetch = require("node-fetch");
 class BillService {
 
+  constructor() {
+    this.services = [];
+    let supportedModules = config.billSupportedModules.split(',');
+    for(let module of supportedModules) {
+      this.services.push(module.trim());
+    }
+    console.log(this.services);
+  }
+
   getSupportedServicesAndMessageBundle() {
-    let services = [ 'WS', 'PT', 'TL', 'FIRENOC', 'BPA' ];
+    let services = this.services;
     let messageBundle = {
       WS: {
         en_IN: 'Water and Sewerage Bill'
@@ -21,7 +30,7 @@ class BillService {
         en_IN: 'Building Plan Scrutiny Fees'
       }
     }
-
+    
     return { services, messageBundle };
   }
 
