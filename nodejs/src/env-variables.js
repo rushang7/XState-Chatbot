@@ -46,7 +46,13 @@ const envVariables = {
 
     egov_filestore_service_host: process.env.EGOV_FILESTORE_SERVICE_HOST || "https://egov-micro-dev.egovernments.org/",
     egov_filestore_service_upload_endpoint: process.env.EGOV_FILESTORE_SERVICE_UPLOAD_ENDPOINT || "filestore/v1/files?tenantId=pb&module=chatbot",
-    egov_filestore_service_download_endpoint: process.env.EGOV_FILESTORE_SERVICE_DOWNLOAD_ENDPOINT || "filestore/v1/files/url"
+    egov_filestore_service_download_endpoint: process.env.EGOV_FILESTORE_SERVICE_DOWNLOAD_ENDPOINT || "filestore/v1/files/url",
+
+    uiappHost: process.env.UI_APP_HOST || 'https://egov-micro-dev.egovernments.org',
+    msgpaylink: process.env.MSG_PAY_LINK || 'citizen/withoutAuth/egov-common/pay?consumerCode=$consumercode&tenantId=$tenantId&businessService=$businessservice',
+
+    UrlShortnerHost: process.env.URL_SHORTNER_HOST || 'https://egov-micro-dev.egovernments.org',
+    UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener'
 }
 
 module.exports = envVariables;
