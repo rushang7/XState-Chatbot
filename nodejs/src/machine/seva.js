@@ -119,7 +119,7 @@ const sevaMachine = Machine({
           id: 'onboardingThankYou',
           invoke: {
             id: 'updateUserProfile',
-            src: (context, event) => userProfileService.updateUser(context.user, context.tenantId),
+            src: (context, event) => userProfileService.updateUser(context.user, context.extraInfo.tenantId),
             onDone: {
               target: '#welcome',
               actions: assign((context, event) => {
@@ -174,7 +174,7 @@ const sevaMachine = Machine({
               } else {
                 context.user.locale = context.intention;
               }
-              return userProfileService.updateUser(context.user, context.tenantId);
+              return userProfileService.updateUser(context.user, context.extraInfo.tenantId);
             },
             onDone: {
               target: '#welcome'

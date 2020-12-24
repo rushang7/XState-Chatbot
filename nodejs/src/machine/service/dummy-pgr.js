@@ -41,15 +41,15 @@ class DummyPGRService {
     
       return data["MdmsRes"][moduleName][masterName];
     }
-    async fetchCities() {
+    async fetchCities(tenantId) {
         let cities = this.cities.tenantInfo.map(el=>el.code);
         let messageBundle = this.citiesMessageBundle;
         return {cities, messageBundle};
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
-    getCityExternalWebpageLink() {
-      return config.externalHost + config.cityExternalWebpagePath + '?tenantId=' + config.rootTenantId + '&phone=' + config.whatsAppBusinessNumber;
+    getCityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
+      return config.externalHost + config.cityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + whatsAppBusinessNumber;
     }
     async fetchLocalities(tenantId) {
       let moduleName = 'egov-location';
@@ -76,25 +76,25 @@ class DummyPGRService {
       console.log(messageBundle);
       return { localities, messageBundle };
     }
-    getLocalityExternalWebpageLink(tenantId) {
-      return config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + config.whatsAppBusinessNumber;
+    getLocalityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
+      return config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + whatsAppBusinessNumber;
     }
-    async getCityAndLocalityForGeocode(geocode) {
+    async getCityAndLocalityForGeocode(geocode, tenantId) {
         let latlng = geocode.substring(1, geocode.length - 1); // Remove braces
         let cityAndLocality = await getCityAndLocality(latlng);
         return cityAndLocality;
     }
-    async fetchComplaintItemsForCategory(category) {
+    async fetchComplaintItemsForCategory(category, tenantId) {
         let complaintItems = this.complaintCategoryToItemsMap[category];
         let messageBundle = this.complaintTypesMessageBundle;
         return { complaintItems, messageBundle };
     }
-    async fetchComplaintCategories() {
+    async fetchComplaintCategories(tenantId) {
         let complaintCategories = Object.keys(this.complaintCategoryToItemsMap);
         let messageBundle = this.complaintCategoriesMessageBundle;
         return { complaintCategories, messageBundle };
     }
-    async fetchFrequentComplaints() {
+    async fetchFrequentComplaints(tenantId) {
         let complaintTypes = [
             'StreetLightNotWorking',
             'BlockOrOverflowingSewage',
