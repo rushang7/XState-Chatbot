@@ -52,7 +52,14 @@ const envVariables = {
     msgpaylink: process.env.MSG_PAY_LINK || 'citizen/withoutAuth/egov-common/pay?consumerCode=$consumercode&tenantId=$tenantId&businessService=$businessservice',
 
     UrlShortnerHost: process.env.URL_SHORTNER_HOST || 'https://egov-micro-dev.egovernments.org',
-    UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener'
+    UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener',
+
+    collectonServiceHost: process.env.COLLECTION_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    collectonServicSearchEndpoint: process.env.COLLECTION_SERVICE_SEARCH_ENDPOINT || 'collection-services/payments/$module/_search',
+    receiptSearchLimit: process.env.RECEIPT_SEARCH_LIMIT || 10,
+
+    dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
+    timeZone: process.env.TIMEZONE || 'Asia/Kolkata'
 }
 
 module.exports = envVariables;
