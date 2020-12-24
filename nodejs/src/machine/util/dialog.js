@@ -58,6 +58,10 @@ function constructLiteralGrammer(keys, message_bundle, locale) {
   });
   return grammer;
 }
+function validateInputType(event, type) {
+  let inputType = event.message.type;
+  return inputType === type;
+}
 function sendMessage(context, message, immediate = true) {
   if(!context.output) {
     context.output = [];
@@ -94,4 +98,4 @@ let global_messages = {
   },
 }
 
-module.exports = { get_input, get_message, get_intention, INTENTION_UNKOWN, INTENTION_MORE, INTENTION_GOBACK, global_messages, constructListPromptAndGrammer, constructLiteralGrammer, sendMessage };
+module.exports = { get_input, get_message, get_intention, INTENTION_UNKOWN, INTENTION_MORE, INTENTION_GOBACK, global_messages, constructListPromptAndGrammer, constructLiteralGrammer, validateInputType, sendMessage };
