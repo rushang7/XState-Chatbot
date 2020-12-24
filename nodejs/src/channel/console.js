@@ -19,7 +19,7 @@ class ConsoleProvider {
         return reformattedMessage;
     }
 
-    sendMessageToUser(user, outputMessages) {
+    sendMessageToUser(user, outputMessages, extraInfo) {
         if(!Array.isArray(outputMessages)) {
             let message = outputMessages;
             outputMessages = [ message ];

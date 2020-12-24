@@ -37,8 +37,8 @@ class SessionManager {
         let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';
         service.send(event, reformattedMessage );
     }
-    async toUser(user, outputMessages) {
-        channelProvider.sendMessageToUser(user, outputMessages);
+    async toUser(user, outputMessages, extraInfo) {
+        channelProvider.sendMessageToUser(user, outputMessages, extraInfo);
         for(let message of outputMessages) {
             telemetry.log(user.uuid, 'to_user', {message : {type: "text", output: message}});
         }

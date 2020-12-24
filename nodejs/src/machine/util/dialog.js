@@ -68,7 +68,7 @@ function sendMessage(context, message, immediate = true) {
   }
   context.output.push(message);
   if(immediate) {
-    context.chatInterface.toUser(context.user, context.output);
+    context.chatInterface.toUser(context.user, context.output, context.extraInfo);
     context.output = [];
   }
 }
