@@ -1,5 +1,3 @@
-const receipts = require("../receipts");
-
 class DummyReceipts{
 
     getSupportedServicesAndMessageBundle() {

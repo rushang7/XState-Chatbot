@@ -1,7 +1,5 @@
 const { assign } = require('xstate');
-const receiptService = require('./service/egov-receipts');
-//const { receiptService } = require('./service/service-loader');
-const { INTENTION_UNKOWN } = require('./util/dialog');
+const { receiptService } = require('./service/service-loader');
 const dialog = require('./util/dialog');
 
 
