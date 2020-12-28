@@ -64,8 +64,14 @@ const envVariables = {
 
     billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
 
-    //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
-    //paylink: process.env.PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
+    DomainHost: process.env.DOMAIN_HOST || 'https://egov-micro-dev.egovernments.org',
+    URLparameters: process.env.URL_PARAMETERS || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=$mobileno',
+
+    localityservicehost: process.env.LOCALITY_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org',
+    localityserviceparameters: process.env.LOCALITY_SERVICE_PARAMETERS || 'egov-searcher/locality/tl-services/_get',
+
+    localisationHost: process.env.LOCALISATION_HOST || 'https://egov-micro-qa.egovernments.org',
+    localisationparameters: process.env.LOCALISATION_PARAMETERS || 'localization/messages/v1/_search?module=rainmaker-chatbot&locale=en_IN&tenantId=pb'
 }
 
 module.exports = envVariables;
