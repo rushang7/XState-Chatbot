@@ -108,13 +108,11 @@ class PGRService {
       localitiesLocalisationCodes.push(localisationCode);
     }
     let localisedMessages = await localisationService.getMessagesForCodesAndTenantId(localitiesLocalisationCodes, tenantId);
-    console.log(localisedMessages);
     let messageBundle = {};
     for(let locality of localities) {
       let localisationCode = tenantId.replace('.', '_').toUpperCase() + '_ADMIN_' + locality;
       messageBundle[locality] = localisedMessages[localisationCode]
     }
-    console.log(messageBundle);
     return { localities, messageBundle };
   }
 

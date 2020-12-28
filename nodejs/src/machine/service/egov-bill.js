@@ -8,7 +8,6 @@ class BillService {
     for(let module of supportedModules) {
       this.services.push(module.trim());
     }
-    console.log(this.services);
   }
 
   getSupportedServicesAndMessageBundle() {

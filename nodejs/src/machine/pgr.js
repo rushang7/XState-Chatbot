@@ -255,10 +255,7 @@ const pgr =  {
                         })
                       },
                       {
-                        target: '#city',
-                        actions: assign((context, event) => {
-                          console.log('qwe');
-                        })
+                        target: '#city'
                       }
                     ],
                     onError: {
