@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "main": "src/app.js",
     "scripts": {
-        "start": "node src/app.js",
+        "start": "node --inspect src/app.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "rushang7",
