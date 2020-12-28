@@ -28,7 +28,7 @@ const sevaMachine = Machine({
         ]
       }
     },
-    oboarding: {
+    onboarding: {
       id: 'onboarding',
       initial: 'onboardingWelcome',
       states:{
@@ -77,7 +77,7 @@ const sevaMachine = Machine({
             preCondition: {
               always: [
                 {
-                  target: '#onboardingThankYou',
+                  target: '#onboardingUpdateUserProfile',
                   cond: (context) => context.user.name 
                 },
                 {
@@ -106,7 +106,7 @@ const sevaMachine = Machine({
               always: [
                 {
                   cond: (context) => context.user.name,
-                  target: '#onboardingThankYou'
+                  target: '#onboardingUpdateUserProfile'
                 },
                 {
                   target: '#welcome'
@@ -115,23 +115,33 @@ const sevaMachine = Machine({
             }
           }
         },
-        onboardingThankYou: {
-          id: 'onboardingThankYou',
+        onboardingUpdateUserProfile: {
+          id: 'onboardingUpdateUserProfile',
           invoke: {
             id: 'updateUserProfile',
             src: (context, event) => userProfileService.updateUser(context.user, context.extraInfo.tenantId),
-            onDone: {
-              target: '#welcome',
-              actions: assign((context, event) => {
-                let message = dialog.get_message(messages.onboarding.onboardingThankYou, context.user.locale);
-                message = message.replace('{{name}}', context.user.name);
-                dialog.sendMessage(context, message, false);
-              })
-            },
+            onDone: [
+              {
+                target: '#onboardingThankYou',
+                cond: (context) => context.user.name
+              },
+              {
+                target: '#welcome'
+              }
+            ],
             onError: {
               target: '#welcome'
             }
           }
+        },
+        onboardingThankYou: {
+          id: 'onboardingThankYou',
+          onEntry: assign((context, event) => {
+            let message = dialog.get_message(messages.onboarding.onboardingThankYou, context.user.locale);
+            message = message.replace('{{name}}', context.user.name);
+            dialog.sendMessage(context, message, false);
+          }),
+          always: '#welcome'
         },
       }
     },
