@@ -62,6 +62,13 @@ const envVariables = {
     UrlShortnerHost: process.env.URL_SHORTNER_HOST || 'https://egov-micro-dev.egovernments.org',
     UrlShortnerEndpoint: process.env.URL_SHORTNER_ENDPOINT || '/egov-url-shortening/shortener',
 
+    collectonServiceHost: process.env.COLLECTION_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+    collectonServicSearchEndpoint: process.env.COLLECTION_SERVICE_SEARCH_ENDPOINT || 'collection-services/payments/$module/_search',
+    receiptSearchLimit: process.env.RECEIPT_SEARCH_LIMIT || 10,
+
+    dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
+    timeZone: process.env.TIMEZONE || 'Asia/Kolkata'
+
     billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
 
     //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
