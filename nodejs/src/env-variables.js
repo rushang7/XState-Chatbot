@@ -1,11 +1,11 @@
 const os = require('os');
 
 const envVariables = {
-    serviceId : process.env.NAME || 'xstate-chatbot-server',
+    serviceId : process.env.NAME || 'xstate-chatbot',
     ver : process.env.VERSION || '0.0.1',
 
     port: process.env.SERVICE_PORT || 8080,
-    contextPath : process.env.CONTEXT_PATH || '/',
+    contextPath : process.env.CONTEXT_PATH || '/xstate-chatbot',
 
     whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'console',
 
@@ -20,6 +20,10 @@ const envVariables = {
         dbUsername: process.env.DB_USER || 'postgres',
         dbPassword: process.env.DB_PASSWORD || ''
     },
+
+    kafkaHost: process.env.KAFKA_BOOTSTRAP_SERVER || 'localhost:9092',
+
+    chatbotTelemetryTopic: process.env.CHATBOT_TELEMETRY_TOPIC || 'chatbot-telemetry-v2',
 
     mdmsHost: process.env.MDMS_HOST || 'https://egov-micro-dev.egovernments.org/',
 
