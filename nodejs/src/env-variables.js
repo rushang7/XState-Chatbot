@@ -67,7 +67,7 @@ const envVariables = {
     receiptSearchLimit: process.env.RECEIPT_SEARCH_LIMIT || 10,
 
     dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
-    timeZone: process.env.TIMEZONE || 'Asia/Kolkata'
+    timeZone: process.env.TIMEZONE || 'Asia/Kolkata',
 
     billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
 
