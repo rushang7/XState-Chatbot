@@ -89,7 +89,8 @@ class BillService {
     var Bills = {};
     Bills['Bills'] = [];
 
-    results.forEach(function(result) {
+    let self = this;
+    for(let result of results){
       if(result.status=='ACTIVE' && result.totalAmount!=0){
         let dueDate = new Date(result.billDetails[result.billDetails.length-1].expiryDate).toLocaleDateString();
         let fromMonth = new Date(result.billDetails[result.billDetails.length-1].fromPeriod).toLocaleString('en-IN', { month: 'short' });
@@ -97,7 +98,9 @@ class BillService {
         let fromBillYear = new Date(result.billDetails[result.billDetails.length-1].fromPeriod).getFullYear();
         let toBillYear = new Date(result.billDetails[result.billDetails.length-1].toPeriod).getFullYear();
         let billPeriod = fromMonth+" "+fromBillYear+"-"+toMonth+" "+toBillYear;
-
+        let tenantId= result.tenantId;
+        let link = await self.getPaymentLink(result.consumerCode,tenantId,result.businessService);
+        
         var data={
           service: result.businessService,
           id: result.consumerCode,
@@ -105,11 +108,12 @@ class BillService {
           dueAmount: result.totalAmount,
           dueDate: dueDate,
           period: billPeriod,
-          paymentLink: 'https://mseva.org/pay/132' // to do
+          paymentLink: link
         }
         Bills['Bills'].push(data);
       } 
-  });
+  }
+
   return Bills['Bills'];  
   }
 
@@ -214,9 +218,9 @@ class BillService {
   {
     var UIHost = config.uiappHost;
     var paymentPath = config.msgpaylink;
-    paymentPath.replace(/\$consumercode/g,consumerCode);
-    paymentPath.replace(/\$tenantId/g,tenantId);
-    paymentPath.replace(/\$businessservice/g,businessService);
+    paymentPath=paymentPath.replace(/\$consumercode/g,consumerCode);
+    paymentPath=paymentPath.replace(/\$tenantId/g,tenantId);
+    paymentPath=paymentPath.replace(/\$businessservice/g,businessService);
     var finalPath = UIHost + paymentPath;
     var link = await this.getShortenedURL(finalPath);
     return link;
