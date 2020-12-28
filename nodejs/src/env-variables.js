@@ -13,6 +13,14 @@ const envVariables = {
 
     repoProvider: process.env.REPO_PROVIDER || 'PostgreSQL',
 
+    postgresConfig: {
+        dbHost: process.env.DB_HOST || 'localhost',
+        dbPort: process.env.DB_PORT || '5432',
+        dbName: process.env.DB_NAME || 'chat',
+        dbUsername: process.env.DB_USER || 'postgres',
+        dbPassword: process.env.DB_PASSWORD || ''
+    },
+
     mdmsHost: process.env.MDMS_HOST || 'https://egov-micro-dev.egovernments.org/',
 
     localisationServiceHost: process.env.LOCALISATION_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
@@ -28,7 +36,7 @@ const envVariables = {
     localityExternalWebpagePath: process.env.LOCALITY_EXTERNAL_WEBPAGE_PATH || 'citizen/openlink/whatsapp/locality',
 
     whatsAppBusinessNumber : process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
-
+    
     userServiceHost: process.env.USER_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
     userServiceOAuthPath: process.env.USER_SERVICE_OAUTH_PATH || 'user/oauth/token',
     userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZEN_PATH || 'user/citizen/_create',
@@ -60,6 +68,11 @@ const envVariables = {
 
     dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
     timeZone: process.env.TIMEZONE || 'Asia/Kolkata'
+
+    billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
+
+    //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
+    //paylink: process.env.PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
 }
 
 module.exports = envVariables;

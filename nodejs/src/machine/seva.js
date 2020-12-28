@@ -56,7 +56,10 @@ const sevaMachine = Machine({
             },
             process: {
               onEntry: assign((context, event) => {
-                context.intention = dialog.get_intention(context.grammer, event, true);
+                if(dialog.validateInputType(event, 'text'))
+                  context.intention = dialog.get_intention(context.grammer, event, true);
+                else 
+                  context.intention = dialog.INTENTION_UNKOWN;
                 if(context.intention != dialog.INTENTION_UNKOWN) {
                   context.user.locale = context.intention;
                 } else {
@@ -93,6 +96,8 @@ const sevaMachine = Machine({
             },
             process: {
               onEntry: assign((context, event) => {
+                if(!dialog.validateInputType(event, 'text'))
+                  return;
                 let name = dialog.get_input(event, false);
                 if(name.toLowerCase() != 'no') {
                   context.user.name = name;
@@ -114,7 +119,7 @@ const sevaMachine = Machine({
           id: 'onboardingThankYou',
           invoke: {
             id: 'updateUserProfile',
-            src: (context, event) => userProfileService.updateUser(context.user, context.tenantId),
+            src: (context, event) => userProfileService.updateUser(context.user, context.extraInfo.tenantId),
             onDone: {
               target: '#welcome',
               actions: assign((context, event) => {
@@ -158,13 +163,18 @@ const sevaMachine = Machine({
           invoke: {
             id: 'updateUserLocale',
             src: (context, event) => {
-              if (context.user.locale === dialog.INTENTION_UNKOWN) {
+              if(dialog.validateInputType(event, 'text')) {
+                context.intention = dialog.get_intention(grammer.locale.question, event, true);
+              } else {
+                context.intention = dialog.INTENTION_UNKOWN;
+              }
+              if (context.intention === dialog.INTENTION_UNKOWN) {
                 context.user.locale = 'en_IN';
                 dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.proceeding, context.user.locale));
               } else {
-                context.user.locale = dialog.get_intention(grammer.locale.question, event, true);
-                return userProfileService.updateUser(context.user, context.tenantId);
+                context.user.locale = context.intention;
               }
+              return userProfileService.updateUser(context.user, context.extraInfo.tenantId);
             },
             onDone: {
               target: '#welcome'
@@ -176,7 +186,7 @@ const sevaMachine = Machine({
         }
       }
     },
-    sevamenu : { // TODO rename to menu if you can figure out how to avoid name clash with seva's menu
+    sevamenu : { 
       id: 'sevamenu',
       initial: 'question',
       states: {
@@ -190,7 +200,10 @@ const sevaMachine = Machine({
         },
         process: {
           onEntry: assign((context, event) => {
-            context.intention = dialog.get_intention(grammer.menu.question, event, true)
+            if(dialog.validateInputType(event, 'text'))
+              context.intention = dialog.get_intention(grammer.menu.question, event, true);
+            else
+              context.intention = dialog.INTENTION_UNKOWN;
           }),
           always: [
             {

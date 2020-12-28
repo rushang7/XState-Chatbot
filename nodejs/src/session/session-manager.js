@@ -11,7 +11,7 @@ class SessionManager {
 
     async fromUser(reformattedMessage) {
         let mobileNumber = reformattedMessage.user.mobileNumber;
-        let user = await userService.getUserForMobileNumber(mobileNumber, 'pb');
+        let user = await userService.getUserForMobileNumber(mobileNumber, reformattedMessage.extraInfo.tenantId);
         let userId = user.userId;
 
         let chatState = await chatStateRepository.getActiveStateForUserId(userId);
@@ -32,13 +32,13 @@ class SessionManager {
             saveState = this.removeUserDataFromState(saveState);
             await chatStateRepository.insertNewState(userId, true, JSON.stringify(saveState));
         } 
-        service = this.getChatServiceFor(chatState, user);
+        service = this.getChatServiceFor(chatState, reformattedMessage);
         
         let event = (intention == 'reset')? 'USER_RESET' : 'USER_MESSAGE';
         service.send(event, reformattedMessage );
     }
-    async toUser(user, outputMessages) {
-        channelProvider.sendMessageToUser(user, outputMessages);
+    async toUser(user, outputMessages, extraInfo) {
+        channelProvider.sendMessageToUser(user, outputMessages, extraInfo);
         for(let message of outputMessages) {
             telemetry.log(user.uuid, 'to_user', {message : {type: "text", output: message}});
         }
@@ -52,12 +52,13 @@ class SessionManager {
         return state;
     }
 
-    getChatServiceFor(chatStateJson, user) {
+    getChatServiceFor(chatStateJson, reformattedMessage) {
         const context = chatStateJson.context;
         context.chatInterface = this;
         let locale = context.user.locale;
-        context.user = user;
+        context.user = reformattedMessage.user;
         context.user.locale = locale;
+        context.extraInfo = reformattedMessage.extraInfo;
 
         const state = State.create(chatStateJson);
         const resolvedState = sevaStateMachine.withContext(context).resolveState(state);
