@@ -50,6 +50,9 @@ class SessionManager {
         let locale = state.context.user.locale;
         state.context.user = undefined;
         state.context.user = { locale: locale, userId: userId };
+        state.event = {};
+        state._event = {};
+        state.history.context.user = {};
         return state;
     }
 
