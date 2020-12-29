@@ -75,8 +75,8 @@ const envVariables = {
 
     billSupportedModules: process.env.BILL_SUPPORTED_MODULES || 'WS, PT, TL, FIRENOC, BPA',
 
-    //userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
-    //paylink: process.env.PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
+    userHost: process.env.USER_HOST || 'https://egov-micro-dev.egovernments.org',
+    downpaylink: process.env.DOWN_PAY_LINK || 'citizen/withoutAuth/egov-common/download-receipt?status=success&consumerCode=$consumercode&tenantId=$tenantId&receiptNumber=$receiptNumber&businessService=$businessservice&smsLink=true&mobileNo=7391904467'
 }
 
 module.exports = envVariables;

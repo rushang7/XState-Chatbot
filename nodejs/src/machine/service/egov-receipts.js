@@ -210,5 +210,37 @@ class ReceiptService {
       
     }
 
+    async getShortenedURL(finalPath)
+    {
+      var urlshortnerHost = config.UrlShortnerHost
+      var url = urlshortnerHost + '/egov-url-shortening/shortener';
+      var request = {};
+      request.url = finalPath; 
+      var options = {
+        method: 'POST',
+        body: JSON.stringify(request),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+      let response = await fetch(url, options);
+      let data = await response.text();
+      return data;
+    }
+
+    async DownLink(consumerCode,tenantId,receiptNumber,businessService,mobileNumber)
+    {
+      var UIHost = config.userHost;
+      var paymentPath = config.downpaylink;
+      paymentPath = paymentPath.replace(/\$consumercode/g,consumerCode);
+      paymentPath = paymentPath.replace(/\$tenantId/g,tenantId);
+      paymentPath = paymentPath.replace(/\$receiptnumber/g,receiptNumber)
+      paymentPath = paymentPath.replace(/\$businessservice/g,businessService);
+      paymentPath = paymentPath.replace(/\$mobilenumber/g,mobileNumber);
+      var finalPath = UIHost + paymentPath;
+      var link = await getShortenedURL(finalPath);
+      return link;
+    }
+
   }
 module.exports = new ReceiptService();
