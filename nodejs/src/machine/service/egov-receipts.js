@@ -96,25 +96,31 @@ class ReceiptService {
       Payments['Payments'] = [];
       var count =0;
       var lookup=[];
-      results.forEach(function(result) {
+
+      let self = this;
+      for(let result of results) {
         if(count<receiptLimit && (!lookup.includes(result.paymentDetails[0].bill.consumerCode) || isMultipleRecords)){
           var transactionDate = moment(result.transactionDate).tz(config.timeZone).format(config.dateFormat);
           var consumerCode = result.paymentDetails[0].bill.consumerCode;
+          var tenantId= result.tenantId;
+          var receiptNumber = result.paymentDetails[0].receiptNumber;
+          var businessService = result.paymentDetails[0].businessService;
+          var mobileNumber = result.mobileNumber;
           var data={
-            service: result.paymentDetails[0].businessService,
+            service: businessService,
             id: consumerCode,
             locality: 'Ajit Nagar', //to do
             city: 'Phagwara', //to do
             amount: result.totalDue,
             date: transactionDate,
             transactionNumber: result.transactionNumber,
-            receiptDocumentLink: 'https://mseva.org/pay/132' // to do
+            receiptDocumentLink: await this.receiptDownloadLink(consumerCode,tenantId,receiptNumber,businessService,mobileNumber)
           }
           Payments['Payments'].push(data);
           lookup.push(consumerCode);
           count=count+1;
         }
-      });
+      }
       
       return Payments['Payments'];
       
@@ -228,17 +234,17 @@ class ReceiptService {
       return data;
     }
 
-    async DownLink(consumerCode,tenantId,receiptNumber,businessService,mobileNumber)
+    async receiptDownloadLink(consumerCode,tenantId,receiptNumber,businessService,mobileNumber)
     {
-      var UIHost = config.userHost;
-      var paymentPath = config.downpaylink;
+      var UIHost = config.externalHost;
+      var paymentPath = config.receiptdownladlink;
       paymentPath = paymentPath.replace(/\$consumercode/g,consumerCode);
       paymentPath = paymentPath.replace(/\$tenantId/g,tenantId);
       paymentPath = paymentPath.replace(/\$receiptnumber/g,receiptNumber)
       paymentPath = paymentPath.replace(/\$businessservice/g,businessService);
       paymentPath = paymentPath.replace(/\$mobilenumber/g,mobileNumber);
       var finalPath = UIHost + paymentPath;
-      var link = await getShortenedURL(finalPath);
+      var link = await this.getShortenedURL(finalPath);
       return link;
     }
 
