@@ -1,5 +1,6 @@
 const config = require('../../env-variables');
 const fetch = require("node-fetch");
+const moment = require("moment-timezone");
 class BillService {
 
   constructor() {
@@ -84,9 +85,40 @@ class BillService {
   }
 
   validateParamInput(service, searchParamOption, paramInput) {
+    var state=config.rootTenantId;
+    state=state.toUpperCase();
+
     if(searchParamOption === 'mobile') {
       let regexp = new RegExp('^[0-9]{10}$');
-      return regexp.test(paramInput)
+      return regexp.test(paramInput);
+    }
+
+    if(searchParamOption === 'consumerNumber' || searchParamOption === 'propertyId' || searchParamOption === 'connectionNumber'){
+        if(service === 'PT'){
+          let regexp = new RegExp(state+'-PT-\\d{4}-\\d{2}-\\d{2}-\\d+$');
+          return regexp.test(paramInput);
+        }
+        if(service === 'WS'){
+          //todo
+          let regexp = new RegExp('WS/\\d{3}/\\d{4}-\\d{2}/\\d+$');
+          return regexp.test(paramInput);
+        }
+    }
+    
+
+    if(searchParamOption === 'tlApplicationNumber'){
+        let regexp = new RegExp(state+'-TL-\\d{4}-\\d{2}-\\d{2}-\\d+$');
+        return regexp.test(paramInput);
+    }
+
+    if(searchParamOption === 'nocApplicationNumber'){
+      let regexp = new RegExp(state+'-FN-\\d{4}-\\d{2}-\\d{2}-\\d+$');
+      return regexp.test(paramInput);
+    }
+
+    if(searchParamOption === 'bpaApplicationNumber'){
+      let regexp = new RegExp(state+'-BP-\\d{4}-\\d{2}-\\d{2}-\\d+$');
+      return regexp.test(paramInput);
     }
     return true;
   }
@@ -94,13 +126,19 @@ class BillService {
 
   async prepareBillResult(responseBody){
     let results=responseBody.Bill;
+    let billLimit = config.billSearchLimit;
+
+    if(results.length < billLimit)
+      billLimit = results.length;
+
     var Bills = {};
     Bills['Bills'] = [];
+    var count =0;
 
     let self = this;
     for(let result of results){
-      if(result.status=='ACTIVE' && result.totalAmount!=0){
-        let dueDate = new Date(result.billDetails[result.billDetails.length-1].expiryDate).toLocaleDateString();
+      if(result.status=='ACTIVE' && result.totalAmount!=0 && count<billLimit){
+        let dueDate = moment(result.billDetails[result.billDetails.length-1].expiryDate).tz(config.timeZone).format(config.dateFormat);
         let fromMonth = new Date(result.billDetails[result.billDetails.length-1].fromPeriod).toLocaleString('en-IN', { month: 'short' });
         let toMonth = new Date(result.billDetails[result.billDetails.length-1].toPeriod).toLocaleDateString('en-IN', { month: 'short' });
         let fromBillYear = new Date(result.billDetails[result.billDetails.length-1].fromPeriod).getFullYear();
@@ -119,6 +157,7 @@ class BillService {
           paymentLink: link
         }
         Bills['Bills'].push(data);
+        count = count + 1;
       } 
   }
 
@@ -140,6 +179,9 @@ class BillService {
       billUrl+='&';
       if(user.paramOption=='mobile')
         billUrl +='mobileNumber='+user.paramInput;
+      if(user.paramOption=='consumerNumber' || user.paramOption == 'tlApplicationNumber' || user.paramOption == 'nocApplicationNumber'
+      || user.paramOption=='bpaApplicationNumber' || user.paramOption=='connectionNumber' || user.paramOption=='propertyId')
+        billUrl +='consumerCode='+user.paramInput;
       else
         billUrl +=user.paramOption+'='+user.paramInput;
       
@@ -224,7 +266,7 @@ class BillService {
 
   async getPaymentLink(consumerCode,tenantId,businessService)
   {
-    var UIHost = config.uiappHost;
+    var UIHost = config.externalHost;
     var paymentPath = config.msgpaylink;
     paymentPath=paymentPath.replace(/\$consumercode/g,consumerCode);
     paymentPath=paymentPath.replace(/\$tenantId/g,tenantId);
