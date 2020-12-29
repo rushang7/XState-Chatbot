@@ -12,10 +12,6 @@ The Xstate Machine that contains the dialog is present in `nodejs/src/machine/`.
 
 Any external api calls are written as part of files present in `nodejs/src/machine/service` which would get called from the state machine.
 
-## Latest Visualization
-
-[XState Visualization](https://xstate.js.org/viz/?gist=128f8103dd1d80315a10d1a1cf4e8d70)
-
 ## Command to setup
 `
 npm install
