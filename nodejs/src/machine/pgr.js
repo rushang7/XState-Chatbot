@@ -1,10 +1,17 @@
 const { assign } = require('xstate');
 const { pgrService } = require('./service/service-loader');
 const dialog = require('./util/dialog');
+const localisationService = require('./util/localisation-service');
+const config = require('../env-variables');
+const moment = require("moment-timezone");
 
 const pgr =  {
   id: 'pgr',
   initial: 'pgrmenu',
+  onEntry: assign((context, event) => {
+    context.slots.pgr = {}
+    context.pgr = {slots: {}};
+  }),
   states: {
     pgrmenu : {
       id: 'pgrmenu',
@@ -119,6 +126,12 @@ const pgr =  {
                             let { complaintCategories, messageBundle } = event.data;
                             let preamble = dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.preamble, context.user.locale);
                             let {prompt, grammer} = dialog.constructListPromptAndGrammer(complaintCategories, messageBundle, context.user.locale);
+
+                            let lengthOfList = grammer.length;
+                            let otherTypeGrammer = { intention: 'Others', recognize: [ (lengthOfList + 1).toString() ] };
+                            prompt += `\n${lengthOfList + 1}. ` + dialog.get_message(messages.fileComplaint.complaintType2Step.category.question.otherType, context.user.locale);
+                            grammer.push(otherTypeGrammer);
+
                             context.grammer = grammer; // save the grammer in context to be used in next step
                             dialog.sendMessage(context, `${preamble}${prompt}`);
                           }),
@@ -136,6 +149,13 @@ const pgr =  {
                         context.intention = dialog.get_intention(context.grammer, event, true) 
                       }),
                       always: [
+                        {
+                          target: '#location',
+                          cond: (context) => context.intention == 'Others',
+                          actions: assign((context, event) => {
+                            context.slots.pgr["complaint"] = context.intention;
+                          })
+                        },
                         {
                           target: '#complaintItem',
                           cond: (context) => context.intention != dialog.INTENTION_UNKOWN
@@ -159,7 +179,7 @@ const pgr =  {
                   states: {
                     question: {
                       invoke:  {                  
-                        src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention),
+                        src: (context) => pgrService.fetchComplaintItemsForCategory(context.intention,context.extraInfo.tenantId),
                         id: 'fetchComplaintItemsForCategory',
                         onDone: {
                           actions: assign((context, event) => {
@@ -218,7 +238,11 @@ const pgr =  {
             geoLocationSharingInfo: {
               id: 'geoLocationSharingInfo',
               onEntry: assign( (context, event) => {
-                dialog.sendMessage(context, '_Informational Image_', false);
+                var message = {
+                  type: 'image',
+                  output: config.pgrUseCase.informationImageFilestoreId
+                };
+                dialog.sendMessage(context, message, false);
               }),
               always: 'geoLocation'
             },
@@ -243,15 +267,14 @@ const pgr =  {
                         context.slots.pgr.geocode = event.message.input;
                         return pgrService.getCityAndLocalityForGeocode(event.message.input, context.extraInfo.tenantId);
                       }
-                      return Promise.resolve({});
+                      return Promise.resolve();
                     },
                     onDone: [
                       {
                         target: '#confirmLocation',
-                        cond: (context, event) => event.data.city,
+                        cond: (context, event) => event.data,
                         actions: assign((context, event) => {
-                          context.slots.pgr["city"]= event.data.city;
-                          context.slots.pgr["locality"] = event.data.locality;
+                          context.pgr.detectedLocation = event.data;
                         })
                       },
                       {
@@ -271,9 +294,16 @@ const pgr =  {
               states: {
                 question: {
                   onEntry: assign((context, event) => {
-                    let message = dialog.get_message(messages.fileComplaint.confirmLocation.question, context.user.locale);
-                    message = message.replace('{{city}}', context.slots.pgr['city']);
-                    message = message.replace('{{locality}}', context.slots.pgr['locality']);
+                    let message;
+                    if(context.pgr.detectedLocation.locality) {
+                      let localityName = dialog.get_message(context.pgr.detectedLocation.matchedLocalityMessageBundle, context.user.locale);
+                      message = dialog.get_message(messages.fileComplaint.confirmLocation.confirmCityAndLocality, context.user.locale);
+                      message = message.replace('{{locality}}', localityName);
+                    } else {
+                      message = dialog.get_message(messages.fileComplaint.confirmLocation.confirmCity, context.user.locale);                      
+                    }
+                    let cityName = dialog.get_message(context.pgr.detectedLocation.matchedCityMessageBundle, context.user.locale);
+                    message = message.replace('{{city}}', cityName);
                     dialog.sendMessage(context, message);
                   }),
                   on: {
@@ -287,11 +317,15 @@ const pgr =  {
                       context.slots.pgr["locationConfirmed"] = false;
                     } else {
                       context.slots.pgr["locationConfirmed"] = true;
+                      context.slots.pgr.city = context.pgr.detectedLocation.city;
+                      if(context.pgr.detectedLocation.locality) {
+                        context.slots.pgr.locality = context.pgr.detectedLocation.locality;
+                      }
                     }
                   }),
                   always: [
                     {
-                      target: '#persistComplaint',
+                      target: '#other',
                       cond: (context, event) => context.slots.pgr["locationConfirmed"]  && context.slots.pgr["locality"]
                     },
                     {
@@ -312,14 +346,14 @@ const pgr =  {
                 question: {
                   invoke: {
                     id: 'fetchCities',
-                    src: (context, event) => pgrService.fetchCities(context.extraInfo.tenantId),
+                    src: (context, event) => pgrService.fetchCitiesAndWebpageLink(context.extraInfo.tenantId,context.extraInfo.whatsAppBusinessNumber),
                     onDone: {
                       actions: assign((context, event) => {
-                        let { cities, messageBundle } = event.data;
+                        let { cities, messageBundle, link } = event.data;
                         let preamble = dialog.get_message(messages.fileComplaint.city.question.preamble, context.user.locale);
-                        let link = pgrService.getCityExternalWebpageLink(context.extraInfo.tenantId, context.extraInfo.whatsAppBusinessNumber);
                         let message = preamble + '\n' + link;
-                        context.grammer = dialog.constructLiteralGrammer(cities, messageBundle, context.user.locale);
+                        let grammer = dialog.constructLiteralGrammer(cities, messageBundle, context.user.locale);
+                        context.grammer = grammer;
                         dialog.sendMessage(context, message);
                       })
                     },
@@ -361,16 +395,19 @@ const pgr =  {
                 question: {
                   invoke: {
                     id: 'fetchLocalities',
-                    src: (context) => pgrService.fetchLocalities(context.slots.pgr.city),
+                    src: (context) => pgrService.fetchLocalitiesAndWebpageLink(context.slots.pgr.city,context.extraInfo.whatsAppBusinessNumber),
                     onDone: {
                       actions: assign((context, event) => {
-                        let { localities, messageBundle } = event.data;
+                        let { localities, messageBundle,link } = event.data;
                         let preamble = dialog.get_message(messages.fileComplaint.locality.question.preamble, context.user.locale);
-                        let link = pgrService.getLocalityExternalWebpageLink(context.slots.pgr.city, context.extraInfo.whatsAppBusinessNumber);
                         let message = preamble + '\n' + link;
-                        context.grammer = dialog.constructLiteralGrammer(localities, messageBundle, context.user.locale);
+                        let grammer = dialog.constructLiteralGrammer(localities, messageBundle, context.user.locale);
+                        context.grammer = grammer;
                         dialog.sendMessage(context, message);
                       })
+                    },
+                    onError: {
+                      target: '#system_error'
                     }
                   },
                   on: {
@@ -383,7 +420,7 @@ const pgr =  {
                   }),
                   always : [
                     {
-                      target: '#persistComplaint',
+                      target: '#other',
                       cond: (context) => context.intention != dialog.INTENTION_UNKOWN,
                       actions: assign((context, event) => context.slots.pgr["locality"] = context.intention)
                     },
@@ -408,13 +445,70 @@ const pgr =  {
         },
         other: {
           // get other info
-
+          id: 'other',
+          initial: 'imageUpload',
+          states: {
+            imageUpload: {
+              id: 'imageUpload',
+              initial: 'question',
+              states: {
+                question: {
+                  onEntry: assign((context, event) => {
+                    let message = dialog.get_message(messages.fileComplaint.imageUpload.question, context.user.locale);
+                    dialog.sendMessage(context, message);
+                  }),
+                  on: {
+                    USER_MESSAGE: 'process'
+                  }
+                },
+                process: {
+                  onEntry: assign((context, event) => {
+                    if(dialog.validateInputType(event, 'image')) {
+                      context.slots.pgr.image = event.message.input;
+                      context.message = {
+                        isValid: true
+                      };
+                    }
+                    else{
+                      let parsed = event.message.input;
+                      let isValid = (parsed === "No");
+                      context.message = {
+                        isValid: isValid,
+                        messageContent: event.message.input
+                      };
+                    }
+                  }),
+                  always:[
+                    {
+                      target: 'error',
+                      cond: (context, event) => {
+                        return ! context.message.isValid;
+                      }
+                    },
+                    {
+                      target: '#persistComplaint',
+                      cond: (context, event) => {
+                        return context.message.isValid;
+                      }
+                    }
+                  ] 
+                },
+                error: {
+                  onEntry: assign( (context, event) => {
+                    let message = dialog.get_message(messages.fileComplaint.imageUpload.error, context.user.locale);
+                    dialog.sendMessage(context, message, false);
+                  }),
+                  always : 'question'
+                }
+              }
+            }
+          }
         },
         persistComplaint: {
           id: 'persistComplaint',
           invoke: {
             id: 'persistComplaint',
-            src: (context) => pgrService.persistComplaint(context.slots.pgr),
+            src: (context) => pgrService.persistComplaint(context.user,context.slots.pgr,context.extraInfo),
             onDone: {
               target: '#endstate',
               actions: assign((context, event) => {
@@ -422,7 +516,9 @@ const pgr =  {
                 let message = dialog.get_message(messages.fileComplaint.persistComplaint, context.user.locale);
                 message = message.replace('{{complaintNumber}}', complaintDetails.complaintNumber);
                 message = message.replace('{{complaintLink}}', complaintDetails.complaintLink);
-                dialog.sendMessage(context, message, false);
+                let closingStatement = dialog.get_message(messages.fileComplaint.closingStatement, context.user.locale);
+                message = message + closingStatement;
+                dialog.sendMessage(context, message);
               })
             }
           }
@@ -437,29 +533,34 @@ const pgr =  {
         onDone: [
           {
             target: '#endstate',
-            cond: (context, event) => event.data.length > 0,
-            actions: assign((context, event) => {
+            cond: (context, event) => {
+              return event.data.length>0;
+            },
+            actions: assign((context, event) => {     
               let complaints = event.data;
+  
               let message = dialog.get_message(messages.trackComplaint.results.preamble, context.user.locale);
               message += '\n';
               for(let i = 0; i < complaints.length; i++) {
                 let template = dialog.get_message(messages.trackComplaint.results.complaintTemplate, context.user.locale);
-                template = template.replace('{{complaintType}}', complaints[i].complaintType);
-                template = template.replace('{{complaintId}}', complaints[i].complaintId);
-                template = template.replace('{{filedDate}}', complaints[i].filedDate);
-                template = template.replace('{{complaintStatus}}', complaints[i].complaintStatus);
-                template = template.replace('{{complaintLink}}', complaints[i].complaintLink);
-                message += '\n' + (i + 1) + '. ' + template;
+                let complaint = complaints[i];
+                template = template.replace('{{complaintType}}',complaint.complaintType);
+                template = template.replace('{{complaintNumber}}', complaint.complaintNumber);
+                template = template.replace('{{filedDate}}', complaint.filedDate);
+                template = template.replace('{{complaintStatus}}', complaint.complaintStatus);
+                template = template.replace('{{complaintLink}}', complaint.complaintLink);
+                message += '\n\n' + (i + 1) + '. ' + template;
               }
-
-              dialog.sendMessage(context, message, false);
+              let closingStatement = dialog.get_message(messages.trackComplaint.results.closingStatement, context.user.locale);
+              message = message +'\n'+ closingStatement;
+              dialog.sendMessage(context, message);
             })
           },
           {
             target: '#endstate',
             actions: assign((context, event) => {
               let message = dialog.get_message(messages.trackComplaint.noRecords, context.user.locale);
-              dialog.sendMessage(context, message, false);
+              dialog.sendMessage(context, message);
             })
           }
         ]
@@ -471,8 +572,8 @@ const pgr =  {
 let messages = {
   pgrmenu: {
     question: {
-      en_IN : 'Please type\n\n1 to File New Complaint.\n2 to Track Your Complaints',
-      hi_IN: 'कृप्या टाइप करे\n\n1 यदि आप शिकायत दर्ज करना चाहते हैं\n2 यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
+      en_IN : 'Please type and send the number of your option from the list given 👇 below:\n\n1. File New Complaint.\n2. Track Your Complaints.',
+      hi_IN: 'कृपया नीचे 👇 दिए गए सूची से अपना विकल्प टाइप करें और भेजें\n\n1. यदि आप शिकायत दर्ज करना चाहते हैं\n2. यदि आप अपनी शिकायतों की स्थिति देखना चाहते हैं'
     }
   },
   fileComplaint: {
@@ -495,6 +596,10 @@ let messages = {
             en_IN : 'Please enter the number for your complaint category',
             hi_IN : 'अपनी शिकायत श्रेणी के लिए नंबर दर्ज करें'
           },
+          otherType: {
+            en_IN: 'Others',
+            hi_IN: 'अन्य'
+          }
         }
       },
       item: {
@@ -513,8 +618,13 @@ let messages = {
       }
     }, // geoLocation 
     confirmLocation: {
-      question: {
-        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nLocality: {{locality}}\nPlease send "*No*", if it is incorrect'
+      confirmCityAndLocality: {
+        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nLocality: {{locality}}\nPlease send "No", if it is incorrect',
+        hi_IN: 'क्या यह शिकायत का सही स्थान है?\nशहर: {{city}} \n स्थान: {{locality}} \n अगर यह गलत है तो कृपया "No" भेजें ।'
+      },
+      confirmCity: {
+        en_IN: 'Is this the correct location of the complaint?\nCity: {{city}}\nPlease send "No", if it is incorrect.\nOtherwise type any character and send to proceed.',
+        hi_IN: 'क्या यह शिकायत का सही स्थान है? \nशहर: {{city}}\n अगर यह गलत है तो कृपया "No" भेजें।\nअन्यथा किसी भी चरित्र को टाइप करें और आगे बढ़ने के लिए भेजें।'
       }
     },
     city: {
@@ -533,20 +643,42 @@ let messages = {
         }
       }
     }, // locality
+    imageUpload: {
+      question: {
+        en_IN: 'Please attach a picture of the complaint. Otherwise, type and send "No"',
+        hi_IN: 'कृपया शिकायत की एक तस्वीर भेजें। अन्यथा टाइप करें "No" और भेजें ।'
+      },
+      error:{
+        en_IN : 'Sorry, I didn\'t understand',
+        hi_IN: 'क्षमा करें, मुझे समझ नहीं आया ।',
+      }
+    },
     persistComplaint: {
-      en_IN: 'Thank You! You have successfully filed a complaint through mSeva Punjab.\nYour Complaint No is : {{complaintNumber}}\nYou can view and track your complaint  through the link below:\n{{complaintLink}}\n\nPlease type and send “mseva” whenever you need my assistance.'
+      en_IN: 'Thank You! You have successfully filed a complaint through mSeva Punjab.\nYour Complaint No is : {{complaintNumber}}\nYou can view and track your complaint  through the link below:\n{{complaintLink}}\n',
+      hi_IN: 'धन्यवाद! आपने mSeva Punjab के माध्यम से सफलतापूर्वक शिकायत दर्ज की है।\nआपकी शिकायत संख्या: {{complaintNumber}}\n आप नीचे दिए गए लिंक के माध्यम से अपनी शिकायत देख और ट्रैक कर सकते हैं:\n {{complaintLink}}\n'
+    },
+    closingStatement: {
+      en_IN: '\nPlease type and send “mseva” whenever you need my assistance',
+      hi_IN: '\nजब भी आपको मेरी सहायता की आवश्यकता हो तो कृपया "mseva" लिखें और भेजें'
     }
   }, // fileComplaint
   trackComplaint: {
     noRecords: {
-      en_IN: 'There are no open complaints.\nPlease type and send mseva to go to the main menu options.'
+      en_IN: 'There are no open complaints.\nPlease type and send mseva to go to the main menu options.',
+      hi_IN: 'अब आपके द्वारा पंजीकृत कोई खुली शिकायत नहीं है।\nमुख्य मेनू पर वापस जाने के लिए ‘mseva’ टाइप करें और भेजें ।'
     },
     results: {
       preamble: {
-        en_IN: 'Your Open Complaints'
+        en_IN: 'Your Open Complaints',
+        hi_IN: 'आपकी पंजीकृत ओपन शिकायतें'
       },
       complaintTemplate: {
-        en_IN: '*{{complaintType}}*\nComplaint No: {{complaintId}}\nFiled Date: {{filedDate}}\nCurrent Complaint Status: *{{complaintStatus}}*\nTap on the link below to view the complaint\n{{complaintLink}}'
+        en_IN: '*{{complaintType}}*\nComplaint No: {{complaintNumber}}\nFiled Date: {{filedDate}}\nCurrent Complaint Status: *{{complaintStatus}}*\nTap on the link below to view the complaint\n{{complaintLink}}',
+        hi_IN: '*{{complaintType}}*\nशिकायत संख्या: {{complaintNumber}}\nदायर तिथि: {{filedDate}}\nशिकायत की स्थिति: *{{complaintStatus}}*\nशिकायत देखने के लिए नीचे दिए गए लिंक पर टैप करें\n{{complaintLink}}'
+      },
+      closingStatement: {
+        en_IN: '\nPlease type and send “mseva” whenever you need my assistance',
+        hi_IN: '\nजब भी आपको मेरी सहायता की आवश्यकता हो तो कृपया "mseva" लिखें और भेजें'
       }
     }
   }

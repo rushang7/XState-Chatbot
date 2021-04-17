@@ -2,10 +2,10 @@ const config = require('../../env-variables');
 const fetch = require('node-fetch');
 
 class UserProfileService {
-  async updateUser(user, tenantId) {
-    user.userInfo.locale = user.locale;
-    if(user.name)
-      user.userInfo.name = user.name;
+  async updateUser(user, slots, tenantId) {
+    user.userInfo.locale = slots.locale;
+    if(slots.name)
+      user.userInfo.name = slots.name;
 
     let requestBody = {
       RequestInfo: {
@@ -13,7 +13,7 @@ class UserProfileService {
       },
       user: user.userInfo
     };
-    let url = config.userServiceHost + config.userServiceUpdateProfilePath + '?tenantId=' + tenantId;
+    let url = config.egovServices.egovServicesHost + config.egovServices.userServiceUpdateProfilePath + '?tenantId=' + tenantId;
 
     let options = {
       method: 'POST',

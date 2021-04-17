@@ -10,8 +10,8 @@ const sevaMachine = Machine({
   initial: 'start',
   on: {
     USER_RESET: {
-      target: 'sevamenu',
-      actions: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(messages.reset, context.user.locale), false))
+      target: '#welcome',
+      // actions: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(messages.reset, context.user.locale), false))
     }
   },
   states: {
@@ -35,6 +35,7 @@ const sevaMachine = Machine({
         onboardingWelcome: {
           id: 'onboardingWelcome',
           onEntry: assign((context, event) => {
+            context.onboarding = {};
             let message = messages.onboarding.onboardingWelcome;
             dialog.sendMessage(context, message, false);
           }),
@@ -65,6 +66,7 @@ const sevaMachine = Machine({
                 } else {
                   context.user.locale = 'en_IN';
                 }
+                context.onboarding.locale = context.user.locale;
               }),
               always: '#onboardingName'
             }
@@ -100,18 +102,67 @@ const sevaMachine = Machine({
                   return;
                 let name = dialog.get_input(event, false);
                 if(name.toLowerCase() != 'no') {
-                  context.user.name = name;
+                  context.onboarding.name = name;
                 }
               }),
               always: [
                 {
-                  cond: (context) => context.user.name,
+                  cond: (context) => context.onboarding.name,
+                  target: '#onboardingNameConfirmation'
+                },
+                {
+                  target: '#onboardingUpdateUserProfile'
+                }
+              ]
+            }
+          }
+        },
+        onboardingNameConfirmation: {
+          id: 'onboardingNameConfirmation',
+          initial: 'question',
+          states: {
+            question: {
+              onEntry: assign((context, event) => {
+                let message = dialog.get_message(messages.onboarding.onboardingNameConfirmation, context.user.locale);
+                message = message.replace('{{name}}', context.onboarding.name);
+                dialog.sendMessage(context, message);
+              }),
+              on: {
+                USER_MESSAGE: 'process'
+              }
+            },
+            process: {
+              onEntry: assign((context, event) => {
+                if(!dialog.validateInputType(event, 'text')) {
+                  context.intention = 'error';
+                  return;
+                }
+                let input = dialog.get_input(event);
+                if(input == 'no')
+                  context.intention = 'disagree';
+                if(input == 'yes')
+                  context.intention = 'agree';
+              }),
+              always: [
+                {
+                  cond: (context) => context.intention == 'agree',
                   target: '#onboardingUpdateUserProfile'
                 },
                 {
-                  target: '#welcome'
+                  cond: (context) => context.intention == 'disagree',
+                  target: '#onboardingName'
+                },
+                {
+                  target: 'error'
                 }
               ]
+            },
+            error: {
+              onEntry: assign((context, event) => {
+                let message = dialog.get_message(dialog.global_messages.error.retry, context.user.locale);
+                dialog.sendMessage(context, message, false);
+              }),
+              always: 'question'
             }
           }
         },
@@ -119,11 +170,16 @@ const sevaMachine = Machine({
           id: 'onboardingUpdateUserProfile',
           invoke: {
             id: 'updateUserProfile',
-            src: (context, event) => userProfileService.updateUser(context.user, context.extraInfo.tenantId),
+            src: (context, event) => userProfileService.updateUser(context.user, context.onboarding, context.extraInfo.tenantId),
             onDone: [
               {
                 target: '#onboardingThankYou',
-                cond: (context) => context.user.name
+                actions: assign((context, event) => {
+                  context.user.name = context.onboarding.name;
+                  context.user.locale = context.onboarding.locale;
+                  context.onboarding = undefined;
+                }),
+                cond: (context) => context.onboarding.name
               },
               {
                 target: '#welcome'
@@ -149,6 +205,18 @@ const sevaMachine = Machine({
       id: 'welcome',
       onEntry: assign((context, event) => {
         var message = dialog.get_message(messages.welcome, context.user.locale);
+        if(context.user.name)
+          message = message.replace('{{name}}', context.user.name);
+        else 
+          message = message.replace(' {{name}}', '');
+        dialog.sendMessage(context, message, false);
+      }),
+      always: '#sevamenu'
+    },
+    updateLocale: {
+      id: 'updateLocale',
+      onEntry: assign((context, event) => {
+        var message = dialog.get_message(messages.updateLocaleMessage, context.user.locale);
         if(context.user.name)
           message = message.replace('{{name}}', context.user.name);
         else 
@@ -186,9 +254,16 @@ const sevaMachine = Machine({
               }
               return userProfileService.updateUser(context.user, context.extraInfo.tenantId);
             },
-            onDone: {
-              target: '#welcome'
-            },
+            onDone: [
+              {
+                target: '#updateLocale',
+                cond: (context) => context.intention != dialog.INTENTION_UNKOWN
+              },
+              {
+                target: '#sevamenu',
+                cond: (context) => context.intention === dialog.INTENTION_UNKOWN
+              }
+            ],
             onError: {
               target: '#welcome'
             }
@@ -251,10 +326,10 @@ const sevaMachine = Machine({
     endstate: {
       id: 'endstate',
       always: 'start',
-      // type: 'final', //Make it a final state so session manager kills this machine and creates a new one when user types again
-      onEntry: assign((context, event) => {
-        dialog.sendMessage(context, dialog.get_message(messages.endstate, context.user.locale));
-      })
+      // type: 'final', //Another approach: Make it a final state so session manager kills this machine and creates a new one when user types again
+      // onEntry: assign((context, event) => {
+      //   dialog.sendMessage(context, dialog.get_message(messages.endstate, context.user.locale));
+      // })
     },
     system_error: {
       id: 'system_error',
@@ -282,10 +357,14 @@ let messages = {
     },
     onboardingName: {
       question: {
-        en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "*No*".',
-        hi_IN: 'आगे बढ़ने से पहले, अपने अनुभव को और व्यक्तिगत बनाने के लिए कृपया अपना नाम साझा करें।\nयदि आप अपना नाम साझा नहीं करना चाहते हैं, तो टाइप करें और "*No*" भेजें।'
+        en_IN: 'Before moving further, please share your name to make your experience more personalized.\nElse if you don\'t want to share your name, type and send "No".',
+        hi_IN: 'आगे बढ़ने से पहले, अपने अनुभव को और व्यक्तिगत बनाने के लिए कृपया अपना नाम साझा करें।\nयदि आप अपना नाम साझा नहीं करना चाहते हैं, तो टाइप करें और "No" भेजें।'
       }      
-    }, 
+    },
+    onboardingNameConfirmation: {
+      en_IN: "Please confirm your name {{name}} by typing “Yes” or send “No” to change your name.",
+      hi_IN: "कृपया अपने नाम {{name}} की पुष्टि करने के लिए “Yes” टाइप करें। यदि आप अपना नाम बदलना चाहते हैं, तो “No” टाइप कीजिए।"
+    },
     onboardingThankYou: {
       en_IN: 'Thank you so much {{name}} for the details, we are happy to serve you.',
       hi_IN: 'विवरण के लिए आपका बहुत-बहुत धन्यवाद {{name}}, हम आपकी सेवा करके प्रसन्न हैं।'
@@ -303,13 +382,17 @@ let messages = {
   },
   sevamenu: {
     question: {
-      en_IN : 'Please type\n\n1 for Complaints\n2 for Bills\n3 for Receipts.\n\n4 to Change Language',
-      hi_IN: 'कृप्या टाइप करे\n\n1 शिकायतों के लिए\n2 बिलों के लिए\n3 रसीदों के लिए\n\n4 भाषा बदलने के लिए'
+      en_IN : 'Please type and send the number of your option from the list given 👇 below:\n\n1. File or Track Complaints.\n2. Pay Bills and Fees.\n3. View Payments Receipts.\n4. Change Language.',
+      hi_IN: 'कृपया नीचे 👇 दिए गए सूची से अपना विकल्प टाइप करें और भेजें:\n\n1. शिकायतों के लिए\n2. बिलों के लिए\n3. रसीदों के लिए\n4. भाषा बदलने के लिए'
     }
   },
   endstate: {
     en_IN: 'Goodbye. Say hi to start another conversation',
     hi_IN: 'अलविदा। एक और बातचीत शुरू करने के लिए नमस्ते कहें'
+  },
+  updateLocaleMessage:{
+    en_IN: 'Thank you {{name}} for updating the Language of your choice.\n',
+    hi_IN: 'अपनी पसंद की भाषा को अपडेट करने के लिए धन्यवाद {{name}} ।\n'
   }
 }
 

@@ -12,9 +12,9 @@ var geturl = require("url");
 var path = require("path");
 require('url-search-params-polyfill');
 
-let pgrCreateRequestBody = "{\"RequestInfo\":{\"authToken\":\"\",\"userInfo\":{}},\"service\":{\"tenantId\":\"\",\"serviceCode\":\"\",\"description\":\"\",\"accountId\":\"\",\"source\":\"whatsapp\",\"address\":{\"landmark\":\"\",\"city\":\"\",\"geoLocation\":{\"latitude\": null, \"longitude\": null},\"locality\":{\"code\":\"\"}}},\"workflow\":{\"action\":\"APPLY\",\"verificationDocuments\":[]}}";
+let pgrv1CreateRequestBody = "{\"RequestInfo\":{\"authToken\":\"\"},\"actionInfo\":[{\"media\":[]}],\"services\":[{\"serviceCode\":\"\",\"description\":\"\",\"addressDetail\":{\"latitude\":\"\",\"longitude\":\"\",\"city\":\"\",\"mohalla\":\"\",\"houseNoAndStreetName\":\"\",\"landmark\":\"\"},\"address\":\"\",\"tenantId\":\"\",\"source\":\"whatsapp\",\"phone\":\"\"}]}";
 
-class PGRService {
+class PGRV1Service {
 
   async fetchMdmsData(tenantId, moduleName, masterName, filterPath) {
     var url = config.egovServices.egovServicesHost + config.egovServices.mdmsSearchPath;
@@ -141,8 +141,8 @@ class PGRService {
   }
 
   async getCityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
-    let url = config.egovServices.externalHost + config.egovServices.cityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
-    let shorturl = await this.getShortenedURL(url);
+    var url = config.egovServices.externalHost + config.egovServices.cityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
+    var shorturl = await this.getShortenedURL(url);
     return shorturl;
   }
 
@@ -154,8 +154,8 @@ class PGRService {
   }
 
   async getLocalityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
-    let url = config.egovServices.externalHost + config.egovServices.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
-    let shorturl = await this.getShortenedURL(url);
+    var url = config.egovServices.externalHost + config.egovServices.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
+    var shorturl = await this.getShortenedURL(url);
     return shorturl;
   }
 
@@ -184,7 +184,7 @@ class PGRService {
   }
 
   async preparePGRResult(responseBody,locale){
-    let serviceWrappers = responseBody.ServiceWrappers;
+    let serviceWrappers = responseBody.services;
     var results = {};
     results['ServiceWrappers'] = [];
     let localisationPrefix = 'SERVICEDEFS.';
@@ -195,15 +195,15 @@ class PGRService {
         complaintLimit = serviceWrappers.length;
     var count =0;
 
-    for( let serviceWrapper of serviceWrappers){
+    for(let serviceWrapper of serviceWrappers){
       if(count<complaintLimit){
-        let mobileNumber = serviceWrapper.service.citizen.mobileNumber;
-        let serviceRequestId = serviceWrapper.service.serviceRequestId;
+        let mobileNumber = serviceWrapper.phone;
+        let serviceRequestId = serviceWrapper.serviceRequestId;
         let complaintURL = await this.makeCitizenURLForComplaint(serviceRequestId,mobileNumber);
-        let serviceCode = localisationService.getMessageBundleForCode(localisationPrefix + serviceWrapper.service.serviceCode.toUpperCase());
-        let filedDate = serviceWrapper.service.auditDetails.createdTime;
+        let serviceCode = localisationService.getMessageBundleForCode(localisationPrefix + serviceWrapper.serviceCode.toUpperCase());
+        let filedDate = serviceWrapper.auditDetails.createdTime;
         filedDate = moment(filedDate).tz(config.timeZone).format(config.dateFormat);
-        let applicationStatus = localisationService.getMessageBundleForCode( serviceWrapper.service.applicationStatus);
+        let applicationStatus = localisationService.getMessageBundleForCode( "reports.rainmaker-pgr.status."+ serviceWrapper.status);
         var data ={
           complaintType: dialog.get_message(serviceCode,locale),
           complaintNumber: serviceRequestId,
@@ -214,47 +214,45 @@ class PGRService {
         count ++;
         results['ServiceWrappers'].push(data);
       }
-      else
+      else{
         break;
-      
+      }
     }
     return results['ServiceWrappers'];
   }
 
   async persistComplaint(user,slots,extraInfo) {
-    let requestBody = JSON.parse(pgrCreateRequestBody);
+    let requestBody = JSON.parse(pgrv1CreateRequestBody);
 
     let authToken = user.authToken;
     let userId = user.userId;
     let complaintType = slots.complaint;
-    let locality = slots.locality;
+    let mohalla = slots.locality;
     let city = slots.city;
-    
+    let mobileNumber = user.mobileNumber;
+
     requestBody["RequestInfo"]["authToken"] = authToken;
-    requestBody["service"]["tenantId"] = city;
-    requestBody["service"]["address"]["city"] = city;
-    requestBody["service"]["address"]["locality"]["code"] = locality;
-    requestBody["service"]["serviceCode"] = complaintType;
-    requestBody["service"]["accountId"] = userId;
+    requestBody["services"][0]["tenantId"] = city;
+    requestBody["services"][0]["addressDetail"]["city"] = city;
+    requestBody["services"][0]["serviceCode"] = complaintType;
+    requestBody["services"][0]["addressDetail"]["mohalla"] = mohalla;
+    requestBody["services"][0]["accountId"] = userId;
+    requestBody["services"][0]["phone"] = mobileNumber;
 
     if(slots.geocode){
       let latlng = slots.geocode.substring(1, slots.geocode.length - 1);
       latlng = latlng.split(',');
-      requestBody["service"]["address"]["geoLocation"]["latitude"] = latlng[0];
-      requestBody["service"]["address"]["geoLocation"]["longitude"] = latlng[1];
+      requestBody["services"][0]["addressDetail"]["latitude"] = latlng[0];
+      requestBody["services"][0]["addressDetail"]["longitude"] = latlng[1];
     }
-
+    
     if(slots.image){
       let filestoreId = await this.getFileForFileStoreId(slots.image,city);
-      var content = {
-        documentType: "PHOTO",
-        filestoreId:filestoreId
-      };
-      requestBody["workflow"]["verificationDocuments"].push(content);
+      requestBody["actionInfo"][0]["media"].push(filestoreId);
     }
 
-
-    var url = config.egovServices.egovServicesHost+config.egovServices.pgrCreateEndpoint;
+    var url = config.egovServices.egovServicesHost+config.egovServices.pgrv1CreateEndpoint;
+    url = url + '?tenantId=' + config.rootTenantId;
 
     var options = {
       method: 'POST',
@@ -268,7 +266,7 @@ class PGRService {
 
 
     let results;
-    if(response.status === 200) {
+    if(response.status === 201) {
       let responseBody = await response.json();
       results = await this.preparePGRResult(responseBody,user.locale);
     } else {
@@ -279,38 +277,38 @@ class PGRService {
   }
 
   async fetchOpenComplaints(user){
-    let requestBody = {
-      RequestInfo: {
+    let requestBody={
+      RequestInfo:{
         authToken: user.authToken
       }
     };
 
-    var url = config.egovServices.egovServicesHost+config.egovServices.pgrSearchEndpoint;
+    var url = config.egovServices.externalHost + config.egovServices.pgrv1SearchEndpoint;
     url = url + '?tenantId=' + config.rootTenantId;
-    url+='&';
-    url+='mobileNumber='+user.mobileNumber;
+    url += '&' ;
+    url +=  'mobileNumber=' + user.mobileNumber;
 
     let options = {
       method: 'POST',
       origin: '*',
-      headers: {
+      headers:{
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
     }
-
-    let response = await fetch(url, options);
+    let response = await fetch(url,options);
     let results;
-    if(response.status === 200) {
+    if(response.status==200)
+    {
       let responseBody = await response.json();
-      results=await this.preparePGRResult(responseBody,user.locale);
-    } else {
-      console.error('Error in fetching the complaints');
+      results = await this.preparePGRResult(responseBody,user.locale);
+    }
+    else
+    {
+      console.error('Error in fetching complaints');
       return [];
     }
-
     return results;
-
   }
 
   async getShortenedURL(finalPath){
@@ -332,7 +330,7 @@ class PGRService {
 
   async makeCitizenURLForComplaint(serviceRequestId, mobileNumber){
     let encodedPath = urlencode(serviceRequestId, 'utf8');
-    let url = config.egovServices.externalHost + "citizen/otpLogin?mobileNo=" + mobileNumber + "&redirectTo=digit-ui/citizen/pgr/complaints/" + encodedPath;
+    let url = config.egovServices.externalHost + "citizen/otpLogin?mobileNo=" + mobileNumber + "&redirectTo=complaint-details/" + encodedPath;
     let shortURL = await this.getShortenedURL(url);
     return shortURL;
   }
@@ -403,4 +401,4 @@ class PGRService {
   
 }
 
-module.exports = new PGRService();
+module.exports = new PGRV1Service();

@@ -17,7 +17,7 @@ class UserService {
     let user = await this.loginUser(mobileNumber, tenantId);
     if(user === undefined) {
       await this.createUser(mobileNumber, tenantId);
-      let user = await this.loginUser(mobileNumber, tenantId);
+      user = await this.loginUser(mobileNumber, tenantId);
     }
     return user;
   }
@@ -26,7 +26,7 @@ class UserService {
     let data = new URLSearchParams();
     data.append('grant_type', 'password');
     data.append('scope', 'read');
-    data.append('password', config.userServiceHardCodedPassword);
+    data.append('password', config.userService.userServiceHardCodedPassword);
     data.append('userType', 'CITIZEN');
 
     data.append('tenantId', tenantId);
@@ -34,10 +34,10 @@ class UserService {
     
     let headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': config.userLoginAuthorizationHeader
+      'Authorization': config.userService.userLoginAuthorizationHeader
     }
 
-    let url = config.userServiceHost + config.userServiceOAuthPath;
+    let url = config.egovServices.userServiceHost + config.egovServices.userServiceOAuthPath;
     let options = {
       method: 'POST',
       headers: headers,
@@ -61,20 +61,20 @@ class UserService {
     let requestBody = {
       RequestInfo: {},
       User: {
-        otpReference: config.userServiceHardCodedPassword,
+        otpReference: config.userService.userServiceHardCodedPassword,
         permamnentCity: tenantId,
         tenantId: tenantId,
         username: mobileNumber
       }
     }
 
-    let url = config.userServiceHost + config.userServiceCreateCitizenPath;
+    let url = config.egovServices.userServiceHost + config.egovServices.userServiceCreateCitizenPath;
     let options = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: requestBody
+      body: JSON.stringify(requestBody)
     }
 
     let response = await fetch(url, options);
@@ -82,6 +82,8 @@ class UserService {
       let responseBody = await response.json();
       return responseBody;
     } else {
+      let responseBody = await response.json();
+      console.error(JSON.stringify(responseBody));
       console.error('User Create Error');
       return undefined;
     }

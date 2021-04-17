@@ -9,7 +9,8 @@ const bills = {
   states: {
     start: {
       onEntry: assign((context, event) => {
-        context.bills = {};
+        context.slots.bills = {};
+        context.bills = {slots: {}};
       }),
       invoke: {
         id: 'fetchBillsForUser',
@@ -131,7 +132,7 @@ const bills = {
         },
         error: {
           onEntry: assign( (context, event) => {
-            let message = 'Sorry, I didn\'t understand';
+            let message = dialog.get_message(messages.searchBillInitiate.error, context.user.locale);
             dialog.sendMessage(context, message, false);
           }),
           always : 'question'
@@ -186,7 +187,7 @@ const bills = {
         },
         error: {
           onEntry: assign((context, event) => {
-            let message = 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.';
+            let message = dialog.get_message(messages.billServices.error, context.user.locale);
             dialog.sendMessage(context, message, false);
           }),
           always: 'question'
@@ -228,7 +229,7 @@ const bills = {
         },
         error: {
           onEntry: assign((context, event) => {
-            let message = 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.';
+            let message = dialog.get_message(messages.searchParamOptions.error, context.user.locale);
             dialog.sendMessage(context, message, false);
           }),
           always: 'question'
@@ -332,7 +333,7 @@ const bills = {
               message = message.replace('{{id}}', bill.id);
               message = message.replace('{{secondaryInfo}}', bill.secondaryInfo);
               message = message.replace('{{period}}', bill.period);
-              message = message.replace('{{dueAmount}}', bill.amount);
+              message = message.replace('{{dueAmount}}', bill.dueAmount);
               message = message.replace('{{dueDate}}', bill.dueDate);
               message = message.replace('{{paymentLink}}', bill.paymentLink);
             } else {
@@ -415,7 +416,7 @@ const bills = {
         },
         error: {
           onEntry: assign( (context, event) => {
-            let message = 'Sorry, I didn\'t understand';
+            let message = dialog.get_message(messages.paramInputInitiate.error, context.user.locale);
             dialog.sendMessage(context, message, false);
           }),
           always : 'question'
@@ -428,79 +429,114 @@ const bills = {
 let messages = {
   personalBills: {
     singleRecord: {
-      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}'
+      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}',
+      hi_IN: 'आपकी {{service}} बिल उपभोक्ता संख्या {{id}}, {{secondaryInfo}} में संपत्ति के लिए {{period}} अवधि के लिए देय राशि: रु {{dueAmount}} है। देर से भुगतान शुल्क से बचने के लिए {{dueDate}} से पहले भुगतान करें। \n\n भुगतान लिंक: {{paymentLink}}'
     },
     multipleRecords: {
       en_IN: 'Following bills found against your mobile number:',
+      hi_IN: 'आपके मोबाइल नंबर के खिलाफ पाए गए बिल: ',
       billTemplate: {
-        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}',
+        hi_IN: '{{service}} | रु. {{dueAmount}} | पर कारण {{dueDate}} \nभुगतान लिंक: {{paymentLink}}'
       }
     },
     multipleRecordsSameService: {
       en_IN: 'Following bills found against your mobile number:',
+      hi_IN: 'आपके मोबाइल नंबर के खिलाफ पाए गए बिल: ',
       billTemplate: {
-        en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+        en_IN: ' {{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}',
+        hi_IN: '{{service}} | {{id}} | {{secondaryInfo}} | रु. {{dueAmount}} | पर कारण {{dueDate}} \nभुगतान लिंक: {{paymentLink}}'
       }
     }
   },
   noBills: {
     notLinked: {
-      en_IN: 'Sorry, your mobile number is not linked to any service. Contact your ULB to link it. You can avail service by searching your account information as given below:'
+      en_IN: 'Sorry, your mobile number is not linked to any service. Contact your ULB to link it. You can avail service by searching your account information as given below:',
+      hi_IN: 'क्षमा करें, आपका मोबाइल नंबर किसी सेवा से लिंक नहीं है। इसे लिंक करने के लिए अपने शहरी स्थानीय निकाय से संपर्क करें। आप नीचे दी गई जानकारी के अनुसार अपनी खाता जानकारी खोज कर सेवा प्राप्त कर सकते हैं:'
     },
     noPending: {
-      en_IN: 'There are no pending bills against your account. You can still search the bills as given below'
+      en_IN: 'There are no pending bills against your account. You can still search the bills as given below',
+      hi_IN: 'आपके खाते के खिलाफ कोई लंबित बिल नहीं हैं। आप अभी भी नीचे दी गई सेवाओं के बिल खोज सकते हैं'
     }
   },
   searchBillInitiate: {
     question: {
-      en_IN: 'Please type and send ‘1’ to Search and Pay for other bills or fees which are not linked with your mobile number. \nOr \'mseva\' to Go ⬅️ Back to the main menu.'
+      en_IN: '\nPlease type and send ‘1’ to Search and Pay for other bills or fees which are not linked with your mobile number. \nOr \'mseva\' to Go ⬅️ Back to the main menu.',
+      hi_IN: '\nकृपया अन्य बिल या शुल्क के लिए खोज और भुगतान करें जो आपके मोबाइल नंबर से लिंक नहीं हैं, टाइप करें ‘1’ और भेजें। मुख्य मेनू पर वापस जाने के लिए ‘mseva’ टाइप करें और भेजें ।'
+    },
+    error:{
+      en_IN: "Sorry, I didn\'t understand",
+      hi_IN: "क्षमा करें, मुझे समझ में नहीं आया"
     }
   },
   billServices: {
     question: {
       preamble: {
-        en_IN: 'Please type and send the number of your option from the list given 👇 below to search and pay:'
+        en_IN: 'Please type and send the number of your option from the list given 👇 below to search and pay:',
+        hi_IN: 'कृपया खोज और भुगतान के लिए नीचे दी गई सूची से अपना विकल्प टाइप करें और भेजें:'
       }
+    },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.',
+      hi_IN: 'क्षमा करें, मुझे समझ में नहीं आया। कृपया दिए गए विकल्पों के लिए फिर से एक नंबर दर्ज करे।'
     }
   },
   searchParamOptions: {
     question: {
       preamble: {
-        en_IN: 'Please type and send the number of your option from the list given 👇 below:'
+        en_IN: 'Please type and send the number of your option from the list given 👇 below:',
+        hi_IN: 'कृपया नीचे दिए गए सूची से अपना विकल्प टाइप करें और भेजें:'
       }
+    },
+    error:{
+      en_IN: 'Sorry, I didn\'t understand. Could please try again entering a number for the given options.',
+      hi_IN: 'क्षमा करें, मुझे समझ में नहीं आया। कृपया दिए गए विकल्पों के लिए फिर से एक नंबर दर्ज करे।'
     }
   },
   paramInput: {
     question: {
-      en_IN: 'Please Enter {{option}} to view the bill. {{example}}\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.'
+      en_IN: 'Please Enter {{option}} to view the bill. {{example}}\n\nOr Type and send "mseva" to Go ⬅️ Back to main menu.',
+      hi_IN: 'बिल देखने के लिए कृपया {{option}} डालें। {{example}} \n\n मुख्य मेनू पर वापस जाने के लिए ‘mseva’ टाइप करें और भेजें ।'
     },
     re_enter: {
-      en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.'
+      en_IN: 'Sorry, the value you have provided is incorrect.\nPlease re-enter the {{option}} again to fetch the bills.\n\nOr Type and send \'mseva\' to Go ⬅️ Back to main menu.',
+      hi_IN: 'क्षमा करें, आपके द्वारा प्रदान किया गया मूल्य गलत है। बिलों को प्राप्त करने के लिए \n कृपया फिर से {{option}} दर्ज करें।\n\nमुख्य मेनू पर वापस जाने के लिए ‘mseva’ टाइप करें और भेजें ।'
     }
   },
   billSearchResults: {
     noRecords: {
-      en_IN: 'The {{searchParamOption}} : {{paramInput}} is not found in our records. Please Check the details you have provided once again.'
+      en_IN: 'The {{searchParamOption}} : {{paramInput}} is not found in our records. Please Check the details you have provided once again.',
+      hi_IN: 'आपके द्वारा प्रदान किए गए विवरण {{searchParamOption}} :   {{paramInput}} हमारे रिकॉर्ड में नहीं पाया जाता है। कृपया आपके द्वारा प्रदान किए गए विवरण को एक बार फिर से देखें।'
     },
     singleRecord: {
-      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}'
+      en_IN: 'Your {{service}} bill against consumer number {{id}} for property in {{secondaryInfo}} for the period {{period}} is Rs. {{dueAmount}}. \n\nPay before {{dueDate}} to avoid late payment charges. \n\nPayment Link: {{paymentLink}}',
+      hi_IN: 'आपकी {{service}} बिल उपभोक्ता संख्या {{id}}, {{secondaryInfo}} में संपत्ति के लिए {{period}} अवधि के लिए देय राशि: रु {{dueAmount}} है। देर से भुगतान शुल्क से बचने के लिए {{dueDate}} से पहले भुगतान करें। \n\n भुगतान लिंक: {{paymentLink}}'
     },
     multipleRecords: {
       en_IN: 'Following bills found:',
+      hi_IN: 'निम्नलिखित बिल मिले:',
       billTemplate: {
-        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+        en_IN: '{{service}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}',
+        hi_IN: '{{service}} | रु. {{dueAmount}} | पर कारण {{dueDate}} \nभुगतान लिंक: {{paymentLink}}'
       }
     },
     multipleRecordsSameService: {
       en_IN: 'Following bills found:',
+      hi_IN: 'निम्नलिखित बिल मिले:',
       billTemplate: {
-        en_IN: '{{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}'
+        en_IN: '{{service}} | {{id}} | {{secondaryInfo}} | Rs. {{dueAmount}} | Due on {{dueDate}} \nPayment Link: {{paymentLink}}',
+        hi_IN: '{{service}} | {{id}} | {{secondaryInfo}} | रु. {{dueAmount}} | पर कारण {{dueDate}} \nभुगतान लिंक: {{paymentLink}}'
       }
     }
   },
   paramInputInitiate: {
     question: {
-      en_IN: 'Please type and send ‘*1*’ to Enter {{searchParamOption}} again. \nOr \'mseva\' to Go ⬅️ Back to the main menu.'
+      en_IN: 'Please type and send ‘1’ to Enter {{searchParamOption}} again. \nOr \'mseva\' to Go ⬅️ Back to the main menu.',
+      hi_IN: 'कृपया {{searchParamOption}} फिर से टाइप करने के लिए ’1’ टाइप करें और भेजें।\n\nमुख्य मेनू पर वापस जाने के लिए ‘mseva’ टाइप करें और भेजें ।'
+    },
+    error:{
+      en_IN: "Sorry, I didn\'t understand",
+      hi_IN: "क्षमा करें, मुझे समझ में नहीं आया"
     }
   }
 }

@@ -15,10 +15,12 @@ let textMessageBody = "{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@TEMPL
 
 let imageMessageBody = "{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@CAPTION\":\"\",\"@TYPE\":\"image\",\"@CONTENTTYPE\":\"image\/png\",\"@TEMPLATEINFO\":\"\",\"@PROPERTY\":\"0\",\"@ID\":\"\",\"ADDRESS\":[{\"@FROM\":\"\",\"@TO\":\"\",\"@SEQ\":\"\",\"@TAG\":\"\"}]}";
 
+let templateMessageBody = "{\"@UDH\":\"0\",\"@CODING\":\"1\",\"@TEXT\":\"\",\"@CAPTION\":\"\",\"@TYPE\":\"\",\"@CONTENTTYPE\":\"\",\"@TEMPLATEINFO\":\"\",\"@PROPERTY\":\"0\",\"@ID\":\"\",\"ADDRESS\":[{\"@FROM\":\"\",\"@TO\":\"\",\"@SEQ\":\"1\",\"@TAG\":\"\"}]}"
+
 class ValueFirstWhatsAppProvider {
 
     async checkForMissedCallNotification(requestBody){
-        if(requestBody.vmn_tollfree)
+        if(requestBody.Call_id || requestBody.operartor || requestBody.circle)
             return true;
         
         return false;
@@ -26,16 +28,18 @@ class ValueFirstWhatsAppProvider {
 
     async getMissedCallValues(requestBody){
         let reformattedMessage={};
-        
+
         reformattedMessage.message = {
             input: "mseva",
             type: "text"
-        }
+        };
+
         reformattedMessage.user = {
             mobileNumber: requestBody.mobile_number.slice(2)
         };
         reformattedMessage.extraInfo = {
-            recipient: config.whatsAppBusinessNumber,
+            whatsAppBusinessNumber: config.whatsAppBusinessNumber.slice(2),
+            tenantId: config.rootTenantId,
             missedCall: true
         };
         return reformattedMessage;
@@ -43,7 +47,8 @@ class ValueFirstWhatsAppProvider {
 
     async fileStoreAPICall(fileName,fileData){
 
-        var url = config.egov_filestore_service_host+config.egov_filestore_service_upload_endpoint;
+        var url = config.egovServices.egovServicesHost+config.egovServices.egovFilestoreServiceUploadEndpoint;
+        url = url+'&tenantId='+config.rootTenantId;
         var form = new FormData();
         form.append("file", fileData, {
             filename: fileName,
@@ -76,16 +81,22 @@ class ValueFirstWhatsAppProvider {
 
     async getUserMessage(requestBody){
         let reformattedMessage={};
-        let type = requestBody.media_type;
+        let type;
         let input;
+        if(requestBody.media_type)
+            type = requestBody.media_type;
+        else
+            type = "unknown";
+
         if(type === "location") {
-            let location = requestBody.message.location;
-            input = '(' + location.latitude + ',' + location.longitude + ')';
+            input = '(' + requestBody.latitude + ',' + requestBody.longitude + ')';
         } 
         else if(type === 'image'){
             var imageInBase64String = requestBody.media_data;
             input = await this.convertFromBase64AndStore(imageInBase64String);
         }
+        else if(type === 'unknown' || type === 'document')
+            input = ' ';
         else {
             input = requestBody.text;
         }
@@ -93,7 +104,7 @@ class ValueFirstWhatsAppProvider {
         reformattedMessage.message = {
             input: input,
             type: type
-        }
+        };
         reformattedMessage.user = {
             mobileNumber: requestBody.from.slice(2)
         };
@@ -152,10 +163,10 @@ class ValueFirstWhatsAppProvider {
           writer.on('finish', resolve);
           writer.on('error', reject);
         })
-      }
+    }
 
     async getFileForFileStoreId(filestoreId){
-        var url = config.egov_filestore_service_host+config.egov_filestore_service_download_endpoint;
+        var url = config.egovServices.egovServicesHost+config.egovServices.egovFilestoreServiceDownloadEndpoint;
         url = url + '?';
         url = url + 'tenantId='+config.rootTenantId;
         url = url + '&';
@@ -166,7 +177,8 @@ class ValueFirstWhatsAppProvider {
             origin: '*'
         }
 
-        let response = await (await fetch(url,options)).json();
+        let response = await fetch(url,options);
+        response = await(response).json();
         var fileURL = response['fileStoreIds'][0]['url'].split(",");
         var fileName = geturl.parse(fileURL[0]);
         fileName = path.basename(fileName.pathname);
@@ -185,16 +197,21 @@ class ValueFirstWhatsAppProvider {
             console.error("Receipient number can not be empty");
 
         let requestBody = JSON.parse(valueFirstRequestBody);
-        requestBody["USER"]["@USERNAME"] = config.valueFirstUsername;
-        requestBody["USER"]["@PASSWORD"] = config.valueFirstPassword;
+        requestBody["USER"]["@USERNAME"] = config.valueFirstWhatsAppProvider.valueFirstUsername;
+        requestBody["USER"]["@PASSWORD"] = config.valueFirstWhatsAppProvider.valueFirstPassword;
 
         for(let i = 0; i < messages.length; i++) {
-            let message = messages[i];
+            let message;
             let type;
-            if(message.type && message.type==="image")
-                type="image";
-            else    
-                type="text";
+            if(typeof messages[i] == 'string'){
+                type = "text";
+                message = messages[i];
+            }
+            
+            if(typeof messages[i] == 'object'){
+                type = messages[i].type;
+                message = messages[i].output;
+            }
             
             let messageBody;
             if(type === 'text') {
@@ -204,11 +221,16 @@ class ValueFirstWhatsAppProvider {
             } else {
                 // TODO for non-textual messages
                 let fileStoreId;
-                if(extraInfo.filestoreId)
-                    fileStoreId = extraInfo.filestoreId;
+                if(message)
+                    fileStoreId = message;
                 const base64Image = await this.getFileForFileStoreId(fileStoreId);
                 var uniqueImageMessageId = uuid();
                 messageBody = JSON.parse(imageMessageBody);
+                if(type === 'pdf'){
+                    messageBody['@TYPE'] = "document";
+                    messageBody['@CONTENTTYPE'] = 'application/pdf';
+                    messageBody['@CAPTION'] = extraInfo.fileName+'-'+Date.now();
+                }
                 messageBody['@TEXT'] = base64Image;
                 messageBody['@ID'] = uniqueImageMessageId;
 
@@ -223,7 +245,7 @@ class ValueFirstWhatsAppProvider {
     }
 
     async sendMessage(requestBody) {
-        let url = config.valueFirstURL;
+        let url = config.valueFirstWhatsAppProvider.valueFirstURL;
 
         let headers = {
             'Content-Type': 'application/json',
@@ -236,8 +258,16 @@ class ValueFirstWhatsAppProvider {
             body: JSON.stringify(requestBody)
         }
         let response = await fetch(url,request);
-        if(response.status === 200)
-            return response
+        if(response.status === 200){
+            let messageBack = await response.json();
+            if(messageBack.MESSAGEACK.Err){
+                console.error(messageBack.MESSAGEACK.Err.Desc);
+                return messageBack;
+            }
+
+            
+            return messageBack
+        }         
         else {
             console.error('Error in sending message');
             return undefined;
@@ -251,12 +281,13 @@ class ValueFirstWhatsAppProvider {
         if(Object.keys(requestBody).length === 0)
             requestBody  = req.body; 
             
-        var requestValidation= await this.isValid(requestBody);
+        //var requestValidation= await this.isValid(requestBody);
 
-        if(requestValidation)
-            reformattedMessage= await this.getTransformedRequest(requestBody);
-
+        //if(requestValidation){
+        reformattedMessage = await this.getTransformedRequest(requestBody);
         return reformattedMessage;
+        //}
+
     }
 
     async sendMessageToUser(user, messages,extraInfo) {
@@ -264,6 +295,38 @@ class ValueFirstWhatsAppProvider {
         requestBody = await this.getTransformedResponse(user, messages, extraInfo);
         this.sendMessage(requestBody);       
     }
+
+    async getTransformMessageForTemplate(reformattedMessages){
+        if(reformattedMessages.length>0){
+            let requestBody = JSON.parse(valueFirstRequestBody);
+            requestBody["USER"]["@USERNAME"] = config.valueFirstWhatsAppProvider.valueFirstUsername;
+            requestBody["USER"]["@PASSWORD"] = config.valueFirstWhatsAppProvider.valueFirstPassword;
+
+            for(let message of reformattedMessages){
+                let messageBody = JSON.parse(templateMessageBody);
+                let templateParams = message.extraInfo.params;
+                let combinedStringForTemplateInfo = message.extraInfo.templateId;
+                let userMobile = message.user.mobileNumber;
+            
+                for(let param of templateParams)
+                    combinedStringForTemplateInfo = combinedStringForTemplateInfo + "~" + param;
+
+                messageBody['@TEMPLATEINFO'] = combinedStringForTemplateInfo;
+
+                messageBody["ADDRESS"][0]["@FROM"] = config.whatsAppBusinessNumber;
+                messageBody["ADDRESS"][0]["@TO"] = '91' + userMobile;
+
+                requestBody["SMS"].push(messageBody);
+
+            }
+            this.sendMessage(requestBody);
+
+        }
+
+         
+    }
+
+    
 
 }
 

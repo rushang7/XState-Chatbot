@@ -8,8 +8,7 @@ class DummyPGRService {
     // Please mark the method async if the actual app-service method would involve api calls
 
     async fetchMdmsData(tenantId, moduleName, masterName, filterPath) {
-      var mdmsHost = config.mdmsHost;
-      var url = mdmsHost + 'egov-mdms-service/v1/_search';
+      var url = config.egovServices.egovServicesHost + config.egovServices.mdmsSearchPath;
       var request = {
         "RequestInfo": {},
         "MdmsCriteria": {
@@ -41,6 +40,12 @@ class DummyPGRService {
     
       return data["MdmsRes"][moduleName][masterName];
     }
+    async fetchCitiesAndWebpageLink(tenantId,whatsAppBusinessNumber)
+    {
+      let {cities,messageBundle} = await this.fetchCities(tenantId);
+      let link = await this.getCityExternalWebpageLink(tenantId,whatsAppBusinessNumber);
+      return {cities,messageBundle,link};
+    }
     async fetchCities(tenantId) {
         let cities = this.cities.tenantInfo.map(el=>el.code);
         let messageBundle = this.citiesMessageBundle;
@@ -48,9 +53,21 @@ class DummyPGRService {
         // let tenantId = this.cities.tenantId;
         // return this.cities.tenantInfo.map(el=>el.code.replace(`${tenantId}.`, ""));
     }
-    getCityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
-      return config.externalHost + config.cityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + whatsAppBusinessNumber;
+    async getCityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
+      var url = config.egovServices.externalHost + config.egovServices.cityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
+      var shorturl = await this.getShortenedURL(url);
+      return shorturl;
     }
+    async fetchLocalitiesAndWebpageLink(tenantId,whatsAppBusinessNumber){
+      let {localities,messageBundle} = await this.fetchLocalities(tenantId);
+      let link = await this.getLocalityExternalWebpageLink(tenantId,whatsAppBusinessNumber);
+      return {localities,messageBundle,link};
+    }
+    async getLocalityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
+      var url = config.egovServices.externalHost + config.egovServices.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=+91' + whatsAppBusinessNumber;
+      var shorturl = await this.getShortenedURL(url);
+      return shorturl;
+  }
     async fetchLocalities(tenantId) {
       let moduleName = 'egov-location';
       let masterName = 'TenantBoundary';
@@ -74,9 +91,7 @@ class DummyPGRService {
       }
       return { localities, messageBundle };
     }
-    getLocalityExternalWebpageLink(tenantId, whatsAppBusinessNumber) {
-      return config.externalHost + config.localityExternalWebpagePath + '?tenantId=' + tenantId + '&phone=' + whatsAppBusinessNumber;
-    }
+    
     async getCityAndLocalityForGeocode(geocode, tenantId) {
         let latlng = geocode.substring(1, geocode.length - 1); // Remove braces
         let cityAndLocality = await getCityAndLocality(latlng);
@@ -113,14 +128,14 @@ class DummyPGRService {
       return [
         {
           complaintType: 'Streetlight not working',
-          complaintId: '04/11/2020/081478',
+          complaintNumber: '04/11/2020/081478',
           filedDate: '30/11/2020',
           complaintStatus: 'Pending for Assignment',
           complaintLink: 'https://mseva.org/complaint/081478'
         },
         {
           complaintType: 'Garbage not cleared',
-          complaintId: '04/11/2020/081479',
+          complaintNumber: '04/11/2020/081479',
           filedDate: '30/11/2020',
           complaintStatus: 'Pending for Assignment',
           complaintLink: 'https://mseva.org/complaint/081479'

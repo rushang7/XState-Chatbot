@@ -1,6 +1,6 @@
 {
     "name": "xstate-chatbot-server",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "src/app.js",
     "scripts": {
         "start": "node --inspect src/app.js",
@@ -25,6 +25,7 @@
         "request": "^2.88.0",
         "url-search-params-polyfill": "^8.1.0",
         "urlencode": "^1.1.0",
+        "uuid": "^8.3.2",
         "uuid-random": "^1.3.2",
         "xstate": "^4.13.0"
     },
