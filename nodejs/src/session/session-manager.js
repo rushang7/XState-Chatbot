@@ -44,6 +44,10 @@ class SessionManager {
             telemetry.log(user.userId, 'to_user', {message : {type: "text", output: message}});
         }
     }
+    async fromSystem(response) {
+        let event = 'SYSTEM_MESSAGE';
+        console.log(JSON.stringify(response));
+    }
 
     removeUserDataFromState(state) {
         let userId = state.context.user.userId;

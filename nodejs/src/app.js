@@ -18,6 +18,7 @@ const app = express();
     app.use(bodyParser.urlencoded({ limit: '10mb', extended: true, parameterLimit: 50000 }));
     // app.use(cookieParser());
     app.use(envVariables.contextPath, require('./channel/routes'));
+    app.use(envVariables.contextPath, require('./session/async-response').router);
     module.exports = app;
     return app;
 }

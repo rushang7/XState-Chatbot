@@ -36,7 +36,7 @@ const envVariables = {
         kafkaBootstrapServer: process.env.KAFKA_BOOTSTRAP_SERVER || 'localhost:9092',
         chatbotTelemetryTopic: process.env.CHATBOT_TELEMETRY_TOPIC || 'chatbot-telemetry-v2',
 
-        kafkaConsumerEnabled: process.env.KAFKA_CONSUMER_ENABLED || true,
+        kafkaConsumerEnabled: process.env.KAFKA_CONSUMER_ENABLED || false,
         kafkaConsumerGroupId: process.env.KAFKA_CONSUMER_GROUP_ID || 'xstate-chatbot',
     },
 
@@ -54,11 +54,11 @@ const envVariables = {
     },
 
     egovServices: {
-        egovServicesHost: process.env.EGOV_SERVICES_HOST || 'https://egov-micro-dev.egovernments.org/',
-        externalHost: process.env.EXTERNAL_HOST || 'https://egov-micro-dev.egovernments.org/',
+        egovServicesHost: process.env.EGOV_SERVICES_HOST || 'https://dev.digit.org/',
+        externalHost: process.env.EXTERNAL_HOST || 'https://dev.digit.org/',
         searcherHost: process.env.EGOV_SEARCHER_HOST || "http://egov-searcher.egov:8080/",
 
-        userServiceHost: process.env.USER_SERVICE_HOST || 'https://egov-micro-dev.egovernments.org/',
+        userServiceHost: process.env.USER_SERVICE_HOST || 'https://dev.digit.org/',
         userServiceOAuthPath: process.env.USER_SERVICE_OAUTH_PATH || 'user/oauth/token',
         userServiceCreateCitizenPath: process.env.USER_SERVICE_CREATE_CITIZEN_PATH || 'user/citizen/_create',
         userServiceUpdateProfilePath: process.env.USER_SERVICE_UPDATE_PROFILE_PATH || 'user/profile/_update',
