@@ -1,4 +1,4 @@
-const sevaStateMachine =  require('../machine/seva'),
+const chatStateMachine =  require('../machine/chat-machine'),
     channelProvider = require('../channel'),
     chatStateRepository = require('./repo'),
     telemetry = require('./telemetry'),
@@ -66,8 +66,8 @@ class SessionManager {
         context.extraInfo = reformattedMessage.extraInfo;
 
         const state = State.create(chatStateJson);
-        const resolvedState = sevaStateMachine.withContext(context).resolveState(state);
-        const service = interpret(sevaStateMachine).start(resolvedState);
+        const resolvedState = chatStateMachine.withContext(context).resolveState(state);
+        const service = interpret(chatStateMachine).start(resolvedState);
 
         service.onTransition( state => {
             if(state.changed) {
@@ -86,7 +86,7 @@ class SessionManager {
     }
 
     createChatStateFor(user) {
-        let service = interpret(sevaStateMachine.withContext ({
+        let service = interpret(chatStateMachine.withContext ({
             chatInterface: this,
             user: user,
             slots: {pgr: {}, bills: {}, receipts: {}}
@@ -102,7 +102,7 @@ class SessionManager {
 
 let grammer = {
     reset: [
-        {intention: 'reset', recognize: ['mseva', 'seva', 'सेवा']},
+        {intention: 'reset', recognize: ['reset', 'hi', 'hello']},
     ]
 }
 
