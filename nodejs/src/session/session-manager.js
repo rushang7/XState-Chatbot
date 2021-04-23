@@ -11,7 +11,7 @@ class SessionManager {
 
     async fromUser(reformattedMessage) {
         let mobileNumber = reformattedMessage.user.mobileNumber;
-        let user = await userService.getUserForMobileNumber(mobileNumber, reformattedMessage.extraInfo.tenantId);
+        let user = await userService.getUserForMobileNumber(mobileNumber);
         reformattedMessage.user = user;
         let userId = user.userId;
 
