@@ -1,7 +1,6 @@
 const { assign } = require('xstate');
 const dialog = require('./util/dialog.js');
-const { personService, vitalsService } = require('./service/service-loader');
-const { context } = require('./chat-machine.js');
+const { personService, vitalsService, triageService } = require('./service/service-loader');
 
 const selfCareFlow = {
   recordVitals: {
@@ -80,7 +79,6 @@ const selfCareFlow = {
                   let personIndex = context.persons.findIndex(person => person.uuid.includes(personUuid));
                   let person = context.persons[personIndex];
                   context.slots.vitals.person = person;
-                  console.log(context.person);
                 }),
                 target: '#userConsent'
               }
@@ -170,9 +168,9 @@ const selfCareFlow = {
               },
               {
                 actions: assign((context, event) => {
-                  context.slots.vitals.conclusion = 'CovidfyLinkBedAvailability'            // TODO
+                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale), false);
                 }),
-                target: ''                                                                // TODO
+                target: '#addVitals'
               }
             ]
           },
@@ -216,7 +214,10 @@ const selfCareFlow = {
                 target: '#vitalsTemperature'
               },
               {
-                target: ''           // TODO
+                actions: assign((context, event) => {
+                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkPhysicalConsult, context.user.locale), false);
+                }),
+                target: '#addVitals'
               }
             ]
           },
@@ -256,11 +257,21 @@ const selfCareFlow = {
                 target: 'error'
               },
               {
-                cond: (context) => context.slots.vitals.temperature < 108,
+                cond: (context) => context.slots.vitals.temperature <= 98,
                 target: '#addVitals'
               },
               {
-                target: ''                        // TODO
+                cond: (context) => context.slots.vitals.temperature > 98 && context.slots.vitals.temperature <= 102,
+                actions: assign((context, event) => {
+                  dialog.sendMessage(context, dialog.get_message(messages.adviseParacetamol, context.user.locale), false);
+                }),
+                target: '#addVitals'
+              },
+              {
+                actions: assign((context, event) => {
+                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale), false);
+                }),
+                target: '#addVitals'
               }
             ]
           },
@@ -298,10 +309,248 @@ const selfCareFlow = {
     }
   },
   downloadReport: {
-    id: 'downloadReport'
+    id: 'downloadReport',
+    initial: 'reportFetchPersons',
+    onEntry: assign((context, event) => {
+      context.slots.report = {};
+    }),
+    states: {
+      reportFetchPersons: {
+        invoke: {
+          src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+          onDone: [
+            {
+              cond: (context, event) => event.data.length == 0,
+              target: '#reportNoUserFound'
+            },
+            {
+              cond: (context, event) => event.data.length == 1,
+              actions: assign((context, event) => {
+                context.slots.report.person = event.data[0];
+              }),
+              target: '#showReport'
+            },
+            {
+              cond: (context, event) => event.data.length > 1,
+              actions: assign((context, event) => {
+                context.persons = event.data;
+              }),
+              target: '#reportSelectPerson'
+            }
+          ]
+        }
+      },
+      reportNoUserFound: {
+        id: 'reportNoUserFound',
+        onEntry: assign((context, event) => {
+          dialog.sendMessage(context, dialog.get_message(messages.noUserFound, context.user.locale), false);
+        }),
+        always: '#selfCareMenu'
+      },
+      reportSelectPerson: {
+        id: 'reportSelectPerson',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.selectPerson.prompt, context.user.locale);
+              let persons = context.persons;
+              let grammer = [];
+              for (let i = 0; i < persons.length; i++) {
+                let person = persons[i];
+                let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
+                grammer.push(grammerItem);
+                message += '\n' + (i + 1) + '. ' + person.name;
+              }
+              context.grammer = grammer;
+              dialog.sendMessage(context, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event);
+            }),
+            always: [
+              {
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+                target: 'error'
+              },
+              {
+                actions: assign((context, event) => {
+                  let personUuid = context.intention;
+                  let personIndex = context.persons.findIndex(person => person.uuid.includes(personUuid));
+                  let person = context.persons[personIndex];
+                  context.slots.report.person = person;
+                }),
+                target: '#showReport'
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }
+      },
+      showReport: {
+        id: 'showReport',
+        invoke: {
+          src: (context) => triageService.downloadReportForPerson(context.slots.report.person),
+          onDone: {
+            actions: assign((context, event) => {
+              dialog.sendMessage(context, '_Report_');
+            }),
+            target: '#endstate'
+          }
+        }
+      }
+    }
   },
   exitProgram: {
-    id: 'exitProgram'
+    id: 'exitProgram',
+    initial: 'exitProgramFetchPersons',
+    onEntry: assign((context, event) => {
+      context.slots.exitProgram = {};
+    }),
+    states: {
+      exitProgramFetchPersons: {
+        invoke: {
+          src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+          onDone: [
+            {
+              cond: (context, event) => event.data.length == 0,
+              target: '#exitProgramNoUserFound'
+            },
+            {
+              cond: (context, event) => event.data.length == 1,
+              actions: assign((context, event) => {
+                context.slots.exitProgram.person = event.data[0];
+              }),
+              target: '#exitReason'
+            },
+            {
+              cond: (context, event) => event.data.length > 1,
+              actions: assign((context, event) => {
+                context.persons = event.data;
+              }),
+              target: '#exitProgramSelectPerson'
+            }
+          ]
+        }
+      },
+      exitProgramNoUserFound: {
+        id: 'exitProgramNoUserFound',
+        onEntry: assign((context, event) => {
+          dialog.sendMessage(context, dialog.get_message(messages.noUserFound, context.user.locale), false);
+        }),
+        always: '#selfCareMenu'
+      },
+      exitProgramSelectPerson: {
+        id: 'exitProgramSelectPerson',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              let message = dialog.get_message(messages.selectPerson.prompt, context.user.locale);
+              let persons = context.persons;
+              let grammer = [];
+              for (let i = 0; i < persons.length; i++) {
+                let person = persons[i];
+                let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
+                grammer.push(grammerItem);
+                message += '\n' + (i + 1) + '. ' + person.name;
+              }
+              context.grammer = grammer;
+              dialog.sendMessage(context, message);
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event);
+            }),
+            always: [
+              {
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+                target: 'error'
+              },
+              {
+                actions: assign((context, event) => {
+                  let personUuid = context.intention;
+                  let personIndex = context.persons.findIndex(person => person.uuid.includes(personUuid));
+                  let person = context.persons[personIndex];
+                  context.slots.exitProgram.person = person;
+                }),
+                target: '#exitReason'
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }
+      },
+      exitReason: {
+        id: 'exitReason',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              context.grammer = grammer.exitReason;
+              dialog.sendMessage(context, dialog.get_message(messages.exitProgram.exitReason.prompt, context.user.locale));
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              context.intention = dialog.get_intention(context.grammer, event);
+            }),
+            always: [
+              {
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+                target: 'error'
+              },
+              {
+                actions: assign((context, event) => {
+                  context.slots.exitProgram.exitReason = context.intention
+                }),
+                target: '#unsubscribePerson'
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }
+      },
+      unsubscribePerson: {
+        id: 'unsubscribePerson',
+        invoke: {
+          src: (context) => triageService.exitProgram(context.slots.exitProgram.person, context.slots.exitProgram.exitReason),
+          onDone: {
+            actions: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(messages.exitProgram.unsubscribedSuccessfully, context.user.locale));
+            }),
+            target: '#endstate'
+          }
+        }
+      }
+    }
   }
 }
 
@@ -339,6 +588,25 @@ let messages = {
   },
   consentdenied: {
     en_IN: 'Consent Denied'
+  },
+  covidfyLinkPhysicalConsult: {                 // Duplicacy with message in triage file
+    en_IN: 'CovidfyLinkPhysicalConsult'
+  },
+  covidfyLinkBedAvailability: {                 // Duplicacy with message in triage file
+    en_IN: 'CovidfyLinkBedAvailability Message'
+  },
+  adviseParacetamol: {
+    en_IN: 'Advise Paracetamol'
+  },
+  exitProgram: {
+    exitReason: {
+      prompt: {
+        en_IN: 'Why are you exiting the program: \n1. Patient no longer has CoVID\n2. Too many WhatsApp Messages\n3. Escalation Required'
+      }
+    },
+    unsubscribedSuccessfully: {
+      en_IN: 'You have successfully unsubscribed from the program'
+    }
   }
 }
 
@@ -347,6 +615,11 @@ let grammer = {
     { intention: true, recognize: ['yes', 'y'] },
     { intention: false, recognize: ['no', 'n'] }
   ],
+  exitReason: [
+    { intention: 'NoCovid', recognize: ['1'] },
+    { intention: 'TooManyMessages', recognize: ['2'] },
+    { intention: 'EscalationRequired', recognize: ['3'] }
+  ]
 }
 
 module.exports = selfCareFlow;

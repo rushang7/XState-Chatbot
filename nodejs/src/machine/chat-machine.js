@@ -151,7 +151,11 @@ const chatStateMachine = Machine({
       }
     }, // selfCareMenu
     informationFlow: {
-      id: 'informationFlow'
+      id: 'informationFlow',
+      onEntry: assign((context, event) => {
+        dialog.sendMessage(context, dialog.get_message(messages.informationFlow, context.user.locale));
+      }),
+      always: '#endstate'
     },
     triageFlow: triageFlow,
     recordVitals: selfCareFlow.recordVitals,
@@ -182,6 +186,9 @@ let messages = {
     prompt: {
       en_IN: '1. Add new patient\n2. Please record my vitals\n3. Download my report\n4. Exit self care program'
     }
+  },
+  informationFlow: {
+    en_IN: 'Informational Message'
   },
   endstate: {
     en_IN: 'Goodbye. Say hi to start another conversation'
