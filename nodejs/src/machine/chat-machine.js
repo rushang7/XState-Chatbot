@@ -22,8 +22,8 @@ const chatStateMachine = Machine({
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.menu.prompt, context.user.locale));
             context.grammer = grammer.menu.prompt;
+            dialog.sendMessage(context, dialog.get_message(messages.menu.prompt, context.user.locale));
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -65,8 +65,8 @@ const chatStateMachine = Machine({
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.triageMenu.prompt, context.user.locale));
             context.grammer = grammer.triageMenu.prompt;
+            dialog.sendMessage(context, dialog.get_message(messages.triageMenu.prompt, context.user.locale));
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -103,8 +103,8 @@ const chatStateMachine = Machine({
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.selfCareMenu.prompt, context.user.locale));
             context.grammer = grammer.selfCareMenu.prompt;
+            dialog.sendMessage(context, dialog.get_message(messages.selfCareMenu.prompt, context.user.locale));
           }),
           on: {
             USER_MESSAGE: 'process'
