@@ -7,6 +7,9 @@ const selfCareFlow = {
   recordVitals: {
     id: 'recordVitals',
     initial: 'fetchPersons',
+    onEntry: assign((context, event) => {
+      context.slots.vitals = {};
+    }),
     states: {
       fetchPersons: {
         invoke: {
@@ -19,7 +22,7 @@ const selfCareFlow = {
             {
               cond: (context, event) => event.data.length == 1,
               actions: assign((context, event) => {
-                context.person = event.data[0];
+                context.slots.vitals.person = event.data[0];
               }),
               target: '#userConsent'
             },
@@ -76,7 +79,7 @@ const selfCareFlow = {
                   let personUuid = context.intention;
                   let personIndex = context.persons.findIndex(person => person.uuid.includes(personUuid));
                   let person = context.persons[personIndex];
-                  context.person = person;
+                  context.slots.vitals.person = person;
                   console.log(context.person);
                 }),
                 target: '#userConsent'
@@ -114,11 +117,11 @@ const selfCareFlow = {
                 target: 'error'
               },
               {
-                cond: (context) => context.intention == 'yes',
-                target: ''
+                cond: (context) => context.intention == true,
+                target: '#vitalsSpo2'
               },
               {
-                target: ''
+                target: '#consentDenied'
               }
             ]
           },
@@ -129,6 +132,168 @@ const selfCareFlow = {
             always: 'prompt'
           }
         }
+      },
+      vitalsSpo2: {
+        id: 'vitalsSpo2',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(messages.vitalsSpo2.prompt, context.user.locale));
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let spo2 = parseInt(dialog.get_input(event));
+              if (spo2 > 0 && spo2 <= 100) {
+                context.validMessage = true;
+                context.slots.vitals.spo2 = spo2;
+              } else {
+                context.validMessage = false;
+              }
+            }),
+            always: [
+              {
+                cond: (context) => !context.validMessage,
+                target: 'error'
+              },
+              {
+                cond: (context) => context.slots.vitals.spo2 > 95,
+                target: '#vitalsTemperature'
+              },
+              {
+                cond: (context) => context.slots.vitals.spo2 <= 95 && context.slots.vitals.spo2 >= 90,
+                target: '#vitalsSpo2Walk'
+              },
+              {
+                actions: assign((context, event) => {
+                  context.slots.vitals.conclusion = 'CovidfyLinkBedAvailability'            // TODO
+                }),
+                target: ''                                                                // TODO
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }  
+      },
+      vitalsSpo2Walk: {
+        id: 'vitalsSpo2Walk',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(messages.vitalsSpo2Walk.prompt, context.user.locale));
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let spo2 = parseInt(dialog.get_input(event));
+              if (spo2 > 0 && spo2 <= 100) {
+                context.validMessage = true;
+                context.slots.vitals.spo2Walk = spo2;
+              } else {
+                context.validMessage = false;
+              }
+            }),
+            always: [
+              {
+                cond: (context) => !context.validMessage,
+                target: 'error'
+              },
+              {
+                cond: (context) => context.slots.vitals.spo2Walk > 95,
+                target: '#vitalsTemperature'
+              },
+              {
+                target: ''           // TODO
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }
+      },
+      vitalsTemperature: {
+        id: 'vitalsTemperature',
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(messages.vitalsTemperature.prompt, context.user.locale));
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              let temperature = parseFloat(dialog.get_input(event));
+              if (temperature > 92 && temperature <= 108) {
+                context.validMessage = true;
+                context.slots.vitals.temperature = temperature;
+              } else {
+                context.validMessage = false;
+              }
+            }),
+            always: [
+              {
+                cond: (context) => !context.validMessage,
+                target: 'error'
+              },
+              {
+                cond: (context) => context.slots.vitals.temperature < 98,
+                target: '#addVitals'
+              },
+              {
+                target: ''                        // TODO
+              }
+            ]
+          },
+          error: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+            }),
+            always: 'prompt'
+          }
+        }
+      },
+      addVitals: {
+        id: 'addVitals',
+        invoke: {
+          src: (context) => vitalsService.addVitals(context.slots.vitals),
+          onDone: {
+            target: '#vitalsRecordedSuccesfully'
+          }
+        }
+      },
+      vitalsRecordedSuccesfully: {
+        id: 'vitalsRecordedSuccesfully',
+        onEntry: assign((context, event) => {
+          dialog.sendMessage(context, dialog.get_message(messages.vitalsRecordedSuccesfully, context.user.locale));
+        }),
+        always: '#endstate'
+      },
+      consentDenied: {
+        id: 'consentDenied',
+        onEntry: assign((context, event) => {
+          dialog.sendMessage(context, dialog.get_message(messages.consentdenied, context.user.locale));
+        }),
+        always: '#endstate'
       }
     }
   },
@@ -153,6 +318,27 @@ let messages = {
     prompt: {
       en_IN: 'Consent Message'
     }
+  },
+  vitalsSpo2: {
+    prompt: {
+      en_IN: 'Please enter your blood oxygen level.'
+    }
+  },
+  vitalsSpo2Walk: {
+    prompt: {
+      en_IN: 'Could you please walk for 6 minutes and re-measure the oxygen level?'
+    }
+  },
+  vitalsTemperature: {
+    prompt: {
+      en_IN: 'Please enter your temperature'
+    }
+  },
+  vitalsRecordedSuccesfully: {
+    en_IN: 'Your vitals have been recorded successfully'
+  },
+  consentdenied: {
+    en_IN: 'Consent Denied'
   }
 }
 
