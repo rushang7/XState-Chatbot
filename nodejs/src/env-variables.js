@@ -1,11 +1,11 @@
 const os = require('os');
 
 const envVariables = {
-    serviceId : process.env.NAME || 'xstate-chatbot',
-    ver : process.env.VERSION || '0.0.1',
+    serviceId: process.env.NAME || 'xstate-chatbot',
+    ver: process.env.VERSION || '0.0.1',
 
     port: process.env.SERVICE_PORT || 8080,
-    contextPath : process.env.CONTEXT_PATH || '/xstate-chatbot',
+    contextPath: process.env.CONTEXT_PATH || '/xstate-chatbot',
 
     whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'console',
 
@@ -13,7 +13,7 @@ const envVariables = {
 
     repoProvider: process.env.REPO_PROVIDER || 'PostgreSQL',
 
-    whatsAppBusinessNumber : process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
+    whatsAppBusinessNumber: process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
 
     rootTenantId: process.env.ROOT_TENANTID || 'pb',
 
@@ -31,6 +31,9 @@ const envVariables = {
         dbUsername: process.env.DB_USER || 'postgres',
         dbPassword: process.env.DB_PASSWORD || ''
     },
+
+    hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
+    hasuraUrl: process.env.HASURA_URL || 'https://13.66.223.224.nip.io/hge/v1/graphql',
 
 }
 
