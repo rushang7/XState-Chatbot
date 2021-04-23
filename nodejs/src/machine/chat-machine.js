@@ -1,4 +1,4 @@
-const { Machine, assign } = require('xstate');
+const { Machine, assign, actions } = require('xstate');
 const dialog = require('./util/dialog.js');
 const triageFlow = require('./triage');
 const selfCareFlow = require('./self-care');
@@ -9,6 +9,9 @@ const chatStateMachine = Machine({
   states: {
     start: {
       id: 'start',
+      onEntry: assign((context, event) => {
+        context.slots = {}
+      }),
       on: {
         USER_MESSAGE: '#menu'
       }
@@ -79,7 +82,10 @@ const chatStateMachine = Machine({
               target: 'error'
             },
             {
-              target: '#triageFlow'
+              target: '#triageFlow',
+              actions: assign((context, event) => {
+                context.slots.triageMenu = context.intention;
+              })
             }
           ]
         },
