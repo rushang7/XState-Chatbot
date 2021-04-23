@@ -138,7 +138,6 @@ const triageFlow = {
         src: (context) => personService.createPerson(context.slots.triage.person, context.user.mobileNumber),
         onDone: {
           actions: assign((context, event) => {
-            console.log('event.data: ' + JSON.stringify(event.data));
             context.slots.triage.person = event.data;
           }),
           target: '#symptoms'
@@ -264,14 +263,13 @@ const triageFlow = {
       id: 'triageEvaluator1',
       onEntry: assign((context, event) => {
         let triage = context.slots.triage;
-        let age = triage.person.age;
         if(triage.symptoms == false && triage.contactedCovidPerson == false && (triage.rtpcr == 'negative' || triage.rtpcr == 'na')) {
-          context.triage.conclusion = 'NoCovid'
+          context.slots.triage.conclusion = 'NoCovid'
         } 
       }),
       always: [
         {
-          cond: (context) => context.triage.conclusion == 'NoCovid',
+          cond: (context) => context.slots.triage.conclusion == 'NoCovid',
           target: '#nonPharmacologicalInterventions'
         },
         {
@@ -308,7 +306,7 @@ const triageFlow = {
             },
             {
               actions: assign((context, event) => {
-                context.triage.comorbidity = context.intention;
+                context.slots.triage.isComorbid = context.intention;
               }),
               target: '#triageEvaluator2'
             }
@@ -319,6 +317,72 @@ const triageFlow = {
             dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
           }),
           always: 'prompt'
+        }
+      }
+    },
+    triageEvaluator2: {
+      id: 'triageEvaluator2',
+      always: [
+        {
+          cond: (context) => context.slots.triage.person.age > 60 || context.slots.triage.isComorbid,
+          target: '#covidfyLinkPhysicalConsult'
+        },
+        {
+          target: '#triageSpo2'
+        }
+      ]
+    },
+    triageSpo2: {
+      id: 'triageSpo2',
+      initial: 'prompt',
+      states: {
+        prompt: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.prompt, context.user.locale));
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            let spo2 = parseInt(dialog.get_input(event));
+            if(spo2 > 0 && spo2 <= 100) {
+              context.validMessage = true;
+              context.slots.triage.spo2 = spo2;
+            } else {
+              context.validMessage = false;
+            }
+          }),
+          always: [
+            {
+              cond: (context) => !context.validMessage,
+              target: 'error'
+            }
+          ]
+        }
+      }
+    },
+    nonPharmacologicalInterventions: {
+      id: 'nonPharmacologicalInterventions',
+      onEntry: assign((context, event) => {
+        dialog.sendMessage(context, dialog.get_message(messages.nonPharmacologicalInterventions, context.user.locale));
+      }),
+      always: '#upsertTriageDetails'
+    },
+    covidfyLinkPhysicalConsult: {
+      id: 'covidfyLinkPhysicalConsult',
+      onEntry: assign((context, event) => {
+        dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkPhysicalConsult, context.user.locale));
+      }),
+      always: '#upsertTriageDetails'
+    },
+    upsertTriageDetails: {
+      id: 'upsertTriageDetails',
+      invoke: {
+        src: (context) => triageService.upsertTriageDetails(context.slots.triage.person, context.slots.triage),
+        onDone: {
+          target: '#endstate'
         }
       }
     }
@@ -379,12 +443,23 @@ let messages = {
   comorbidity: {
     prompt: {
       male: {
-        en_IN: 'Do you have any of the following comorbities: 1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n\nPlease reply with Yes/No.',
+        en_IN: 'Do you have any of the following comorbities: \n1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n\nPlease reply with Yes/No.',
       },
       female: {
-        en_IN: 'Do you have any of the following comorbities: 1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n7. Pregnancy\n\nPlease reply with Yes/No.'
+        en_IN: 'Do you have any of the following comorbities: \n1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n7. Pregnancy\n\nPlease reply with Yes/No.'
       }
     }
+  },
+  triageSpo2: {
+    prompt: {
+      en_IN: 'Please enter your Oxygen level.'
+    }
+  },
+  nonPharmacologicalInterventions: {
+    en_IN: 'Non Pharmacological Interventions Message'
+  },
+  covidfyLinkPhysicalConsult: {
+    en_IN: 'CovidfyLinkPhysicalConsult'
   }
 }
 

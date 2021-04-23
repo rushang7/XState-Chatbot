@@ -1,6 +1,6 @@
 const config = require('../../env-variables');
 
-if(config.serviceProvider == 'Dummmy') {
+if(config.serviceProvider == 'Dummy') {
     module.exports.personService = require('./dummy-person-service');
     module.exports.triageService = require('./dummy-triage-service');
     module.exports.vitalsService = require('./dummy-vitals-service');

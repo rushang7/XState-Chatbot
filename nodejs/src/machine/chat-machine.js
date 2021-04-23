@@ -150,7 +150,14 @@ const chatStateMachine = Machine({
     triageFlow: triageFlow,
     recordVitals: selfCareFlow.recordVitals,
     downloadReport: selfCareFlow.downloadReport,
-    exitProgram: selfCareFlow.exitProgram
+    exitProgram: selfCareFlow.exitProgram,
+    endstate: {
+      id: 'endstate',
+      // onEntry: assign((context, event) => {
+      //   dialog.sendMessage(context, dialog.get_message(messages.endstate, context.user.locale));
+      // }),
+      always: '#start'
+    }
   }
 });
 
@@ -169,6 +176,9 @@ let messages = {
     prompt: {
       en_IN: '1. Add new patient\n2. Please record my vitals\n3. Download my report\n4. Exit self care program'
     }
+  },
+  endstate: {
+    en_IN: 'Goodbye. Say hi to start another conversation'
   }
 }
 
