@@ -5,7 +5,7 @@ const selfCareFlow = require('./self-care');
 
 const chatStateMachine = Machine({
   id: 'chatMachine',
-  initial: 'start',
+  initial: 'menu',
   states: {
     start: {
       id: 'start',
