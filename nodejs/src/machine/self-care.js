@@ -1,6 +1,6 @@
 const { assign } = require('xstate');
 const dialog = require('./util/dialog.js');
-const { selfCareService } = require('./service/service-loader');
+const { vitalsService } = require('./service/service-loader');
 
 const selfCareFlow = {
   recordVitals: {
