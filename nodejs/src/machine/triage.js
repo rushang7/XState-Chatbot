@@ -24,7 +24,7 @@ const triageFlow = {
         },
         process: {
           onEntry: assign((context, event) => {
-            if(event.message.type == 'text' && event.message.input.length < 100) {
+            if (event.message.type == 'text' && event.message.input.length < 100) {
               context.slots.triage.person.name = dialog.get_input(event, false);
               context.validMessage = true;
             } else {
@@ -63,9 +63,9 @@ const triageFlow = {
         },
         process: {
           onEntry: assign((context, event) => {
-            if(event.message.type == 'text') {
+            if (event.message.type == 'text') {
               let age = parseInt(dialog.get_input(event, false));
-              if(age > 0 && age < 120) {
+              if (age > 0 && age < 120) {
                 context.slots.triage.person.age = age;
                 context.validMessage = true;
                 return;
@@ -263,9 +263,9 @@ const triageFlow = {
       id: 'triageEvaluator1',
       onEntry: assign((context, event) => {
         let triage = context.slots.triage;
-        if(triage.symptoms == false && triage.contactedCovidPerson == false && (triage.rtpcr == 'negative' || triage.rtpcr == 'na')) {
+        if (triage.symptoms == false && triage.contactedCovidPerson == false && (triage.rtpcr == 'negative' || triage.rtpcr == 'na')) {
           context.slots.triage.conclusion = 'NoCovid'
-        } 
+        }
       }),
       always: [
         {
@@ -285,9 +285,9 @@ const triageFlow = {
           onEntry: assign((context, event) => {
             context.grammer = grammer.binaryChoice;
             let message = '';
-            if(context.slots.triage.person.gender == 'female') 
+            if (context.slots.triage.person.gender == 'female')
               message = dialog.get_message(messages.comorbidity.prompt.female, context.user.locale);
-            else 
+            else
               message = dialog.get_message(messages.comorbidity.prompt.male, context.user.locale);
             dialog.sendMessage(context, message);
           }),
@@ -347,7 +347,7 @@ const triageFlow = {
         process: {
           onEntry: assign((context, event) => {
             let spo2 = parseInt(dialog.get_input(event));
-            if(spo2 > 0 && spo2 <= 100) {
+            if (spo2 > 0 && spo2 <= 100) {
               context.validMessage = true;
               context.slots.triage.spo2 = spo2;
             } else {
@@ -364,7 +364,7 @@ const triageFlow = {
               actions: assign((context, event) => {
                 context.slots.triage.conclusion = 'self-care'
               }),
-              target: '#endstate'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage)
+              target: '#spaceAvailability'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage)
             },
             {
               cond: (context) => context.slots.triage.spo2 <= 95 && context.slots.triage.spo2 >= 90,
@@ -372,7 +372,7 @@ const triageFlow = {
             },
             {
               actions: assign((context, event) => {
-                context.slots.triage.conslusion = 'CovidfyLinkBedAvailability'
+                context.slots.triage.conclusion = 'CovidfyLinkBedAvailability'
               }),
               target: '#covidfyLinkBedAvailability'
             }
@@ -401,7 +401,7 @@ const triageFlow = {
         process: {
           onEntry: assign((context, event) => {
             let spo2 = parseInt(dialog.get_input(event));
-            if(spo2 > 0 && spo2 <= 100) {
+            if (spo2 > 0 && spo2 <= 100) {
               context.validMessage = true;
               context.slots.triage.spo2Walk = spo2;
             } else {
@@ -418,7 +418,7 @@ const triageFlow = {
               actions: assign((context, event) => {
                 context.slots.triage.conclusion = 'self-care'
               }),
-              target: '#endstate'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
+              target: '#spaceAvailability'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
             },
             {
               target: '#covidfyLinkPhysicalConsult'
@@ -433,10 +433,149 @@ const triageFlow = {
         }
       }
     },
+    spaceAvailability: {
+      id: 'spaceAvailability',
+      initial: 'prompt',
+      states: {
+        prompt: {
+          onEntry: assign((context, event) => {
+            context.grammer = grammer.binaryChoice;
+            dialog.sendMessage(context, dialog.get_message(messages.spaceAvailability.prompt, context.user.locale));
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            context.intention = dialog.get_intention(context.grammer, event);
+          }),
+          always: [
+            {
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+              target: 'error'
+            },
+            {
+              actions: assign((context, event) => {
+                context.slots.triage.spaceAvailability = context.intention
+              }),
+              target: '#caregiverAvailability'
+            }
+          ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
+        }
+      }
+    },
+    caregiverAvailability: {
+      id: 'caregiverAvailability',
+      initial: 'prompt',
+      states: {
+        prompt: {
+          onEntry: assign((context, event) => {
+            context.grammer = grammer.binaryChoice;
+            dialog.sendMessage(context, dialog.get_message(messages.caregiverAvailability.prompt, context.user.locale));
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            context.intention = dialog.get_intention(context.grammer, event);
+          }),
+          always: [
+            {
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+              target: 'error'
+            },
+            {
+              actions: assign((context, event) => {
+                context.slots.triage.caregiverAvailability = context.intention
+              }),
+              target: '#aarogyaSetuDownloaded'
+            }
+          ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
+        }
+      }
+    },
+    aarogyaSetuDownloaded: {
+      id: 'aarogyaSetuDownloaded',
+      initial: 'prompt',
+      states: {
+        prompt: {
+          onEntry: assign((context, event) => {
+            console.log(context)
+            context.grammer = grammer.binaryChoice;
+            dialog.sendMessage(context, dialog.get_message(messages.aarogyaSetuDownloaded.prompt, context.user.locale));
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            context.intention = dialog.get_intention(context.grammer, event);
+            context.slots.triage.aarogyaSetuDownloaded = context.intention
+          }),
+          always: [
+            {
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+              target: 'error'
+            },
+            {
+              cond: (context) => context.slots.triage.spaceAvailability == false || context.slots.triage.caregiverAvailability == false,
+              actions: assign((context, event) => {
+                context.slots.triage.conclusion = 'covidfyLinkBedAvailability'
+              }),
+              target: '#covidfyLinkBedAvailability'
+            },
+            {
+              actions: assign((context, event) => {
+                context.slots.triage.conclusion = 'pharmacologicalInterventions'
+              }),
+              target: '#pharmacologicalInterventions'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
+            }
+          ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
+        }
+      }
+    },
+    pharmacologicalInterventions: {
+      id: 'pharmacologicalInterventions',
+      onEntry: assign((context, event) => {
+        context.slots.triage.conclusion = 'NoCovid';
+        dialog.sendMessage(context, dialog.get_message(messages.pharmacologicalInterventions, context.user.locale));
+      }),
+      always: '#infectionControl'
+    },
+    infectionControl: {
+      id: 'infectionControl',
+      onEntry: assign((context, event) => {
+        context.slots.triage.conclusion = 'NoCovid';
+        dialog.sendMessage(context, dialog.get_message(messages.infectionControl, context.user.locale));
+      }),
+      always: '#nonPharmacologicalInterventions'
+    },
     nonPharmacologicalInterventions: {
       id: 'nonPharmacologicalInterventions',
       onEntry: assign((context, event) => {
-        context.slots.triage.conslusion = 'NoCovid';
+        context.slots.triage.conclusion = 'NoCovid';
         dialog.sendMessage(context, dialog.get_message(messages.nonPharmacologicalInterventions, context.user.locale));
       }),
       always: '#upsertTriageDetails'
@@ -452,7 +591,7 @@ const triageFlow = {
     covidfyLinkBedAvailability: {
       id: 'covidfyLinkBedAvailability',
       onEntry: assign((context, event) => {
-        context.slots.triage.conslusion = 'CovidfyLinkBedAvailability';
+        context.slots.triage.conclusion = 'CovidfyLinkBedAvailability';
         dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale));
       }),
       always: '#upsertTriageDetails'
@@ -491,7 +630,7 @@ let messages = {
       en_IN: 'Please select gender of the patient'
     },
     options: {
-      list: [ 'male', 'female', 'other' ],
+      list: ['male', 'female', 'other'],
       messageBundle: {
         male: {
           en_IN: 'Male'
@@ -503,7 +642,7 @@ let messages = {
           en_IN: 'Other'
         }
       }
-    }    
+    }
   },
   symptoms: {
     prompt: {
@@ -540,8 +679,29 @@ let messages = {
       en_IN: 'Could you please walk for 6 minutes and re-measure the oxygen level?'
     }
   },
+  spaceAvailability: {
+    prompt: {
+      en_IN: 'Do you have a separate room and bathroom?\nPlease reply with Yes/No.'
+    }
+  },
+  caregiverAvailability: {
+    prompt: {
+      en_IN: 'Do you have a caregiver available who is between 20-60 years of age?\nPlease reply with Yes/No.'
+    }
+  },
+  aarogyaSetuDownloaded: {
+    prompt: {
+      en_IN: 'Have you downloaded the Aarogya Setu app?\nPlease reply with Yes/No.'
+    }
+  },
   nonPharmacologicalInterventions: {
     en_IN: 'Non Pharmacological Interventions Message'
+  },
+  pharmacologicalInterventions: {
+    en_IN: 'Pharmacological Interventions Message'
+  },
+  infectionControl: {
+    en_IN: 'Infection control home measures Message'
   },
   covidfyLinkPhysicalConsult: {
     en_IN: 'CovidfyLinkPhysicalConsult'
@@ -553,13 +713,13 @@ let messages = {
 
 let grammer = {
   binaryChoice: [
-    { intention: true, recognize: ['yes', 'y' ]},
-    { intention: false, recognize: ['no', 'n' ]}
+    { intention: true, recognize: ['yes', 'y'] },
+    { intention: false, recognize: ['no', 'n'] }
   ],
   rtpcrTest: [
-    { intention: 'positive', recognize: [ '1' ]},
-    { intention: 'negative', recognize: [ '2' ]},
-    { intention: 'na', recognize: [ '3' ]},
+    { intention: 'positive', recognize: ['1'] },
+    { intention: 'negative', recognize: ['2'] },
+    { intention: 'na', recognize: ['3'] },
   ]
 }
 
