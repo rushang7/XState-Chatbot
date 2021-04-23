@@ -57,7 +57,7 @@ class PersonService {
       body: JSON.stringify({
         query: query,
         variables: {
-          "mobile": "mobileNumber"
+          "mobile": mobileNumber
         },
         operationName: "get_people"
       }),

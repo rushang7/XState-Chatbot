@@ -52,9 +52,9 @@ const selfCareFlow = {
               let message = dialog.get_message(messages.selectPerson.prompt, context.user.locale);
               let persons = context.persons;
               let grammer = [];
-              for(let i = 0; i < persons.length; i++) {
+              for (let i = 0; i < persons.length; i++) {
                 let person = persons[i];
-                let grammerItem = { intention: person.uuid, recognize: [ (i + 1).toString() ] };
+                let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
                 grammer.push(grammerItem);
                 message += '\n' + (i + 1) + '. ' + person.name;
               }
@@ -182,7 +182,7 @@ const selfCareFlow = {
             }),
             always: 'prompt'
           }
-        }  
+        }
       },
       vitalsSpo2Walk: {
         id: 'vitalsSpo2Walk',
@@ -256,7 +256,7 @@ const selfCareFlow = {
                 target: 'error'
               },
               {
-                cond: (context) => context.slots.vitals.temperature < 98,
+                cond: (context) => context.slots.vitals.temperature < 108,
                 target: '#addVitals'
               },
               {
@@ -344,8 +344,8 @@ let messages = {
 
 let grammer = {
   binaryChoice: [
-    { intention: true, recognize: ['yes', 'y' ]},
-    { intention: false, recognize: ['no', 'n' ]}
+    { intention: true, recognize: ['yes', 'y'] },
+    { intention: false, recognize: ['no', 'n'] }
   ],
 }
 

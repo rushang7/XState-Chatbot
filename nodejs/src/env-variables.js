@@ -9,9 +9,9 @@ const envVariables = {
 
     whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'GupShup',
 
-    serviceProvider: process.env.SERVICE_PROVIDER || 'Dummy',
+    serviceProvider: process.env.SERVICE_PROVIDER || 'swasth',
 
-    repoProvider: process.env.REPO_PROVIDER || 'PostgreSQL',
+    repoProvider: process.env.REPO_PROVIDER || 'InMemory',
 
     whatsAppBusinessNumber: process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
 
@@ -33,7 +33,7 @@ const envVariables = {
     },
 
     hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
-    hasuraUrl: process.env.HASURA_URL || 'https://13.66.223.224.nip.io/hge/v1/graphql',
+    hasuraUrl: process.env.HASURA_URL || '',
 
 
     kafka: {
