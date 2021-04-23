@@ -43,7 +43,7 @@ class GupShupWhatsAppProvider {
 
             let headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'apiKey': "81ee6fe7c9854228c2270996a3340c1f"
+                'apiKey': "dqakkcvwtt5llu7tyog5syhlx6ykzyso"
             }
 
             var urlSearchParams = new URLSearchParams();
@@ -51,7 +51,7 @@ class GupShupWhatsAppProvider {
             urlSearchParams.append("channel", "whatsapp");
             urlSearchParams.append("source", "917834811114");
             urlSearchParams.append("destination", '91' + phone);
-            urlSearchParams.append("src.name", "SwasthChatbot");
+            urlSearchParams.append("src.name", "SwasthAppBot");
             urlSearchParams.append("message", message);
 
             var request = {
@@ -60,7 +60,7 @@ class GupShupWhatsAppProvider {
                 body: urlSearchParams
             }
 
-            fetch(url, request);
+            fetch(url, request).then(response => response.json()).then(body => console.log(JSON.stringify(body)));
         }
     }
 }

@@ -6,6 +6,12 @@ const selfCareFlow = require('./self-care');
 const chatStateMachine = Machine({
   id: 'chatMachine',
   initial: 'menu',
+  on: {
+    USER_RESET: {
+      target: '#menu',
+      // actions: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(messages.reset, context.user.locale), false))
+    }
+  },
   states: {
     start: {
       id: 'start',
