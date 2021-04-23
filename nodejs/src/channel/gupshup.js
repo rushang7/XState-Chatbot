@@ -43,7 +43,7 @@ class GupShupWhatsAppProvider {
 
             let headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'apiKey': ""
+                'apiKey': "81ee6fe7c9854228c2270996a3340c1f"
             }
 
             var urlSearchParams = new URLSearchParams();
@@ -51,7 +51,7 @@ class GupShupWhatsAppProvider {
             urlSearchParams.append("channel", "whatsapp");
             urlSearchParams.append("source", "917834811114");
             urlSearchParams.append("destination", '91' + phone);
-            urlSearchParams.append("src.name", "mSevaChatbot");
+            urlSearchParams.append("src.name", "SwasthChatbot");
             urlSearchParams.append("message", message);
 
             var request = {

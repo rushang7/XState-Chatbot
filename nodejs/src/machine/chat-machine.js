@@ -164,7 +164,7 @@ const chatStateMachine = Machine({
 let messages = {
   menu: {
     prompt: {
-      en_IN: 'Welcome to XYZ. Please let me know how can we help:\n1. I am feeling worried\n2. Manage self care\n3. Please give me information about COVID facilities\n\nYou could always get back to the main menu by sending "Reset".'
+      en_IN: 'Welcome to XYZ. Please let me know how can we help:\n1. I am feeling worried\n2. Manage self care\n3. Please give me information about COVID facilities\n\nYou can always get back to the main menu by sending "Reset".'
     }
   },
   triageMenu: {

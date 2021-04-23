@@ -7,7 +7,7 @@ const envVariables = {
     port: process.env.SERVICE_PORT || 8080,
     contextPath: process.env.CONTEXT_PATH || '/xstate-chatbot',
 
-    whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'console',
+    whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'GupShup',
 
     serviceProvider: process.env.SERVICE_PROVIDER || 'Dummy',
 
@@ -34,6 +34,15 @@ const envVariables = {
 
     hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
     hasuraUrl: process.env.HASURA_URL || 'https://13.66.223.224.nip.io/hge/v1/graphql',
+
+
+    kafka: {
+        kafkaBootstrapServer: process.env.KAFKA_BOOTSTRAP_SERVER || 'localhost:9092',
+        chatbotTelemetryTopic: process.env.CHATBOT_TELEMETRY_TOPIC || 'chatbot-telemetry-v2',
+
+        kafkaConsumerEnabled: process.env.KAFKA_CONSUMER_ENABLED || true,
+        kafkaConsumerGroupId: process.env.KAFKA_CONSUMER_GROUP_ID || 'xstate-chatbot',
+    },
 
 }
 
