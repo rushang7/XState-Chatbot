@@ -358,14 +358,85 @@ const triageFlow = {
             {
               cond: (context) => !context.validMessage,
               target: 'error'
+            },
+            {
+              cond: (context) => context.slots.triage.spo2 > 95,
+              actions: assign((context, event) => {
+                context.slots.triage.conclusion = 'self-care'
+              }),
+              target: '#endstate'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage)
+            },
+            {
+              cond: (context) => context.slots.triage.spo2 <= 95 && context.slots.triage.spo2 >= 90,
+              target: '#triageSpo2Walk'
+            },
+            {
+              actions: assign((context, event) => {
+                context.slots.triage.conslusion = 'CovidfyLinkBedAvailability'
+              }),
+              target: '#covidfyLinkBedAvailability'
             }
           ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
+        }
+      }
+    },
+    triageSpo2Walk: {
+      id: 'triageSpo2Walk',
+      initial: 'prompt',
+      states: {
+        prompt: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(messages.triageSpo2Walk.prompt, context.user.locale));
+          }),
+          on: {
+            USER_MESSAGE: 'process'
+          }
+        },
+        process: {
+          onEntry: assign((context, event) => {
+            let spo2 = parseInt(dialog.get_input(event));
+            if(spo2 > 0 && spo2 <= 100) {
+              context.validMessage = true;
+              context.slots.triage.spo2Walk = spo2;
+            } else {
+              context.validMessage = false;
+            }
+          }),
+          always: [
+            {
+              cond: (context) => !context.validMessage,
+              target: 'error'
+            },
+            {
+              cond: (context) => context.slots.triage.spo2Walk > 95,
+              actions: assign((context, event) => {
+                context.slots.triage.conclusion = 'self-care'
+              }),
+              target: '#endstate'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
+            },
+            {
+              target: '#covidfyLinkPhysicalConsult'
+            }
+          ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
         }
       }
     },
     nonPharmacologicalInterventions: {
       id: 'nonPharmacologicalInterventions',
       onEntry: assign((context, event) => {
+        context.slots.triage.conslusion = 'NoCovid';
         dialog.sendMessage(context, dialog.get_message(messages.nonPharmacologicalInterventions, context.user.locale));
       }),
       always: '#upsertTriageDetails'
@@ -373,7 +444,16 @@ const triageFlow = {
     covidfyLinkPhysicalConsult: {
       id: 'covidfyLinkPhysicalConsult',
       onEntry: assign((context, event) => {
+        context.slots.triage.conclusion = 'CovidfyLinkPhysicalConsult';
         dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkPhysicalConsult, context.user.locale));
+      }),
+      always: '#upsertTriageDetails'
+    },
+    covidfyLinkBedAvailability: {
+      id: 'covidfyLinkBedAvailability',
+      onEntry: assign((context, event) => {
+        context.slots.triage.conslusion = 'CovidfyLinkBedAvailability';
+        dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale));
       }),
       always: '#upsertTriageDetails'
     },
@@ -452,7 +532,12 @@ let messages = {
   },
   triageSpo2: {
     prompt: {
-      en_IN: 'Please enter your Oxygen level.'
+      en_IN: 'Please enter your blood oxygen level.'
+    }
+  },
+  triageSpo2Walk: {
+    prompt: {
+      en_IN: 'Could you please walk for 6 minutes and re-measure the oxygen level?'
     }
   },
   nonPharmacologicalInterventions: {
@@ -460,6 +545,9 @@ let messages = {
   },
   covidfyLinkPhysicalConsult: {
     en_IN: 'CovidfyLinkPhysicalConsult'
+  },
+  covidfyLinkBedAvailability: {
+    en_IN: 'CovidfyLinkBedAvailability Message'
   }
 }
 
