@@ -300,7 +300,25 @@ const triageFlow = {
         process: {
           onEntry: assign((context, event) => {
             context.intention = dialog.get_intention(context.grammer, event);
-          })
+          }),
+          always: [
+            {
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
+              target: 'error'
+            },
+            {
+              actions: assign((context, event) => {
+                context.triage.comorbidity = context.intention;
+              }),
+              target: '#triageEvaluator2'
+            }
+          ]
+        },
+        error: {
+          onEntry: assign((context, event) => {
+            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+          }),
+          always: 'prompt'
         }
       }
     }
