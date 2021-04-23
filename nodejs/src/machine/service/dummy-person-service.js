@@ -2,21 +2,21 @@ class PersonService {
 
   async createPerson(person, mobileNumber) {
     console.log('Create person: ' + JSON.stringify(person));
-    let personId = '123' // Person id returned from backend service
-    person.personId = personId;
+    let uuid = '123' // Person id returned from backend service
+    person.uuid = uuid;
     return person;
   }
 
   async getPersonsForMobileNumber(mobileNumber) {
     return [
       {
-        personId: '123',
+        uuid: '123',
         name: 'Ajay',
         age: 34,
         gender: 'male'
       },
       {
-        personId: '456',
+        uuid: '456',
         name: 'Vijya',
         age: 65,
         gender: 'female'

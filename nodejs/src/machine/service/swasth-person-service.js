@@ -35,20 +35,20 @@ class PersonService {
     let response = await fetch(url, options);
     let data = await response.json()
 
-    person.personId = data.data.insert_person_one.uuid;
+    person.uuid = data.data.insert_person_one.uuid;
     return person;
   }
 
   async getPersonsForMobileNumber(mobileNumber) {
     return [
       {
-        personId: '123',
+        uuid: '123',
         name: 'Ajay',
         age: 34,
         gender: 'male'
       },
       {
-        personId: '456',
+        uuid: '456',
         name: 'Vijya',
         age: 65,
         gender: 'female'
