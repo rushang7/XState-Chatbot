@@ -35,6 +35,10 @@ const envVariables = {
     hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
     hasuraUrl: process.env.HASURA_URL || '',
 
+    gupshup: {
+        botname: 'SwasthAppBot',
+        apikey: ''
+    },
 
     kafka: {
         kafkaBootstrapServer: process.env.KAFKA_BOOTSTRAP_SERVER || 'localhost:9092',

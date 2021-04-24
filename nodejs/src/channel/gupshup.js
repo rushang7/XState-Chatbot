@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 require('url-search-params-polyfill');
+const config = require('../env-variables');
 
 //This is a template file for whatsapp provider integration.
 //Refer to this file for onboarding of new whatsapp provider to the chatbot service.
@@ -43,15 +44,15 @@ class GupShupWhatsAppProvider {
 
             let headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'apiKey': "dqakkcvwtt5llu7tyog5syhlx6ykzyso"
+                'apiKey': config.gupshup.apikey
             }
 
             var urlSearchParams = new URLSearchParams();
             
             urlSearchParams.append("channel", "whatsapp");
-            urlSearchParams.append("source", "917834811114");
+            urlSearchParams.append("source", config.whatsAppBusinessNumber);
             urlSearchParams.append("destination", '91' + phone);
-            urlSearchParams.append("src.name", "SwasthAppBot");
+            urlSearchParams.append("src.name", config.gupshup.botname);
             urlSearchParams.append("message", message);
 
             var request = {
