@@ -10,6 +10,10 @@ class GupShupWhatsAppProvider {
     processMessageFromUser(req) {
         let reformattedMessage = {}
         let requestBody = req.body;
+
+        if(requestBody.type != 'message') {
+            return undefined;
+        }
         
         let type = requestBody.payload.type;
         let input;
@@ -61,7 +65,7 @@ class GupShupWhatsAppProvider {
                 body: urlSearchParams
             }
 
-            fetch(url, request).then(response => response.json()).then(body => console.log(JSON.stringify(body)));
+            fetch(url, request);
         }
     }
 }
