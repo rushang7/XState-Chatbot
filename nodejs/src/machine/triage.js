@@ -195,7 +195,7 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            context.grammer = grammer.rtpcrTest;
+            context.grammer = grammers.rtpcrTest;
             dialog.sendMessage(context, dialog.get_message(messages.rtpcr.prompt, context.user.locale));
           }),
           on: {
