@@ -2,13 +2,14 @@ const { Machine, assign, actions } = require('xstate');
 const dialog = require('./util/dialog.js');
 const triageFlow = require('./triage');
 const selfCareFlow = require('./self-care');
+const { personService } = require('./service/service-loader');
 
 const chatStateMachine = Machine({
   id: 'chatMachine',
-  initial: 'menu',
+  initial: 'menuFetchPersons',
   on: {
     USER_RESET: {
-      target: '#menu',
+      target: '#menuFetchPersons',
       // actions: assign( (context, event) => dialog.sendMessage(context, dialog.get_message(messages.reset, context.user.locale), false))
     }
   },
@@ -19,7 +20,19 @@ const chatStateMachine = Machine({
         context.slots = {}
       }),
       on: {
-        USER_MESSAGE: '#menu'
+        USER_MESSAGE: '#menuFetchPersons'
+      }
+    },
+    menuFetchPersons: {
+      id: 'menuFetchPersons',
+      invoke: {
+        src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+        onDone: {
+          actions: assign((context, event) => {
+            context.persons = event.data;
+          }),
+          target: '#menu'
+        }
       }
     },
     menu: {
@@ -28,8 +41,18 @@ const chatStateMachine = Machine({
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            context.grammer = grammer.menu.prompt;
-            dialog.sendMessage(context, dialog.get_message(messages.menu.prompt, context.user.locale));
+            let message = dialog.get_message(messages.menu.prompt.preamble, context.user.locale);
+            let options;
+            if(context.persons.length == 0) {
+              options = messages.menu.prompt.options.newUser;
+            } else {
+              options = messages.menu.prompt.options.subscribedUser;
+            }
+            let { prompt, grammer } = dialog.constructListPromptAndGrammer(options, messages.menu.prompt.options.messageBundle, context.user.locale);
+            context.grammer = grammer;
+            message += prompt;
+            message += dialog.get_message(messages.menu.prompt.postscript, context.user.locale);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -174,7 +197,27 @@ const chatStateMachine = Machine({
 let messages = {
   menu: {
     prompt: {
-      en_IN: 'Welcome to XYZ. Please let me know how can we help:\n1. I am feeling worried\n2. Manage self care\n3. Please give me information about COVID facilities\n\nYou can always get back to the main menu by sending "Reset".'
+      preamble: {
+        en_IN: 'Welcome to XYZ. Please let me know how can we help:'
+      },
+      postscript: {
+        en_IN: '\n\nYou can always get back to the main menu by sending "Reset".'
+      },
+      options: {
+        newUser: [ 'worried', 'info' ],
+        subscribedUser: [ 'worried', 'selfCare', 'info' ],
+        messageBundle: {
+          worried: {
+            en_IN: 'I am feeling worried and have concerns regarding COVID'
+          },
+          selfCare: {
+            en_IN: 'I want to manage my homecare program'
+          },
+          info: {
+            en_IN: 'I want information about COVID facilities'
+          }
+        }
+      }
     }
   },
   triageMenu: {
@@ -196,13 +239,6 @@ let messages = {
 }
 
 let grammer = {
-  menu: {
-    prompt: [
-      { intention: 'worried', recognize: ['1'] },
-      { intention: 'selfCare', recognize: ['2'] },
-      { intention: 'info', recognize: ['3'] }
-    ]
-  },
   triageMenu: {
     prompt: [
       { intention: 'symptoms', recognize: ['1']},
