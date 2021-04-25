@@ -88,8 +88,7 @@ class SessionManager {
     createChatStateFor(user) {
         let service = interpret(chatStateMachine.withContext ({
             chatInterface: this,
-            user: user,
-            slots: {pgr: {}, bills: {}, receipts: {}}
+            user: user
         }));
         service.start();
         return service.state;

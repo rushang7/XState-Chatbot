@@ -1,6 +1,8 @@
 const { assign } = require('xstate');
 const dialog = require('./util/dialog.js');
 const { personService, triageService } = require('./service/service-loader');
+const { context } = require('./chat-machine.js');
+const { upsertTriageDetails } = require('./service/dummy-triage-service.js');
 
 const triageFlow = {
   id: 'triageFlow',
@@ -55,7 +57,9 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.personAge.prompt, context.user.locale));
+            let message = dialog.get_message(messages.personAge.prompt, context.user.locale);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -118,7 +122,6 @@ const triageFlow = {
             {
               actions: assign((context, event) => {
                 context.slots.triage.person.gender = context.intention;
-
               }),
               target: '#persistPerson'
             }
@@ -151,8 +154,11 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            context.grammer = grammer.binaryChoice;
-            dialog.sendMessage(context, dialog.get_message(messages.symptoms.prompt, context.user.locale));
+            let message = dialog.get_message(messages.symptoms.prompt, context.user.locale);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
+            message += grammers.binaryChoice.prompt;
+            context.grammer = grammers.binaryChoice.grammer;
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -170,44 +176,6 @@ const triageFlow = {
             {
               actions: assign((context, event) => {
                 context.slots.triage.symptoms = context.intention
-              }),
-              target: '#contactedCovidPerson'
-            }
-          ]
-        },
-        error: {
-          onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
-          }),
-          always: 'prompt'
-        }
-      }
-    },
-    contactedCovidPerson: {
-      id: 'contactedCovidPerson',
-      initial: 'prompt',
-      states: {
-        prompt: {
-          onEntry: assign((context, event) => {
-            context.grammer = grammer.binaryChoice;
-            dialog.sendMessage(context, dialog.get_message(messages.contactedCovidPerson.prompt, context.user.locale));
-          }),
-          on: {
-            USER_MESSAGE: 'process'
-          }
-        },
-        process: {
-          onEntry: assign((context, event) => {
-            context.intention = dialog.get_intention(context.grammer, event);
-          }),
-          always: [
-            {
-              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
-              target: 'error'
-            },
-            {
-              actions: assign((context, event) => {
-                context.slots.triage.contactedCovidPerson = context.intention;
               }),
               target: '#rtpcr'
             }
@@ -263,14 +231,19 @@ const triageFlow = {
       id: 'triageEvaluator1',
       onEntry: assign((context, event) => {
         let triage = context.slots.triage;
-        if (triage.symptoms == false && triage.contactedCovidPerson == false && (triage.rtpcr == 'negative' || triage.rtpcr == 'na')) {
-          context.slots.triage.conclusion = 'NoCovid'
+        if(triage.person.age > 60 && (triage.symptoms || triage.rtpcr == 'positive')) {
+          context.slots.triage.conclusion = 'ageConsultDoctorEnd'
         }
       }),
       always: [
         {
-          cond: (context) => context.slots.triage.conclusion == 'NoCovid',
-          target: '#nonPharmacologicalInterventions'
+          cond: (context) => context.slots.triage.conclusion == 'ageConsultDoctorEnd',
+          actions: assign((context, event) => {
+            let message = dialog.get_message(messages.endFlow.ageConsultDoctorEnd, context.user.locale);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
+            dialog.sendMessage(context, message);
+          }),
+          target: '#upsertTriageDetails'
         },
         {
           target: '#comorbidity'
@@ -283,12 +256,13 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            context.grammer = grammer.binaryChoice;
+            context.grammer = grammers.binaryChoice.grammer;
             let message = '';
             if (context.slots.triage.person.gender == 'female')
               message = dialog.get_message(messages.comorbidity.prompt.female, context.user.locale);
             else
               message = dialog.get_message(messages.comorbidity.prompt.male, context.user.locale);
+            message += grammers.binaryChoice.prompt;
             dialog.sendMessage(context, message);
           }),
           on: {
@@ -322,10 +296,27 @@ const triageFlow = {
     },
     triageEvaluator2: {
       id: 'triageEvaluator2',
+      onEntry: assign((context, event) => {
+        let triage = context.slots.triage;
+        if(triage.symptoms && triage.isComorbid) {
+          context.slots.triage.conclusion = 'symptomComorbidConsultDoctorEnd';
+        } else if(triage.rtpcr == 'positive' && triage.isComorbid) {
+          context.slots.triage.conclusion = 'testComorbidConsultDoctorEnd';
+        } else if(triage.isComorbid) {
+          context.slots.triage.conclusion = 'precautionEnd';
+        } else if(!triage.symptoms && !triage.isComorbid && triage.rtpcr != 'positive') {
+          context.slots.triage.conclusion = 'noCovidEnd';
+        }
+      }),
       always: [
         {
-          cond: (context) => context.slots.triage.person.age > 60 || context.slots.triage.isComorbid,
-          target: '#covidfyLinkPhysicalConsult'
+          cond: (context) => context.slots.triage.conclusion,
+          actions: assign((context, event) => {
+            let message = dialog.get_message(messages.endFlow[context.slots.triage.conclusion], context.user.locale);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
+            dialog.sendMessage(context, message);
+          }),
+          target: '#upsertTriageDetails'
         },
         {
           target: '#triageSpo2'
@@ -338,7 +329,11 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.prompt, context.user.locale));
+            let message = dialog.get_message(messages.triageSpo2.prompt.preamble, context.user.locale);
+            let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.triageSpo2.prompt.options.list, messages.triageSpo2.prompt.options.messageBundle, context.user.locale);
+            message += prompt;
+            context.grammer = grammer;
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -346,35 +341,43 @@ const triageFlow = {
         },
         process: {
           onEntry: assign((context, event) => {
-            let spo2 = parseInt(dialog.get_input(event));
-            if (spo2 > 0 && spo2 <= 100) {
-              context.validMessage = true;
-              context.slots.triage.spo2 = spo2;
-            } else {
-              context.validMessage = false;
-            }
+            context.intention = dialog.get_intention(context.grammer, event);
           }),
           always: [
             {
-              cond: (context) => !context.validMessage,
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
               target: 'error'
             },
             {
-              cond: (context) => context.slots.triage.spo2 > 95,
+              cond: (context) => context.intention == 'above95',
               actions: assign((context, event) => {
-                context.slots.triage.conclusion = 'self-care'
+                dialog.sendMessage(context, dialog.get_message(messages.normalSpo2, context.user.locale), false);
               }),
-              target: '#spaceAvailability'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage)
+              target: '#subscribe'
             },
             {
-              cond: (context) => context.slots.triage.spo2 <= 95 && context.slots.triage.spo2 >= 90,
+              cond: (context) => context.intention == '90to94',
               target: '#triageSpo2Walk'
             },
             {
+              cond: (context) => context.intention == 'below90',
               actions: assign((context, event) => {
-                context.slots.triage.conclusion = 'CovidfyLinkBedAvailability'
+                context.slots.triage.conclusion = 'lowSpo2End'
+                let message = dialog.get_message(messages.endFlow.lowSpo2End, context.user.locale);
+                message = message.replace('{{name}}', context.slots.triage.person.name);
+                dialog.sendMessage(context, message);
               }),
-              target: '#covidfyLinkBedAvailability'
+              target: '#upsertTriageDetails'
+            },
+            {
+              cond: (context) => context.intention = 'noOximeter',
+              actions: assign((context, event) => {
+                context.slots.triage.conclusion = 'noOximeterEnd';
+                let message = dialog.get_message(messages.endFlow.noOximeterEnd, context.user.locale)
+                message = message.replace('{{name}}', context.slots.triage.person.name);
+                dialog.sendMessage(context, message);
+              }),
+              target: '#upsertTriageDetails'
             }
           ]
         },
@@ -432,6 +435,9 @@ const triageFlow = {
           always: 'prompt'
         }
       }
+    },
+    subscribe: {
+      id: 'subscribe'
     },
     spaceAvailability: {
       id: 'spaceAvailability',
@@ -611,7 +617,7 @@ const triageFlow = {
 let messages = {
   personName: {
     prompt: {
-      en_IN: 'Please enter the patient\'s name'
+      en_IN: 'Got it, please tell me your/patient’s name'
     },
     error: {
       en_IN: 'Please enter the name as text which is less than 100 characters.'
@@ -619,7 +625,7 @@ let messages = {
   },
   personAge: {
     prompt: {
-      en_IN: 'Please enter patient\'s age'
+      en_IN: 'Thanks {{name}}. How old are you?'
     },
     error: {
       en_IN: 'Please enter the age as number in the range 0-120'
@@ -646,12 +652,7 @@ let messages = {
   },
   symptoms: {
     prompt: {
-      en_IN: 'Do you have any of the following symptoms: \n1. Fever\n2. Cough\n3. Sore throat\n4. Loss of smell\n5. Loss of taste\n6. Shortness of breath\n7. Expectoration\n8. Muscle pain\n9. Runny nose\n10. Nausea & diarrhoea\n\nPlease reply with Yes/No.'
-    }
-  },
-  contactedCovidPerson: {
-    prompt: {
-      en_IN: 'Have you came in contact with any Covid-19 positive person?'
+      en_IN: 'Thanks for this information {{name}}! Do you have one or more of these complaints?: \n- Fever\n- Cough\n- Sore throat\n- Loss of smell\n- Loss of taste\n- Shortness of breath\n- Expectoration\n- Muscle pain\n- Runny nose\n- Nausea & diarrhoea\n'
     }
   },
   rtpcr: {
@@ -662,17 +663,62 @@ let messages = {
   comorbidity: {
     prompt: {
       male: {
-        en_IN: 'Do you have any of the following comorbities: \n1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n\nPlease reply with Yes/No.',
+        en_IN: 'Do you have one or more of these conditions? \n- Diabetes\n- Hypertension\n- Chronic lung disease\n- Immunocompromised state\n- Ischemic heart disease\n- Obesity\n',
       },
       female: {
-        en_IN: 'Do you have any of the following comorbities: \n1. Diabetes\n2. Hypertension\n3. Chronic lung disease\n4. Immunocompromised state\n5. Ischemic heart disease\n6. Obesity\n7. Pregnancy\n\nPlease reply with Yes/No.'
+        en_IN: 'Do you have one or more of these conditions? \n- Diabetes\n- Hypertension\n- Chronic lung disease\n- Immunocompromised state\n- Ischemic heart disease\n- Obesity\n- Pregnancy\n'
       }
+    }
+  },
+  endFlow: {
+    ageConsultDoctorEnd: {
+      en_IN: '{{name}}, your age poses an additional risk factor! It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time. To consult a doctor click <here>. \nFor more information regarding COVID-19 click <here>.'
+    },
+    symptomComorbidConsultDoctorEnd: {
+      en_IN: '{{name}} your current symptoms along with your other medical condition(s) are making the situation risky. It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication.\n\nTo consult a doctor click <here>. For more information regarding COVID-19 click <here>'
+    },
+    testComorbidConsultDoctorEnd: {
+      en_IN: '{{name}} your test result along with your other medical condition(s) are making the situation risky. \nIt would be best, if you  consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time.\n\nTo consult a doctor click here. For more information regarding COVID-19 click <here>'
+    },
+    precautionEnd: {
+      en_IN: '{{name}}, based on your responses,  your chances of getting COVID-19  is higher than that of the  average population. I suggest that you exercise caution and strictly follow these simple tips to stay healthy!\n1. Stay home  \n2. Wear an n95 mask \n3. Wash your hands with soap frequently\n4. Exercise indoors, meditate\n5. Sleep 7-8 hours hours a day and consume a balanced diet\n\nFor more information regarding COVID-19 click here'
+    },
+    noCovidEnd: {
+      en_IN: '{{name}}, based on your responses, it is less likely that you are suffering from COVID-19 at this time. I suggest following these simple tips to stay healthy!\n1. Wear a triple layer medical mask appropriately (covering both mouth and nose and well fitted to the face)\n2. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n3. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n4. Avoid alcohol intake, quit smoking if the patient has any habits.\n5. Exercise, meditate or practise yoga.\n\nFor more information regarding COVID-19 click <here>'
+    },
+    lowSpo2End: {
+      en_IN: '{{name}}, your current oxygen level is well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19  click here'
+    },
+    noOximeterEnd: {
+      en_IN: '{{name}}, checking your oxygen levels is one of the most important parameters to gauge the severity of your condition. My advice is please order a pulse oximeter right away from your local medical store. \nSend me a message when you have it so we can begin monitoring your vitals.'
     }
   },
   triageSpo2: {
     prompt: {
-      en_IN: 'Please enter your blood oxygen level.'
+      preamble: {
+        en_IN: 'I hope you have a pulse oximeter at home, Rahul. Check your SpO2. (For more information about a pulse oximeter and to learn how to use an oximeter click <here>)'
+      },
+      options: {
+        list: [ 'above95', '90to94', 'below90', 'noOximeter' ],
+        messageBundle: {
+          above95: {
+            en_IN: 'SpO2 is 95% or above'
+          },
+          '90to94': {
+            en_IN: 'SpO2 is between 90 and  94%'
+          }, 
+          below90: {
+            en_IN: 'SpO2 is below 90%'
+          }, 
+          noOximeter: {
+            en_IN: 'Don’t have an oximeter'
+          }
+        }
+      }
     }
+  },
+  normalSpo2: {
+    en_IN: 'Your SpO2 is well within the normal range! This is a good sign! :) \nI suggest speaking to a doctor so that you can start a few medications to feel better. \nBesides that follow these 5  steps to rid this infection sooner!\n\n1. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n2. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n3. Avoid alcohol intake, quit smoking if the patient has any habits.\n4. Exercise, meditate or practise yoga\n5. Exercise your lungs by trying these breathing exercises\n\nClick <here> to know what more you can do to speed up your recovery'
   },
   triageSpo2Walk: {
     prompt: {
@@ -711,16 +757,20 @@ let messages = {
   }
 }
 
-let grammer = {
-  binaryChoice: [
-    { intention: true, recognize: ['yes', 'y'] },
-    { intention: false, recognize: ['no', 'n'] }
-  ],
+let grammers = {
+  binaryChoice: {
+    prompt: '\n1. Yes\n2. No',
+    grammer: [
+      { intention: true, recognize: ['yes', 'y', '1'] },
+      { intention: false, recognize: ['no', 'n', '2'] }
+    ],
+  },
   rtpcrTest: [
     { intention: 'positive', recognize: ['1'] },
     { intention: 'negative', recognize: ['2'] },
     { intention: 'na', recognize: ['3'] },
-  ]
+  ],
+
 }
 
 module.exports = triageFlow;
