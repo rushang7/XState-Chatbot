@@ -23,7 +23,7 @@ const selfCareFlow = {
               actions: assign((context, event) => {
                 context.slots.vitals.person = event.data[0];
               }),
-              target: '#userConsent'
+              target: '#vitalsSpo2'
             },
             {
               cond: (context, event) => event.data.length > 1,
@@ -80,46 +80,7 @@ const selfCareFlow = {
                   let person = context.persons[personIndex];
                   context.slots.vitals.person = person;
                 }),
-                target: '#userConsent'
-              }
-            ]
-          },
-          error: {
-            onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
-            }),
-            always: 'prompt'
-          }
-        }
-      },
-      userConsent: {
-        id: 'userConsent',
-        initial: 'prompt',
-        states: {
-          prompt: {
-            onEntry: assign((context, event) => {
-              context.grammer = grammer.binaryChoice;
-              dialog.sendMessage(context, dialog.get_message(messages.userConsent.prompt, context.user.locale));
-            }),
-            on: {
-              USER_MESSAGE: 'process'
-            }
-          },
-          process: {
-            onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
-            }),
-            always: [
-              {
-                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
-                target: 'error'
-              },
-              {
-                cond: (context) => context.intention == true,
                 target: '#vitalsSpo2'
-              },
-              {
-                target: '#consentDenied'
               }
             ]
           },
@@ -137,6 +98,7 @@ const selfCareFlow = {
         states: {
           prompt: {
             onEntry: assign((context, event) => {
+              context.grammer = grammer.vitalsSpo2;
               dialog.sendMessage(context, dialog.get_message(messages.vitalsSpo2.prompt, context.user.locale));
             }),
             on: {
@@ -145,33 +107,26 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              let spo2 = parseInt(dialog.get_input(event));
-              if (spo2 > 0 && spo2 <= 100) {
-                context.validMessage = true;
-                context.slots.vitals.spo2 = spo2;
-              } else {
-                context.validMessage = false;
-              }
+              context.intention = dialog.get_intention(context.grammer, event);
+              context.slots.vitals.spo2 = context.intention
             }),
             always: [
               {
-                cond: (context) => !context.validMessage,
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
                 target: 'error'
               },
               {
-                cond: (context) => context.slots.vitals.spo2 > 95,
+                cond: (context) => context.slots.vitals.spo2 == 'good',
                 target: '#vitalsTemperature'
               },
               {
-                cond: (context) => context.slots.vitals.spo2 <= 95 && context.slots.vitals.spo2 >= 90,
+                cond: (context) => context.slots.vitals.spo2 == 'recheck',
                 target: '#vitalsSpo2Walk'
               },
               {
-                actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale), false);
-                }),
-                target: '#addVitals'
-              }
+                cond: (context) => context.slots.vitals.spo2 == 'bad',
+                target: '#vitalsSpo2Walk'
+              },
             ]
           },
           error: {
@@ -188,7 +143,10 @@ const selfCareFlow = {
         states: {
           prompt: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(messages.vitalsSpo2Walk.prompt, context.user.locale));
+              context.grammer = grammer.vitalsSpo2Walk;
+              let message = dialog.get_message(messages.vitalsSpo2Walk.prompt, context.user.locale);
+              message = message.replace('{{name}}', context.slots.vitals.person.first_name);
+              dialog.sendMessage(context, message);
             }),
             on: {
               USER_MESSAGE: 'process'
@@ -196,28 +154,26 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              let spo2 = parseInt(dialog.get_input(event));
-              if (spo2 > 0 && spo2 <= 100) {
-                context.validMessage = true;
-                context.slots.vitals.spo2Walk = spo2;
-              } else {
-                context.validMessage = false;
-              }
+              context.intention = dialog.get_intention(context.grammer, event);
+              context.slots.vitals.spo2 = context.intention
             }),
             always: [
               {
-                cond: (context) => !context.validMessage,
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
                 target: 'error'
               },
               {
-                cond: (context) => context.slots.vitals.spo2Walk > 95,
+                cond: (context) => context.slots.vitals.spo2 == 'good',
                 target: '#vitalsTemperature'
               },
               {
+                cond: (context) => context.slots.vitals.spo2 == 'bad',
                 actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkPhysicalConsult, context.user.locale), false);
+                  let message = dialog.get_message(messages.vitalsSpo2WalkBad.prompt, context.user.locale);
+                  message = message.replace('{{name}}', context.slots.vitals.person.first_name);
+                  dialog.sendMessage(context, message);
                 }),
-                target: '#addVitals'
+                target: '#unsubscribePerson'
               }
             ]
           },
@@ -235,6 +191,7 @@ const selfCareFlow = {
         states: {
           prompt: {
             onEntry: assign((context, event) => {
+              context.grammer = grammer.vitalsTemperature;
               dialog.sendMessage(context, dialog.get_message(messages.vitalsTemperature.prompt, context.user.locale));
             }),
             on: {
@@ -243,33 +200,25 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              let temperature = parseFloat(dialog.get_input(event));
-              if (temperature > 92 && temperature <= 108) {
-                context.validMessage = true;
-                context.slots.vitals.temperature = temperature;
-              } else {
-                context.validMessage = false;
-              }
+              context.intention = dialog.get_intention(context.grammer, event);
+              context.slots.vitals.temperature = context.intention
             }),
             always: [
               {
-                cond: (context) => !context.validMessage,
+                cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
                 target: 'error'
               },
               {
-                cond: (context) => context.slots.vitals.temperature <= 98,
-                target: '#addVitals'
-              },
-              {
-                cond: (context) => context.slots.vitals.temperature > 98 && context.slots.vitals.temperature <= 102,
+                cond: (context) => context.slots.vitals.temperature == 'good',
                 actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.adviseParacetamol, context.user.locale), false);
+                  dialog.sendMessage(context, dialog.get_message(messages.temperatureGood, context.user.locale), false);
                 }),
                 target: '#addVitals'
               },
               {
+                cond: (context) => context.slots.vitals.temperature == 'bad',
                 actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale), false);
+                  dialog.sendMessage(context, dialog.get_message(messages.temperatureBad, context.user.locale), false);
                 }),
                 target: '#addVitals'
               }
@@ -560,7 +509,7 @@ let messages = {
   },
   selectPerson: {
     prompt: {
-      en_IN: 'Please select a patient: '
+      en_IN: 'Please select the patient whose vitals you want to add:\n\n'
     }
   },
   userConsent: {
@@ -570,17 +519,25 @@ let messages = {
   },
   vitalsSpo2: {
     prompt: {
-      en_IN: 'Please enter your blood oxygen level.'
+      en_IN: 'Please look for the oximeter, put it on your finger and let the number stabilize. Now tell me what your pulse oximeter says? \n\n1.SpO2 is 95 and above \n2.SpO2 is between 90 and 94% \n3.SpO2 is below 90%'
     }
+  },
+  vitalsSpo2Bad: {
+    en_IN: '{{name}}, your current oxygen level  is  well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19 click here'
   },
   vitalsSpo2Walk: {
     prompt: {
-      en_IN: 'Could you please walk for 6 minutes and re-measure the oxygen level?'
+      en_IN: '{{name}}, your SpO2 should ideally be between 95 and 99.  I just want to make sure that your lungs are not getting weak. I would suggest doing a simple test right now. All you need to do is walk around inside your room for 6 minutes with the pulse oximeter on your finger. Keep an eye out for the SpO2 all through the 6 minutes. \nLet me know how it goes. \n\n1. SpO2 fell below 93 (at any point during the test)\n2. SpO2 fell by 3 points (at any point during the test)\n3.  Felt light headed (at any point during the test)\n4. Difficulty breathing (at any point during the test)\n5. None of the above'
+    }
+  },
+  vitalsSpo2WalkBad: {
+    prompt: {
+      en_IN: '{{name}}, this reaction to the walk test is not normal. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\n To consult a doctor click here. For more information regarding COVID-19 click here'
     }
   },
   vitalsTemperature: {
     prompt: {
-      en_IN: 'Please enter your temperature'
+      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n 1. 99 and above \n 2. 98 and below'
     }
   },
   vitalsRecordedSuccesfully: {
@@ -595,8 +552,11 @@ let messages = {
   covidfyLinkBedAvailability: {                 // Duplicacy with message in triage file
     en_IN: 'CovidfyLinkBedAvailability Message'
   },
-  adviseParacetamol: {
-    en_IN: 'Advise Paracetamol'
+  temperatureGood: {
+    en_IN: 'No fever! Your SpO2 and your temperature are both normal! Let’s keep it that way. I will check up on you again in a few hours to see how you are feeling!'
+  },
+  temperatureBad: {
+    en_IN: 'Looks like you have a fever. You will need  to take antipyretic to bring the temperature back down. Please contact your doctor so that you can take the right medication. \nI will check up on you again in a few hours to see how you are feeling!'
   },
   exitProgram: {
     exitReason: {
@@ -614,6 +574,19 @@ let grammer = {
   binaryChoice: [
     { intention: true, recognize: ['yes', 'y'] },
     { intention: false, recognize: ['no', 'n'] }
+  ],
+  vitalsSpo2: [
+    { intention: 'good', recognize: ['1'] },
+    { intention: 'recheck', recognize: ['2'] },
+    { intention: 'bad', recognize: ['3'] }
+  ],
+  vitalsTemperature: [
+    { intention: 'bad', recognize: ['1'] },
+    { intention: 'good', recognize: ['2'] }
+  ],
+  vitalsSpo2Walk: [
+    { intention: 'bad', recognize: ['1', '2', '3', '4'] },
+    { intention: 'good', recognize: ['5'] }
   ],
   exitReason: [
     { intention: 'NoCovid', recognize: ['1'] },
