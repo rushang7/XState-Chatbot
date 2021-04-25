@@ -156,7 +156,7 @@ const triageFlow = {
           onEntry: assign((context, event) => {
             let message = dialog.get_message(messages.symptoms.prompt, context.user.locale);
             message = message.replace('{{name}}', context.slots.triage.person.name);
-            message += grammers.binaryChoice.prompt;
+            message += dialog.get_message(grammers.binaryChoice.prompt, context.user.locale);
             context.grammer = grammers.binaryChoice.grammer;
             dialog.sendMessage(context, message);
           }),
@@ -262,7 +262,7 @@ const triageFlow = {
               message = dialog.get_message(messages.comorbidity.prompt.female, context.user.locale);
             else
               message = dialog.get_message(messages.comorbidity.prompt.male, context.user.locale);
-            message += grammers.binaryChoice.prompt;
+            message += dialog.get_message(grammers.binaryChoice.prompt, context.user.locale);
             dialog.sendMessage(context, message);
           }),
           on: {
@@ -351,7 +351,7 @@ const triageFlow = {
             {
               cond: (context) => context.intention == 'above95',
               actions: assign((context, event) => {
-                dialog.sendMessage(context, dialog.get_message(messages.normalSpo2, context.user.locale), false);
+                dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.normalSpo2, context.user.locale), false);
               }),
               target: '#subscribe'
             },
@@ -395,7 +395,12 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(messages.triageSpo2Walk.prompt, context.user.locale));
+            let message = dialog.get_message(messages.triageSpo2Walk.prompt.preamble, context.user.locale);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
+            let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.triageSpo2Walk.prompt.options.list, messages.triageSpo2Walk.prompt.options.messageBundle, context.user.locale);
+            message += prompt;
+            context.grammer = grammer;
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -403,28 +408,27 @@ const triageFlow = {
         },
         process: {
           onEntry: assign((context, event) => {
-            let spo2 = parseInt(dialog.get_input(event));
-            if (spo2 > 0 && spo2 <= 100) {
-              context.validMessage = true;
-              context.slots.triage.spo2Walk = spo2;
-            } else {
-              context.validMessage = false;
-            }
+            context.intention = dialog.get_intention(context.grammer, event);
           }),
           always: [
             {
-              cond: (context) => !context.validMessage,
+              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
               target: 'error'
             },
             {
-              cond: (context) => context.slots.triage.spo2Walk > 95,
+              cond: (context) => context.intention == 'none',
               actions: assign((context, event) => {
-                context.slots.triage.conclusion = 'self-care'
+                dialog.sendMessage(context, dialog.get_message(messages.triageSpo2Walk.normalSpo2, context.user.locale), false);
               }),
-              target: '#spaceAvailability'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
+              target: '#subscribe'
             },
             {
-              target: '#covidfyLinkPhysicalConsult'
+              actions: assign((context, event) => {
+                let message = dialog.get_message(messages.endFlow.walkTestEnd, context.user.locale);
+                message = message.replace('{{name}}', context.slots.triage.person.name);
+                dialog.sendMessage(context, message);
+              }),
+              target: '#upsertTriageDetails'
             }
           ]
         },
@@ -437,16 +441,17 @@ const triageFlow = {
       }
     },
     subscribe: {
-      id: 'subscribe'
-    },
-    spaceAvailability: {
-      id: 'spaceAvailability',
+      id: 'subscribe',
       initial: 'prompt',
       states: {
         prompt: {
           onEntry: assign((context, event) => {
-            context.grammer = grammer.binaryChoice;
-            dialog.sendMessage(context, dialog.get_message(messages.spaceAvailability.prompt, context.user.locale));
+            let message = dialog.get_message(messages.subscribe.prompt.preamble, context.user.locale);
+            message = message.replace('{{name}}', context.slots.person.name);
+            let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.subscribe.prompt.options.list, messages.subscribe.prompt.options.messageBundle, context.user.locale);
+            message += prompt;
+            context.grammer = grammer;
+            dialog.sendMessage(context, message);
           }),
           on: {
             USER_MESSAGE: 'process'
@@ -463,9 +468,17 @@ const triageFlow = {
             },
             {
               actions: assign((context, event) => {
-                context.slots.triage.spaceAvailability = context.intention
+                context.slots.triage.subscribe = context.intention;
+                let message;
+                if(context.intention == 'true') {
+                  message = dialog.get_message(messages.subscribe.doSubscribe, context.user.locale);
+                  message = message.replace('{{name}}', context.slots.triage.person.name);
+                } else {
+                  message = dialog.get_message(messages.subscribe.dontSubscribe, context.user.locale);
+                }
+                dialog.sendMessage(context, message);
               }),
-              target: '#caregiverAvailability'
+              target: '#upsertTriageDetails'
             }
           ]
         },
@@ -476,131 +489,6 @@ const triageFlow = {
           always: 'prompt'
         }
       }
-    },
-    caregiverAvailability: {
-      id: 'caregiverAvailability',
-      initial: 'prompt',
-      states: {
-        prompt: {
-          onEntry: assign((context, event) => {
-            context.grammer = grammer.binaryChoice;
-            dialog.sendMessage(context, dialog.get_message(messages.caregiverAvailability.prompt, context.user.locale));
-          }),
-          on: {
-            USER_MESSAGE: 'process'
-          }
-        },
-        process: {
-          onEntry: assign((context, event) => {
-            context.intention = dialog.get_intention(context.grammer, event);
-          }),
-          always: [
-            {
-              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
-              target: 'error'
-            },
-            {
-              actions: assign((context, event) => {
-                context.slots.triage.caregiverAvailability = context.intention
-              }),
-              target: '#aarogyaSetuDownloaded'
-            }
-          ]
-        },
-        error: {
-          onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
-          }),
-          always: 'prompt'
-        }
-      }
-    },
-    aarogyaSetuDownloaded: {
-      id: 'aarogyaSetuDownloaded',
-      initial: 'prompt',
-      states: {
-        prompt: {
-          onEntry: assign((context, event) => {
-            console.log(context)
-            context.grammer = grammer.binaryChoice;
-            dialog.sendMessage(context, dialog.get_message(messages.aarogyaSetuDownloaded.prompt, context.user.locale));
-          }),
-          on: {
-            USER_MESSAGE: 'process'
-          }
-        },
-        process: {
-          onEntry: assign((context, event) => {
-            context.intention = dialog.get_intention(context.grammer, event);
-            context.slots.triage.aarogyaSetuDownloaded = context.intention
-          }),
-          always: [
-            {
-              cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
-              target: 'error'
-            },
-            {
-              cond: (context) => context.slots.triage.spaceAvailability == false || context.slots.triage.caregiverAvailability == false,
-              actions: assign((context, event) => {
-                context.slots.triage.conclusion = 'covidfyLinkBedAvailability'
-              }),
-              target: '#covidfyLinkBedAvailability'
-            },
-            {
-              actions: assign((context, event) => {
-                context.slots.triage.conclusion = 'pharmacologicalInterventions'
-              }),
-              target: '#pharmacologicalInterventions'         // TODO: Replace with initial consult state name (triage details haven't been upserted. the details are present in context.slots.triage) 
-            }
-          ]
-        },
-        error: {
-          onEntry: assign((context, event) => {
-            dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
-          }),
-          always: 'prompt'
-        }
-      }
-    },
-    pharmacologicalInterventions: {
-      id: 'pharmacologicalInterventions',
-      onEntry: assign((context, event) => {
-        context.slots.triage.conclusion = 'NoCovid';
-        dialog.sendMessage(context, dialog.get_message(messages.pharmacologicalInterventions, context.user.locale));
-      }),
-      always: '#infectionControl'
-    },
-    infectionControl: {
-      id: 'infectionControl',
-      onEntry: assign((context, event) => {
-        context.slots.triage.conclusion = 'NoCovid';
-        dialog.sendMessage(context, dialog.get_message(messages.infectionControl, context.user.locale));
-      }),
-      always: '#nonPharmacologicalInterventions'
-    },
-    nonPharmacologicalInterventions: {
-      id: 'nonPharmacologicalInterventions',
-      onEntry: assign((context, event) => {
-        context.slots.triage.conclusion = 'NoCovid';
-        dialog.sendMessage(context, dialog.get_message(messages.nonPharmacologicalInterventions, context.user.locale));
-      }),
-      always: '#upsertTriageDetails'
-    },
-    covidfyLinkPhysicalConsult: {
-      id: 'covidfyLinkPhysicalConsult',
-      onEntry: assign((context, event) => {
-        context.slots.triage.conclusion = 'CovidfyLinkPhysicalConsult';
-        dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkPhysicalConsult, context.user.locale));
-      }),
-      always: '#upsertTriageDetails'
-    },
-    covidfyLinkBedAvailability: {
-      id: 'covidfyLinkBedAvailability',
-      onEntry: assign((context, event) => {
-        context.slots.triage.conclusion = 'CovidfyLinkBedAvailability';
-        dialog.sendMessage(context, dialog.get_message(messages.covidfyLinkBedAvailability, context.user.locale));
-      }),
-      always: '#upsertTriageDetails'
     },
     upsertTriageDetails: {
       id: 'upsertTriageDetails',
@@ -691,6 +579,9 @@ let messages = {
     },
     noOximeterEnd: {
       en_IN: '{{name}}, checking your oxygen levels is one of the most important parameters to gauge the severity of your condition. My advice is please order a pulse oximeter right away from your local medical store. \nSend me a message when you have it so we can begin monitoring your vitals.'
+    },
+    walkTestEnd: {
+      en_IN: '{{name}}, this is an unexpected reaction to the walk test. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19 click <here>.'
     }
   },
   triageSpo2: {
@@ -715,51 +606,72 @@ let messages = {
           }
         }
       }
-    }
-  },
-  normalSpo2: {
-    en_IN: 'Your SpO2 is well within the normal range! This is a good sign! :) \nI suggest speaking to a doctor so that you can start a few medications to feel better. \nBesides that follow these 5  steps to rid this infection sooner!\n\n1. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n2. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n3. Avoid alcohol intake, quit smoking if the patient has any habits.\n4. Exercise, meditate or practise yoga\n5. Exercise your lungs by trying these breathing exercises\n\nClick <here> to know what more you can do to speed up your recovery'
+    },
+    normalSpo2: {
+      en_IN: 'Your SpO2 is well within the normal range! This is a good sign! :) \nI suggest speaking to a doctor so that you can start a few medications to feel better. \nBesides that follow these 5  steps to rid this infection sooner!\n\n1. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n2. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n3. Avoid alcohol intake, quit smoking if the patient has any habits.\n4. Exercise, meditate or practise yoga\n5. Exercise your lungs by trying these breathing exercises\n\nClick <here> to know what more you can do to speed up your recovery'
+    },
   },
   triageSpo2Walk: {
     prompt: {
-      en_IN: 'Could you please walk for 6 minutes and re-measure the oxygen level?'
+      preamble: {
+        en_IN: '{{name}}, your SpO2 should ideally be between 95 and 99. I just want to make sure that your lungs are not getting weak. I would suggest doing a simple test right now. All you need to do is walk around inside your room for 6 minutes with the pulse oximeter on your finger. Keep an eye out for the SpO2 all through the 6 minutes.\nLet me know how it goes.'
+      },
+      options: {
+        list: [ 'below93', 'fellBy3', 'lightHeaded', 'breathingDifficulty', 'none' ],
+        messageBundle: {
+          below93: {
+            en_IN: 'SpO2 fell below 93 (at any point during the test)'
+          }, 
+          fellBy3: {
+            en_IN: 'SpO2 fell by 3 points (at any point during the test)'
+          }, 
+          lightHeaded: {
+            en_IN: 'Felt light headed (at any point during the test)'
+          },
+          breathingDifficulty: {
+            en_IN: 'Difficulty breathing (at any point during the test)'
+          }, 
+          none: {
+            en_IN: 'None of the above'
+          }
+        }
+      }
+    },
+    normalSpo2: {
+      en_IN: 'Your current oxygen levels are good.'
     }
   },
-  spaceAvailability: {
+  subscribe: {
     prompt: {
-      en_IN: 'Do you have a separate room and bathroom?\nPlease reply with Yes/No.'
+      preamble: {
+        en_IN: '{{name}}, I will be following up with you to ensure you get better right at home by:\n- Reminding you to track your vitals regularly\n- Maintaining your SpO2 chart for you (which can be shared with your doctor easily) \n- Sharing scientifically accurate health tips\n- Helping you cope with isolation \n- Extending my support to anyone in your home who also needs COVID-19 care assistance\n'
+      },
+      options: {
+        list: [ 'true', 'false' ],
+        messageBundle: {
+          'true': {
+            en_IN: 'Let\'s do this'
+          },
+          'false': {
+            en_IN: 'Not now'
+          }
+        }
+      }
+    },
+    doSubscribe: {
+      en_IN: 'That\'s awesome, {{name}}! Thank you for choosing me as your aid to recovery. If you want any more details about my recovery program or want to make any modifications, please use the Manage program option in the main menu. I will be in touch with you again in a few hours to check on you. For more information regarding COVID-19 click <here>'
+    },
+    dontSubscribe: {
+      en_IN: 'Click here to know how to effectively manage mild cases of COVID-19 at home\nYou can always come back if you want my help. Just say the word, any word!:)'
     }
   },
-  caregiverAvailability: {
-    prompt: {
-      en_IN: 'Do you have a caregiver available who is between 20-60 years of age?\nPlease reply with Yes/No.'
-    }
-  },
-  aarogyaSetuDownloaded: {
-    prompt: {
-      en_IN: 'Have you downloaded the Aarogya Setu app?\nPlease reply with Yes/No.'
-    }
-  },
-  nonPharmacologicalInterventions: {
-    en_IN: 'Non Pharmacological Interventions Message'
-  },
-  pharmacologicalInterventions: {
-    en_IN: 'Pharmacological Interventions Message'
-  },
-  infectionControl: {
-    en_IN: 'Infection control home measures Message'
-  },
-  covidfyLinkPhysicalConsult: {
-    en_IN: 'CovidfyLinkPhysicalConsult'
-  },
-  covidfyLinkBedAvailability: {
-    en_IN: 'CovidfyLinkBedAvailability Message'
-  }
 }
 
 let grammers = {
   binaryChoice: {
-    prompt: '\n1. Yes\n2. No',
+    prompt: {
+      en_IN: '\n1. Yes\n2. No'
+    },
     grammer: [
       { intention: true, recognize: ['yes', 'y', '1'] },
       { intention: false, recognize: ['no', 'n', '2'] }
@@ -770,7 +682,6 @@ let grammers = {
     { intention: 'negative', recognize: ['2'] },
     { intention: 'na', recognize: ['3'] },
   ],
-
 }
 
 module.exports = triageFlow;
