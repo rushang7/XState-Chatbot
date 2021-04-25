@@ -615,13 +615,10 @@ let messages = {
         en_IN: '{{name}}, your SpO2 should ideally be between 95 and 99. I just want to make sure that your lungs are not getting weak. I would suggest doing a simple test right now. All you need to do is walk around inside your room for 6 minutes with the pulse oximeter on your finger. Keep an eye out for the SpO2 all through the 6 minutes.\nLet me know how it goes.'
       },
       options: {
-        list: [ 'below93', 'fellBy3', 'lightHeaded', 'breathingDifficulty', 'none' ],
+        list: [ 'below93', 'lightHeaded', 'breathingDifficulty', 'none' ],
         messageBundle: {
           below93: {
-            en_IN: 'SpO2 fell below 93 (at any point during the test)'
-          }, 
-          fellBy3: {
-            en_IN: 'SpO2 fell by 3 points (at any point during the test)'
+            en_IN: 'SpO2 fell below 93 or reduced by 3 points or more (at any point during the test)'
           }, 
           lightHeaded: {
             en_IN: 'Felt light headed (at any point during the test)'
