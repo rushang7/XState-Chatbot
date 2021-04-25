@@ -6,10 +6,7 @@ const { personService } = require('./service/service-loader');
 
 const chatStateMachine = Machine({
   id: 'chatMachine',
-  initial: 'menuFetchPersons',
-  onEntry: assign((context, event) => {
-    context.slots = {}
-  }),
+  initial: 'start',
   on: {
     USER_RESET: {
       target: '#menuFetchPersons',
@@ -19,6 +16,9 @@ const chatStateMachine = Machine({
   states: {
     start: {
       id: 'start',
+      onEntry: assign((context, event) => {
+        context.slots = {}
+      }),
       on: {
         USER_MESSAGE: '#menuFetchPersons'
       }
