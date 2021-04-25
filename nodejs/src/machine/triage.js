@@ -1,8 +1,6 @@
 const { assign } = require('xstate');
 const dialog = require('./util/dialog.js');
 const { personService, triageService } = require('./service/service-loader');
-const { context } = require('./chat-machine.js');
-const { upsertTriageDetails } = require('./service/dummy-triage-service.js');
 
 const triageFlow = {
   id: 'triageFlow',
