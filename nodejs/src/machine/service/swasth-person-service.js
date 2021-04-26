@@ -49,6 +49,9 @@ class PersonService {
         first_name
         mobile
         mobile_code
+        c19_triage {
+          subscribe
+        }        
       }
     }    
     `
@@ -72,6 +75,17 @@ class PersonService {
     return data.data.person;
   }
 
+  async getSubscribedPeople(mobileNumber) {
+    let people = await this.getPersonsForMobileNumber(mobileNumber)
+    let subscribedPeople = []
+    for (let i = 0; i < people.length; i++) {
+
+      if (people[i].c19_triage && people[i].c19_triage.subscribe) {
+        subscribedPeople.push(people[i])
+      }
+    }
+    return subscribedPeople
+  }
 }
 
 module.exports = new PersonService();

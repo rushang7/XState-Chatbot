@@ -37,7 +37,7 @@ const envVariables = {
 
     gupshup: {
         botname: 'SwasthAppBot',
-        apikey: ''
+        apikey: process.env.GUPSHUP_API_KEY || ''
     },
 
     kafka: {

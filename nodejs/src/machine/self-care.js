@@ -13,7 +13,7 @@ const selfCareFlow = {
     states: {
       fetchPersons: {
         invoke: {
-          src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+          src: (context) => personService.getSubscribedPeople(context.user.mobileNumber),
           onDone: [
             {
               cond: (context, event) => event.data.length == 0,
@@ -267,7 +267,7 @@ const selfCareFlow = {
     states: {
       reportFetchPersons: {
         invoke: {
-          src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+          src: (context) => personService.getSubscribedPeople(context.user.mobileNumber),
           onDone: [
             {
               cond: (context, event) => event.data.length == 0,
@@ -370,7 +370,7 @@ const selfCareFlow = {
     states: {
       exitProgramFetchPersons: {
         invoke: {
-          src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+          src: (context) => personService.getSubscribedPeople(context.user.mobileNumber),
           onDone: [
             {
               cond: (context, event) => event.data.length == 0,
@@ -491,7 +491,12 @@ const selfCareFlow = {
       unsubscribePerson: {
         id: 'unsubscribePerson',
         invoke: {
-          src: (context) => triageService.exitProgram(context.slots.exitProgram.person, context.slots.exitProgram.exitReason),
+          src: (context) => {
+            let person = {};
+            if (context.slots.exitProgram.person === undefined)
+              person = context.slots.vitals.person
+            return triageService.exitProgram(person, context.slots.exitProgram.exitReason)
+          },
           onDone: {
             actions: assign((context, event) => {
               dialog.sendMessage(context, dialog.get_message(messages.exitProgram.unsubscribedSuccessfully, context.user.locale));

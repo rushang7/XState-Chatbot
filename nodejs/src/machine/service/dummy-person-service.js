@@ -28,6 +28,10 @@ class PersonService {
     ];
   }
 
+  async getSubscribedPeople(mobileNumber) {
+  }
+
 }
+
 
 module.exports = new PersonService();

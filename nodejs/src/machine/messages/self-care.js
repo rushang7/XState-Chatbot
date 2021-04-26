@@ -32,7 +32,7 @@ let messages = {
   },
   vitalsTemperature: {
     prompt: {
-      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n 1. 99 and above \n 2. 98 and below'
+      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n1. 98 and below \n2. 99 and above'
     }
   },
   vitalsRecordedSuccesfully: {
@@ -70,8 +70,8 @@ let grammer = {
     { intention: 'bad', recognize: ['3'] }
   ],
   vitalsTemperature: [
-    { intention: 'bad', recognize: ['1'] },
-    { intention: 'good', recognize: ['2'] }
+    { intention: 'good', recognize: ['1'] },
+    { intention: 'bad', recognize: ['2'] }
   ],
   vitalsSpo2Walk: [
     { intention: 'bad', recognize: ['1', '2', '3'] },
