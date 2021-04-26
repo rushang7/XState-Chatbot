@@ -29,6 +29,7 @@ class PersonService {
   }
 
   async getSubscribedPeople(mobileNumber) {
+    return await this.getPersonsForMobileNumber(mobileNumber);
   }
 
 }
