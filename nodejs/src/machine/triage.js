@@ -445,7 +445,7 @@ const triageFlow = {
         prompt: {
           onEntry: assign((context, event) => {
             let message = dialog.get_message(messages.subscribe.prompt.preamble, context.user.locale);
-            message = message.replace('{{name}}', context.slots.person.name);
+            message = message.replace('{{name}}', context.slots.triage.person.name);
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.subscribe.prompt.options.list, messages.subscribe.prompt.options.messageBundle, context.user.locale);
             message += prompt;
             context.grammer = grammer;
@@ -642,12 +642,12 @@ let messages = {
         en_IN: '{{name}}, I will be following up with you to ensure you get better right at home by:\n- Reminding you to track your vitals regularly\n- Maintaining your SpO2 chart for you (which can be shared with your doctor easily) \n- Sharing scientifically accurate health tips\n- Helping you cope with isolation \n- Extending my support to anyone in your home who also needs COVID-19 care assistance\n'
       },
       options: {
-        list: [ 'true', 'false' ],
+        list: [ true, false ],
         messageBundle: {
-          'true': {
+          true: {
             en_IN: 'Let\'s do this'
           },
-          'false': {
+          false: {
             en_IN: 'Not now'
           }
         }
