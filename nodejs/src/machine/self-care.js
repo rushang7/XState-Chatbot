@@ -56,7 +56,7 @@ const selfCareFlow = {
                 let person = persons[i];
                 let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
                 grammer.push(grammerItem);
-                message += '\n' + (i + 1) + '. ' + person.name;
+                message += '\n' + (i + 1) + '. ' + person.first_name;
               }
               context.grammer = grammer;
               dialog.sendMessage(context, message);
@@ -310,7 +310,7 @@ const selfCareFlow = {
                 let person = persons[i];
                 let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
                 grammer.push(grammerItem);
-                message += '\n' + (i + 1) + '. ' + person.name;
+                message += '\n' + (i + 1) + '. ' + person.first_name;
               }
               context.grammer = grammer;
               dialog.sendMessage(context, message);
@@ -413,7 +413,7 @@ const selfCareFlow = {
                 let person = persons[i];
                 let grammerItem = { intention: person.uuid, recognize: [(i + 1).toString()] };
                 grammer.push(grammerItem);
-                message += '\n' + (i + 1) + '. ' + person.name;
+                message += '\n' + (i + 1) + '. ' + person.first_name;
               }
               context.grammer = grammer;
               dialog.sendMessage(context, message);

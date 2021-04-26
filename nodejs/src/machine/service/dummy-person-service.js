@@ -10,18 +10,22 @@ class PersonService {
   async getPersonsForMobileNumber(mobileNumber) {
     return [
       {
-        uuid: '123',
-        name: 'Ajay',
-        age: 34,
-        gender: 'male'
+        "uuid": "366cb14e",
+        "gender": "",
+        "age": null,
+        "first_name": "asd",
+        "mobile": "9123123123",
+        "mobile_code": "91"
       },
       {
-        uuid: '456',
-        name: 'Vijya',
-        age: 65,
-        gender: 'female'
-      },
-    ]
+        "uuid": "9f9896c6",
+        "gender": "female",
+        "age": 12,
+        "first_name": "ads",
+        "mobile": "9123123123",
+        "mobile_code": "91"
+      }
+    ];
   }
 
 }

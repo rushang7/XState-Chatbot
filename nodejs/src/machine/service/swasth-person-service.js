@@ -17,7 +17,7 @@ class PersonService {
         query: query,
         variables: {
           "object": {
-            "first_name": person.name,
+            "first_name": person.first_name,
             "age": person.age,
             "gender": person.gender,
             "mobile": mobileNumber,

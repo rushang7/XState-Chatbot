@@ -83,7 +83,7 @@ let messages = {
   triageSpo2: {
     prompt: {
       preamble: {
-        en_IN: 'I hope you have a pulse oximeter at home, Rahul. Check your SpO2. (For more information about a pulse oximeter and to learn how to use an oximeter click <here>)'
+        en_IN: 'I hope you have a pulse oximeter at home, {{name}}. Check your SpO2. (For more information about a pulse oximeter and to learn how to use an oximeter click <here>)'
       },
       options: {
         list: [ 'above95', '90to94', 'below90', 'noOximeter' ],
