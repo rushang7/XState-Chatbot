@@ -35,7 +35,7 @@ class GupShupWhatsAppProvider {
         return reformattedMessage;
     }
 
-    sendMessageToUser(user, outputMessages) {
+    async sendMessageToUser(user, outputMessages) {
         if(!Array.isArray(outputMessages)) {
             let message = outputMessages;
             outputMessages = [ message ];
@@ -65,7 +65,7 @@ class GupShupWhatsAppProvider {
                 body: urlSearchParams
             }
 
-            fetch(url, request);
+            await fetch(url, request);
         }
     }
 }
