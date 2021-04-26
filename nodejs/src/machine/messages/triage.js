@@ -56,28 +56,28 @@ let messages = {
   },
   endFlow: {
     ageConsultDoctorEnd: {
-      en_IN: '{{name}}, your age poses an additional risk factor! It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time. To consult a doctor click <here>. \nFor more information regarding COVID-19 click <here>.'
+      en_IN: '{{name}}, your age poses an additional risk factor! It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time. To consult a doctor click <here>. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     symptomComorbidConsultDoctorEnd: {
-      en_IN: '{{name}} your current symptoms along with your other medical condition(s) are making the situation risky. It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication.\n\nTo consult a doctor click <here>. For more information regarding COVID-19 click <here>'
+      en_IN: '{{name}} your current symptoms along with your other medical condition(s) are making the situation risky. It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication.\n\nTo consult a doctor click <here>. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     testComorbidConsultDoctorEnd: {
-      en_IN: '{{name}} your test result along with your other medical condition(s) are making the situation risky. \nIt would be best, if you  consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time.\n\nTo consult a doctor click here. For more information regarding COVID-19 click <here>'
+      en_IN: '{{name}} your test result along with your other medical condition(s) are making the situation risky. \nIt would be best, if you  consulted a doctor right away so that you can undergo a few tests and start the right medication at the right time.\n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     precautionEnd: {
-      en_IN: '{{name}}, based on your responses,  your chances of getting COVID-19  is higher than that of the  average population. I suggest that you exercise caution and strictly follow these simple tips to stay healthy!\n1. Stay home  \n2. Wear an n95 mask \n3. Wash your hands with soap frequently\n4. Exercise indoors, meditate\n5. Sleep 7-8 hours hours a day and consume a balanced diet\n\nFor more information regarding COVID-19 click here'
+      en_IN: '{{name}}, based on your responses,  your chances of getting COVID-19  is higher than that of the  average population. I suggest that you exercise caution and strictly follow these simple tips to stay healthy!\n1. Stay home  \n2. Wear an n95 mask \n3. Wash your hands with soap frequently\n4. Exercise indoors, meditate\n5. Sleep 7-8 hours hours a day and consume a balanced diet\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     noCovidEnd: {
-      en_IN: '{{name}}, based on your responses, it is less likely that you are suffering from COVID-19 at this time. I suggest following these simple tips to stay healthy!\n1. Wear a triple layer medical mask appropriately (covering both mouth and nose and well fitted to the face)\n2. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n3. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n4. Avoid alcohol intake, quit smoking if the patient has any habits.\n5. Exercise, meditate or practise yoga.\n\nFor more information regarding COVID-19 click <here>'
+      en_IN: '{{name}}, based on your responses, it is less likely that you are suffering from COVID-19 at this time. I suggest following these simple tips to stay healthy!\n1. Wear a triple layer medical mask appropriately (covering both mouth and nose and well fitted to the face)\n2. Take adequate rest 7-8 hrs a day and drink a lot of fluids to maintain adequate hydration.\n3. Eat a healthy low carbohydrate, high protein diet, with three meals per day,containing adequate vegetables and fruits.\n4. Avoid alcohol intake, quit smoking if the patient has any habits.\n5. Exercise, meditate or practise yoga.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     lowSpo2End: {
-      en_IN: '{{name}}, your current oxygen level is well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19  click here'
+      en_IN: '{{name}}, your current oxygen level is well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     noOximeterEnd: {
       en_IN: '{{name}}, checking your oxygen levels is one of the most important parameters to gauge the severity of your condition. My advice is please order a pulse oximeter right away from your local medical store. \nSend me a message when you have it so we can begin monitoring your vitals.'
     },
     walkTestEnd: {
-      en_IN: '{{name}}, this is an unexpected reaction to the walk test. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19 click <here>.'
+      en_IN: '{{name}}, this is an unexpected reaction to the walk test. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     }
   },
   triageSpo2: {
@@ -152,7 +152,7 @@ let messages = {
       }
     },
     doSubscribe: {
-      en_IN: 'That\'s awesome, {{name}}! Thank you for choosing me as your aid to recovery. If you want any more details about my recovery program or want to make any modifications, please use the Manage program option in the main menu. I will be in touch with you again in a few hours to check on you. For more information regarding COVID-19 click <here>'
+      en_IN: 'That\'s awesome, {{name}}! Thank you for choosing me as your aid to recovery. If you want any more details about my recovery program or want to make any modifications, please use the Manage program option in the main menu. I will be in touch with you again in a few hours to check on you. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     dontSubscribe: {
       en_IN: 'Click here to know how to effectively manage mild cases of COVID-19 at home\nYou can always come back if you want my help. Just say the word, any word!:)'

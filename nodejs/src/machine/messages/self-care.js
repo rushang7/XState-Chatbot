@@ -18,7 +18,7 @@ let messages = {
     }
   },
   vitalsSpo2Bad: {
-    en_IN: '{{name}}, your current oxygen level  is  well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. For more information regarding COVID-19 click here'
+    en_IN: '{{name}}, your current oxygen level  is  well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
   },
   vitalsSpo2Walk: {
     prompt: {
@@ -27,7 +27,7 @@ let messages = {
   },
   vitalsSpo2WalkBad: {
     prompt: {
-      en_IN: '{{name}}, this reaction to the walk test is not normal. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\n To consult a doctor click here. For more information regarding COVID-19 click here'
+      en_IN: '{{name}}, this reaction to the walk test is not normal. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\n To consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     }
   },
   vitalsTemperature: {
