@@ -350,17 +350,22 @@ const triageFlow = {
             {
               cond: (context) => context.intention == 'above95',
               actions: assign((context, event) => {
+                context.slots.triage.spo2 = context.intention;
                 dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.normalSpo2, context.user.locale), false);
               }),
               target: '#subscribe'
             },
             {
               cond: (context) => context.intention == '90to94',
+              actions: assign((context, event) => {
+                context.slots.triage.spo2 = context.intention;
+              }),
               target: '#triageSpo2Walk'
             },
             {
               cond: (context) => context.intention == 'below90',
               actions: assign((context, event) => {
+                context.slots.triage.spo2 = context.intention;
                 context.slots.triage.conclusion = 'lowSpo2End'
                 let message = dialog.get_message(messages.endFlow.lowSpo2End, context.user.locale);
                 message = message.replace('{{name}}', context.slots.triage.person.name);
@@ -371,6 +376,7 @@ const triageFlow = {
             {
               cond: (context) => context.intention = 'noOximeter',
               actions: assign((context, event) => {
+                context.slots.triage.spo2 = context.intention;
                 context.slots.triage.conclusion = 'noOximeterEnd';
                 let message = dialog.get_message(messages.endFlow.noOximeterEnd, context.user.locale)
                 message = message.replace('{{name}}', context.slots.triage.person.name);
@@ -417,12 +423,14 @@ const triageFlow = {
             {
               cond: (context) => context.intention == 'none',
               actions: assign((context, event) => {
+                context.slots.triage.spo2Walk = context.intention;
                 dialog.sendMessage(context, dialog.get_message(messages.triageSpo2Walk.normalSpo2, context.user.locale), false);
               }),
               target: '#subscribe'
             },
             {
               actions: assign((context, event) => {
+                context.slots.triage.spo2Walk = context.intention;
                 let message = dialog.get_message(messages.endFlow.walkTestEnd, context.user.locale);
                 message = message.replace('{{name}}', context.slots.triage.person.name);
                 dialog.sendMessage(context, message);
