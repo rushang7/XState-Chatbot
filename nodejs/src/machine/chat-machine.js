@@ -27,7 +27,7 @@ const chatStateMachine = Machine({
     menuFetchPersons: {
       id: 'menuFetchPersons',
       invoke: {
-        src: (context) => personService.getPersonsForMobileNumber(context.user.mobileNumber),
+        src: (context) => personService.getSubscribedPeople(context.user.mobileNumber),
         onDone: {
           actions: assign((context, event) => {
             context.persons = event.data;
