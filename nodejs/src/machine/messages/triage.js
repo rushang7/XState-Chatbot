@@ -4,7 +4,7 @@ let messages = {
       en_IN: 'Got it, please tell me your/patient’s name'
     },
     error: {
-      en_IN: 'Please enter the name as text which is less than 100 characters.'
+      en_IN: 'I am sorry, I didn\'t understand. Please enter a valid name which is less than 100 characters.'
     }
   },
   personAge: {
@@ -12,7 +12,7 @@ let messages = {
       en_IN: 'Thanks {{name}}. How old are you?'
     },
     error: {
-      en_IN: 'Please enter the age as number in the range 0-120'
+      en_IN: 'I am sorry, I didn\'t understand. Please enter a valid age (between 0 and 120)'
     }
   },
   personGender: {

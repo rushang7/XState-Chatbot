@@ -14,7 +14,7 @@ let messages = {
   },
   vitalsSpo2: {
     prompt: {
-      en_IN: 'Please look for the oximeter, put it on your finger and let the number stabilize. Now tell me what your pulse oximeter says? \n\n1.SpO2 is 95 and above \n2.SpO2 is between 90 and 94% \n3.SpO2 is below 90%'
+      en_IN: 'Please look for the oximeter, put it on your finger and let the number stabilize. Now tell me what your pulse oximeter says? \n\n1. SpO2 is 95 and above \n2. SpO2 is between 90 and 94% \n3. SpO2 is below 90%'
     }
   },
   vitalsSpo2Bad: {

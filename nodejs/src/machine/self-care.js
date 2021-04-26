@@ -87,7 +87,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -132,7 +132,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -180,7 +180,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -227,7 +227,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -341,7 +341,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -444,7 +444,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
@@ -482,7 +482,7 @@ const selfCareFlow = {
           },
           error: {
             onEntry: assign((context, event) => {
-              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.retry, context.user.locale), false);
+              dialog.sendMessage(context, dialog.get_message(dialog.global_messages.error.optionsRetry, context.user.locale), false);
             }),
             always: 'prompt'
           }
