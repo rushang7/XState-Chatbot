@@ -15,11 +15,9 @@ const envVariables = {
 
     whatsAppBusinessNumber: process.env.WHATSAPP_BUSINESS_NUMBER || '917834811114',
 
-    rootTenantId: process.env.ROOT_TENANTID || 'pb',
+    rootTenantId: process.env.ROOT_TENANTID || 'in',
 
     supportedLocales: process.env.SUPPORTED_LOCALES || 'en_IN,hi_IN',
-
-    googleAPIKey: process.env.GOOGLE_MAPS_API_KEY || '',
 
     dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
     timeZone: process.env.TIMEZONE || 'Asia/Kolkata',
@@ -35,9 +33,22 @@ const envVariables = {
     hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
     hasuraUrl: process.env.HASURA_URL || '',
 
+    services: {
+        encryptionServiceHost: 'localhost:1234',
+        encryptionServiceEncryptUrl: '/egov-enc-service/crypto/v1/_encrypt',
+        encryptionServiceDecryptUrl: '/egov-enc-service/crypto/v1/_decrypt',
+        encryptionServiceHashUrl: '/egov-enc-service/crypto/v1/_hash'
+    },
+
     gupshup: {
         botname: 'SwasthAppBot',
         apikey: process.env.GUPSHUP_API_KEY || ''
+    },
+
+    kaleyra: {
+        sendMessageUrl: process.env.KALEYRA_SEND_MESSAGE_URL || 'https://api.kaleyra.io/v1/{{sid}}/messages',
+        sid: process.env.KALEYRA_SID || '',
+        apikey: process.env.KALEYRA_APIKEY || '',
     },
 
     kafka: {
