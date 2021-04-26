@@ -3,6 +3,7 @@ const dialog = require('./util/dialog.js');
 const triageFlow = require('./triage');
 const selfCareFlow = require('./self-care');
 const { personService } = require('./service/service-loader');
+const { messages } = require('./messages/chat-machine');
 
 const chatStateMachine = Machine({
   id: 'chatMachine',
@@ -199,87 +200,5 @@ const chatStateMachine = Machine({
     }
   }
 });
-
-let messages = {
-  menu: {
-    prompt: {
-      preamble: {
-        en_IN: 'Hi there! My name is Carina. I am an evolving COVID-19 chatbot created by the Swasth Digital Health Foundation to help address your COVID concerns. How can I help you?'
-      },
-      postscript: {
-        en_IN: '\n\nYou can always get back to the main menu by sending "Reset".'
-      },
-      options: {
-        newUser: [ 'worried', 'info' ],
-        subscribedUser: [ 'worried', 'selfCare', 'info' ],
-        messageBundle: {
-          worried: {
-            en_IN: 'I am feeling worried and have concerns regarding COVID'
-          },
-          selfCare: {
-            en_IN: 'I want to manage my homecare program'
-          },
-          info: {
-            en_IN: 'I want information about COVID facilities'
-          }
-        }
-      }
-    }
-  },
-  triageMenu: {
-    prompt: {
-      preamble: {
-        en_IN: 'Let me try and address them! Tell me more about your concerns:'
-      },
-      options: {
-        list: [ 'symptoms', 'contactCovid', 'doctorAdvise', 'awaitingResult' ],
-        messageBundle: {
-          symptoms: {
-            en_IN: 'I may have COVID-19 symptoms'
-          },
-          contactCovid: {
-            en_IN: 'I have come in contact with a COVID-19 patient'
-          },
-          doctorAdvise: {
-            en_IN: 'My doctor has advised homecare for COVID management'
-          },
-          'awaitingResult': {
-            en_IN: 'I am awaiting my test results'
-          }
-        },
-      }
-    }
-  },
-  selfCareMenu: {
-    prompt: {
-      preamble: {
-        en_IN: 'How would you like to proceed?'
-      },
-      options: {
-        list: [ 'addPatient', 'recordVitals', 'downloadReport', 'exitProgram' ],
-        messageBundle: {
-          addPatient: {
-            en_IN: 'Enroll a new patient into the program'
-          },
-          recordVitals: {
-            en_IN: 'Enter vitals'
-          },
-          downloadReport: {
-            en_IN: 'Download vitals report'
-          },
-          exitProgram: {
-            en_IN: 'Exit self care program'
-          }
-        }
-      }
-    }
-  },
-  informationFlow: {
-    en_IN: 'Informational Message'
-  },
-  endstate: {
-    en_IN: 'Goodbye. Say hi to start another conversation'
-  }
-}
 
 module.exports = chatStateMachine;
