@@ -34,7 +34,7 @@ const envVariables = {
     hasuraUrl: process.env.HASURA_URL || '',
 
     services: {
-        encryptionServiceHost: 'http://localhost:1234',
+        encryptionServiceHost: process.env.ENCRYPTION_SERVICE_HOST || 'http://localhost:1234',
         encryptionServiceEncryptUrl: '/egov-enc-service/crypto/v1/_encrypt',
         encryptionServiceDecryptUrl: '/egov-enc-service/crypto/v1/_decrypt',
         encryptionServiceHashUrl: '/egov-enc-service/crypto/v1/_hash'
