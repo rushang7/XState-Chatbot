@@ -378,7 +378,7 @@ const triageFlow = {
         prompt: {
           onEntry: assign((context, event) => {
             let message = dialog.get_message(messages.triageSpo2.prompt.preamble, context.user.locale);
-            message.replace('{{name}}', context.slots.triage.person.first_name);
+            message = message.replace('{{name}}', context.slots.triage.person.first_name);
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.triageSpo2.prompt.options.list, messages.triageSpo2.prompt.options.messageBundle, context.user.locale);
             message += prompt;
             context.grammer = grammer;
@@ -527,7 +527,7 @@ const triageFlow = {
               actions: assign((context, event) => {
                 context.slots.triage.subscribe = context.intention;
                 let message;
-                if(context.intention == 'true') {
+                if(context.intention == true) {
                   message = dialog.get_message(messages.subscribe.doSubscribe, context.user.locale);
                   message = message.replace('{{name}}', context.slots.triage.person.first_name);
                 } else {

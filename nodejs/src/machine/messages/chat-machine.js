@@ -5,7 +5,7 @@ let messages = {
         en_IN: 'Hi there! I am an evolving COVID-19 chatbot created by the Swasth Alliance to help address your COVID concerns. How can I help you?'
       },
       postscript: {
-        en_IN: '\n\nYou can always get back to the main menu by sending "Reset".'
+        en_IN: '\n\nBy continuing to use our chat facility, you agree to our Terms & Conditions of use https://www.swasth.app/swasth_terms_wb.pdf'
       },
       options: {
         newUser: [ 'worried', 'info' ],
