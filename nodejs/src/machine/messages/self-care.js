@@ -27,7 +27,7 @@ let messages = {
   },
   vitalsSpo2WalkBad: {
     prompt: {
-      en_IN: '{{name}}, Rahul, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '{{name}}, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     }
   },
   vitalsTemperature: {
