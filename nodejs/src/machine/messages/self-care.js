@@ -44,11 +44,16 @@ let messages = {
   exitProgram: {
     exitReason: {
       prompt: {
-        en_IN: 'Why are you exiting the program: \n1. Patient no longer has CoVID\n2. Too many WhatsApp Messages\n3. Escalation Required'
+        en_IN: 'Please tell me why you want to exit the self management program? \n1. I have recovered now\n2. My doctor’s recommendation\n3. I didn’t find the program useful'
+      }
+    },
+    exitFeedback: {
+      prompt: {
+        en_IN: 'Any other feedback to help improve our services'
       }
     },
     unsubscribedSuccessfully: {
-      en_IN: 'You have successfully unsubscribed from the program'
+      en_IN: 'I have removed you from the program now. You can always come and join the program again and please do remember to contact me for any concerns.\n\nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network/'
     }
   }
 }
@@ -68,9 +73,9 @@ let grammer = {
     { intention: 'good', recognize: ['4'] }
   ],
   exitReason: [
-    { intention: 'NoCovid', recognize: ['1'] },
-    { intention: 'TooManyMessages', recognize: ['2'] },
-    { intention: 'EscalationRequired', recognize: ['3'] }
+    { intention: 'recovered', recognize: ['1'] },
+    { intention: 'doctorRecommendation', recognize: ['2'] },
+    { intention: 'notUseful', recognize: ['3'] }
   ]
 }
 

@@ -467,7 +467,7 @@ const selfCareFlow = {
                 actions: assign((context, event) => {
                   context.slots.exitProgram.exitReason = context.intention
                 }),
-                target: '#unsubscribePerson'
+                target: '#exitFeedback'
               }
             ]
           },
@@ -479,6 +479,26 @@ const selfCareFlow = {
           }
         }
       },
+      exitFeedback: {
+        id: 'exitFeedback', 
+        initial: 'prompt',
+        states: {
+          prompt: {
+            onEntry: assign((context, event) => {
+              dialog.sendMessage(context, dialog.get_message(messages.exitProgram.exitFeedback.prompt, context.user.locale));
+            }),
+            on: {
+              USER_MESSAGE: 'process'
+            }
+          },
+          process: {
+            onEntry: assign((context, event) => {
+              context.slots.exitProgram.exitFeedback = dialog.get_input(event, false);
+            }),
+            always: '#unsubscribePerson'
+          }
+        }
+      },
       unsubscribePerson: {
         id: 'unsubscribePerson',
         invoke: {
@@ -486,7 +506,7 @@ const selfCareFlow = {
             let person = {};
             if (context.slots.exitProgram.person === undefined)
               person = context.slots.vitals.person
-            return triageService.exitProgram(person, context.slots.exitProgram.exitReason)
+            return triageService.exitProgram(person, context.slots.exitProgram)
           },
           onDone: {
             actions: assign((context, event) => {

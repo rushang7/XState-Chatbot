@@ -10,7 +10,7 @@ class TriageService {
 
     }
 
-    async exitProgram(person, reason) {
+    async exitProgram(person, exitSlots) {
 
     }
 

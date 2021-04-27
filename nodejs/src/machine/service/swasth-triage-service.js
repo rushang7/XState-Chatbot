@@ -38,7 +38,11 @@ class TriageService {
     return data.data.insert_c19_triage_one.uuid;
   }
 
-  async exitProgram(person, reason) {
+  async downloadReportForPerson(person) {
+
+  }
+
+  async exitProgram(person, exitSlots) {
     var query = `
     mutation update_c19_triage($person_id: uuid!, $subscribe: Boolean!) {
       update_c19_triage(_set: {subscribe: $subscribe}, where: {person_id: {_eq: $person_id}}) {
