@@ -243,23 +243,9 @@ const selfCareFlow = {
         invoke: {
           src: (context) => vitalsService.addVitals(context.slots.vitals),
           onDone: {
-            target: '#vitalsRecordedSuccesfully'
+            target: '#endstate'
           }
         }
-      },
-      vitalsRecordedSuccesfully: {
-        id: 'vitalsRecordedSuccesfully',
-        onEntry: assign((context, event) => {
-          dialog.sendMessage(context, dialog.get_message(messages.vitalsRecordedSuccesfully, context.user.locale));
-        }),
-        always: '#endstate'
-      },
-      consentDenied: {
-        id: 'consentDenied',
-        onEntry: assign((context, event) => {
-          dialog.sendMessage(context, dialog.get_message(messages.consentdenied, context.user.locale));
-        }),
-        always: '#endstate'
       }
     }
   },

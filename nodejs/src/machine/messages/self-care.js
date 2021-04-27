@@ -35,12 +35,6 @@ let messages = {
       en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n1. 99 and above \n2. 98 and below'
     }
   },
-  vitalsRecordedSuccesfully: {
-    en_IN: 'Your vitals have been recorded successfully'
-  },
-  consentdenied: {
-    en_IN: 'Consent Denied'
-  },
   temperatureGood: {
     en_IN: 'No fever! Your SpO2 and your temperature are both normal! Let’s keep it that way. I will check up on you again in a few hours to see how you are feeling!'
   },
