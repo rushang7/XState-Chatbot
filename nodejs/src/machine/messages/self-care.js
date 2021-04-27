@@ -27,12 +27,12 @@ let messages = {
   },
   vitalsSpo2WalkBad: {
     prompt: {
-      en_IN: '{{name}}, this reaction to the walk test is not normal. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\n To consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '{{name}}, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     }
   },
   vitalsTemperature: {
     prompt: {
-      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n1. 98 and below \n2. 99 and above'
+      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n1. 99 and above \n2. 98 and below'
     }
   },
   vitalsRecordedSuccesfully: {
@@ -45,7 +45,7 @@ let messages = {
     en_IN: 'No fever! Your SpO2 and your temperature are both normal! Let’s keep it that way. I will check up on you again in a few hours to see how you are feeling!'
   },
   temperatureBad: {
-    en_IN: 'Looks like you have a fever. You will need  to take antipyretic to bring the temperature back down. Please contact your doctor so that you can take the right medication. \nI will check up on you again in a few hours to see how you are feeling!'
+    en_IN: 'Looks like you have a fever. You will need to take medication to bring the temperature back down. Please contact your doctor and I will check up on you again in a few hours to see how you are feeling!\n\n More information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
   },
   exitProgram: {
     exitReason: {
@@ -60,18 +60,14 @@ let messages = {
 }
 
 let grammer = {
-  binaryChoice: [
-    { intention: true, recognize: ['yes', 'y'] },
-    { intention: false, recognize: ['no', 'n'] }
-  ],
   vitalsSpo2: [
     { intention: 'good', recognize: ['1'] },
     { intention: 'recheck', recognize: ['2'] },
     { intention: 'bad', recognize: ['3'] }
   ],
   vitalsTemperature: [
-    { intention: 'good', recognize: ['1'] },
-    { intention: 'bad', recognize: ['2'] }
+    { intention: 'bad', recognize: ['1'] },
+    { intention: 'good', recognize: ['2'] }
   ],
   vitalsSpo2Walk: [
     { intention: 'bad', recognize: ['1', '2', '3'] },
