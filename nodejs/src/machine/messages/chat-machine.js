@@ -2,7 +2,7 @@ let messages = {
   menu: {
     prompt: {
       preamble: {
-        en_IN: 'Hi there! My name is Carina. I am an evolving COVID-19 chatbot created by the Swasth Digital Health Foundation to help address your COVID concerns. How can I help you?'
+        en_IN: 'Hi there! I am an evolving COVID-19 chatbot created by the Swasth Alliance to help address your COVID concerns. How can I help you?'
       },
       postscript: {
         en_IN: '\n\nYou can always get back to the main menu by sending "Reset".'
@@ -12,10 +12,10 @@ let messages = {
         subscribedUser: [ 'worried', 'selfCare', 'info' ],
         messageBundle: {
           worried: {
-            en_IN: 'I am feeling worried and have concerns regarding COVID'
+            en_IN: 'I am feeling worried and have COVID related concerns'
           },
           selfCare: {
-            en_IN: 'I want to manage my homecare program'
+            en_IN: 'I want to manage my self-monitoring program'
           },
           info: {
             en_IN: 'I want information about COVID facilities'
