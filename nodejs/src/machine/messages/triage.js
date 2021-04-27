@@ -34,6 +34,11 @@ let messages = {
       }
     }
   },
+  specialSymptoms: {
+    prompt: {
+      en_IN: 'Thanks for this information {{name}}! Do you have one or more of these symptoms?: \n- Fever\n- Cough with or without spit/Sore throat\n- Loss of smell/taste\n- Runny nose\n- Difficulty breathing/Persistent pain/pressure in the chest\n- Muscle pain\n- Nausea & loose motions\n- Bluish discolorations of lips/face\n- Inability to eat / drink / walk\n'
+    }
+  },
   symptoms: {
     prompt: {
       en_IN: 'Thanks for this information {{name}}! Do you have one or more of these complaints?: \n- Fever\n- Cough with or without spit/Sore throat\n- Loss of smell/taste\n- Runny nose\n- Difficulty breathing/Persistent pain/pressure in the chest\n- Muscle pain\n- Nausea & loose motions\n- Bluish discolorations of lips/face\n- Inability to eat / drink / walk\n'
@@ -78,6 +83,9 @@ let messages = {
     },
     walkTestEnd: {
       en_IN: '{{name}}, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
+    },
+    specialSymptomsEnd: {
+      en_IN: '{{name}}, current symptoms need immediate medical attention. Please contact a doctor or  visit an emergency room immediately.\n\nIt would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication. \n\nMore information regarding COVID-19 and nearby care facilities is available here <https://life.coronasafe.network/>'
     }
   },
   triageSpo2: {
