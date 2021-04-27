@@ -66,8 +66,8 @@ let grammer = {
     { intention: 'bad', recognize: ['3'] }
   ],
   vitalsTemperature: [
-    { intention: 'good', recognize: ['1'] },
-    { intention: 'bad', recognize: ['2'] }
+    { intention: 'bad', recognize: ['1'] },
+    { intention: 'good', recognize: ['2'] }
   ],
   vitalsSpo2Walk: [
     { intention: 'bad', recognize: ['1', '2', '3'] },
