@@ -217,14 +217,14 @@ const selfCareFlow = {
               {
                 cond: (context) => context.slots.vitals.temperature == 'good',
                 actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.temperatureGood, context.user.locale), false);
+                  dialog.sendMessage(context, dialog.get_message(messages.temperatureGood, context.user.locale));
                 }),
                 target: '#addVitals'
               },
               {
                 cond: (context) => context.slots.vitals.temperature == 'bad',
                 actions: assign((context, event) => {
-                  dialog.sendMessage(context, dialog.get_message(messages.temperatureBad, context.user.locale), false);
+                  dialog.sendMessage(context, dialog.get_message(messages.temperatureBad, context.user.locale));
                 }),
                 target: '#addVitals'
               }
