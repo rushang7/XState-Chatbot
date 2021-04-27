@@ -60,10 +60,6 @@ let messages = {
 }
 
 let grammer = {
-  binaryChoice: [
-    { intention: true, recognize: ['yes', 'y'] },
-    { intention: false, recognize: ['no', 'n'] }
-  ],
   vitalsSpo2: [
     { intention: 'good', recognize: ['1'] },
     { intention: 'recheck', recognize: ['2'] },

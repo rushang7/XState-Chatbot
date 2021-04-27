@@ -166,8 +166,8 @@ let grammers = {
       en_IN: '\n1. Yes\n2. No'
     },
     grammer: [
-      { intention: true, recognize: ['yes', 'y', '1'] },
-      { intention: false, recognize: ['no', 'n', '2'] }
+      { intention: true, recognize: ['1'] },
+      { intention: false, recognize: ['2'] }
     ],
   },
   rtpcrTest: [

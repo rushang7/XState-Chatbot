@@ -126,7 +126,12 @@ const selfCareFlow = {
               },
               {
                 cond: (context) => context.slots.vitals.spo2 == 'bad',
-                target: '#vitalsSpo2Walk'
+                actions: assign((context, event) => {
+                  let message = dialog.get_message(messages.vitalsSpo2WalkBad.prompt, context.user.locale);
+                  message = message.replace('{{name}}', context.slots.vitals.person.first_name);
+                  dialog.sendMessage(context, message);
+                }),
+                target: '#unsubscribePerson'
               },
             ]
           },

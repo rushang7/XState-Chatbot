@@ -231,7 +231,7 @@ const triageFlow = {
       id: 'triageEvaluator1',
       onEntry: assign((context, event) => {
         let triage = context.slots.triage;
-        if(triage.person.age > 60 && (triage.symptoms || triage.rtpcr == 'positive')) {
+        if(triage.person.age >= 60 && (triage.symptoms || triage.rtpcr == 'positive')) {
           context.slots.triage.conclusion = 'ageConsultDoctorEnd'
         }
       }),
