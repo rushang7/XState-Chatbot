@@ -20,6 +20,9 @@ let messages = {
           info: {
             en_IN: 'I want information about COVID facilities'
           }
+        },
+        postscript: {
+          en_IN: '\n\nBy continuing to use our chat facility, you agree to our Terms & Conditions of use https://www.swasth.app/swasth_terms_wb.pdf.'
         }
       }
     }

@@ -52,7 +52,7 @@ const chatStateMachine = Machine({
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(options, messages.menu.prompt.options.messageBundle, context.user.locale);
             context.grammer = grammer;
             message += prompt;
-            message += dialog.get_message(messages.menu.prompt.postscript, context.user.locale);
+            message += dialog.get_message(messages.menu.prompt.options.postscript, context.user.locale);
             dialog.sendMessage(context, message);
           }),
           on: {
