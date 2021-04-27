@@ -41,14 +41,14 @@ const envVariables = {
     },
 
     gupshup: {
-        botname: 'SwasthAppBot',
+        botname: process.env.GUPSHUP_BOT_NAME || 'SwasthAppBot',
         apikey: process.env.GUPSHUP_API_KEY || ''
     },
 
     kaleyra: {
         sendMessageUrl: process.env.KALEYRA_SEND_MESSAGE_URL || 'https://api.kaleyra.io/v1/{{sid}}/messages',
         sid: process.env.KALEYRA_SID || '',
-        apikey: process.env.KALEYRA_APIKEY || '',
+        apikey: process.env.KALEYRA_API_KEY || '',
     },
 
     kafka: {
