@@ -18,7 +18,7 @@ let messages = {
     }
   },
   vitalsSpo2Bad: {
-    en_IN: '{{name}}, your current oxygen level  is  well  below the normal value. I suggest you consult a doctor right away! Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+    en_IN: '*{{name}}, your current oxygen level  is  well  below the normal value. I suggest you consult a doctor right away!* Besides medications, you may need some additional oxygen support. \n\nTo consult a doctor click here. \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
   },
   vitalsSpo2Walk: {
     prompt: {
@@ -27,19 +27,19 @@ let messages = {
   },
   vitalsSpo2WalkBad: {
     prompt: {
-      en_IN: '{{name}}, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}}, this is an unexpected reaction to the walk test.* Please consult a doctor right away.'
     }
   },
   vitalsTemperature: {
     prompt: {
-      en_IN: 'Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.\n\n1. 99 and above \n2. 98 and below'
+      en_IN: '*Your oxygen level is looking good. Now let\'s check your temperature with your thermometer.* \n\n1. 99 and above \n2. 98 and below'
     }
   },
   temperatureGood: {
-    en_IN: 'No fever! Your SpO2 and your temperature are both normal! Let’s keep it that way. I will check up on you again in a few hours to see how you are feeling!'
+    en_IN: '*No fever! Your SpO2 and your temperature are both normal!* Let’s keep it that way. I will check up on you again in a few hours to see how you are feeling!'
   },
   temperatureBad: {
-    en_IN: 'Looks like you have a fever. You will need to take medication to bring the temperature back down. Please contact your doctor and I will check up on you again in a few hours to see how you are feeling!\n\n More information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
+    en_IN: '*Looks like you have a fever.* You will need to take medication to bring the temperature back down. Please contact your doctor and I will check up on you again in a few hours to see how you are feeling!\n\n More information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
   },
   exitProgram: {
     exitReason: {

@@ -159,10 +159,10 @@ const chatStateMachine = Machine({
               cond: (context) => context.intention == 'recordVitals',
               target: '#recordVitals'
             },
-            {
-              cond: (context) => context.intention == 'downloadReport',
-              target: '#downloadReport'
-            },
+            // {
+            //   cond: (context) => context.intention == 'downloadReport',
+            //   target: '#downloadReport'
+            // },
             {
               cond: (context) => context.intention == 'exitProgram',
               target: '#exitProgram'

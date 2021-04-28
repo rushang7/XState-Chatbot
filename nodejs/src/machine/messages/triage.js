@@ -36,7 +36,7 @@ let messages = {
   },
   specialSymptoms: {
     prompt: {
-      en_IN: 'Thanks for this information {{name}}! Do you have one or more of these symptoms?: \n- Fever\n- Cough with or without spit/Sore throat\n- Loss of smell/taste\n- Runny nose\n- Difficulty breathing/Persistent pain/pressure in the chest\n- Muscle pain\n- Nausea & loose motions\n- Bluish discolorations of lips/face\n- Inability to eat / drink / walk\n'
+      en_IN: 'Thanks for this information {{name}}! Do you have one or more of these symptoms?: \n- Pain or pressure in the chest\n- Difficulty breathing\n- Bluish discolorations of lips/face\n- Inability to eat / drink / walk \n- Mental confusion or drowsiness\n'
     }
   },
   symptoms: {
@@ -64,28 +64,28 @@ let messages = {
       en_IN: '{{name}}, your age poses an additional risk factor! It would be best, if you consulted a doctor right away so that you can undergo tests if required and start the right medication. \nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
     },
     symptomComorbidConsultDoctorEnd: {
-      en_IN: '{{name}} your current symptoms along with your other medical condition(s) are making the situation risky. It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}} your current symptoms along with your other medical condition(s) are making the situation risky.* It would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     testComorbidConsultDoctorEnd: {
-      en_IN: '{{name}} your test result along with your other medical condition(s) are making the situation risky. \nIt would be best, if you  consulted a doctor right away so that you can undergo tests and start the right medication.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}} your test result along with your other medical condition(s) are making the situation risky.* \nIt would be best, if you  consulted a doctor right away so that you can undergo tests and start the right medication.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     precautionEnd: {
-      en_IN: '{{name}}, based on your responses,  your chances of getting COVID-19 are higher than that of the  average population. I suggest following these simple tips to stay healthy!!\n- Wear N95 mask covering both mouth and nose\n- Take adequate rest 7-8 hours a day\n- Drink a lot of fluids to stay hydrated\n- Eat a healthy low carbohydrate, high protein diet\n- Avoid alcohol intake and quite smoking\n- Exercise , practise yoga and meditate\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}}, based on your responses,  your chances of getting COVID-19 are higher than that of the  average population.* I suggest following these simple tips to stay healthy!!\n- Wear N95 mask covering both mouth and nose\n- Take adequate rest 7-8 hours a day\n- Drink a lot of fluids to stay hydrated\n- Eat a healthy low carbohydrate, high protein diet\n- Avoid alcohol intake and quite smoking\n- Exercise , practise yoga and meditate\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     noCovidEnd: {
-      en_IN: '{{name}}, based on your responses, it is less likely that you are suffering from COVID-19. I suggest following these simple tips to stay healthy!\n1. Wear N95 mask covering both mouth and nose\n2. Take adequate rest 7-8 hrs a day and drink a lot of fluids to stay hydrated.\n3. Eat a healthy low carbohydrate, high protein diet.\n4. Avoid alcohol intake and quit smoking.\n5. Exercise, practise yoga and meditate.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}}, based on your responses, it is less likely that you are suffering from COVID-19.* I suggest following these simple tips to stay healthy!\n1. Wear N95 mask covering both mouth and nose\n2. Take adequate rest 7-8 hrs a day and drink a lot of fluids to stay hydrated.\n3. Eat a healthy low carbohydrate, high protein diet.\n4. Avoid alcohol intake and quit smoking.\n5. Exercise, practise yoga and meditate.\n\nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     lowSpo2End: {
-      en_IN: '{{name}}, your current oxygen level is below the normal value. Please consult a doctor right away! \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
+      en_IN: '*{{name}}, your current oxygen level is below the normal value. Please consult a doctor right away!* \nMore information regarding COVID-19 is available here https://life.coronasafe.network'
     },
     noOximeterEnd: {
-      en_IN: '{{name}}, your oxygen level is one of the most important parameters to gauge the severity of your condition. Please order a pulse oximeter right away. \nSend me a message when you have it so we can begin monitoring your vitals.'
+      en_IN: '{{name}}, your oxygen level is one of the most important parameters to gauge the severity of your condition. *Please order a pulse oximeter right away.* \nSend me a message when you have it so we can begin monitoring your vitals.'
     },
     walkTestEnd: {
-      en_IN: '{{name}}, this is an unexpected reaction to the walk test. Please consult a doctor right away. \n\nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
+      en_IN: '*{{name}}, this is an unexpected reaction to the walk test.* Please consult a doctor right away. \n\nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
     },
     specialSymptomsEnd: {
-      en_IN: '{{name}}, current symptoms need immediate medical attention. Please contact a doctor or  visit an emergency room immediately.\n\nIt would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication. \n\nMore information regarding COVID-19 and nearby care facilities is available here <https://life.coronasafe.network/>'
+      en_IN: '*{{name}}, current symptoms need immediate medical attention. Please contact a doctor or  visit an emergency room immediately.* \n\nIt would be best, if you consulted a doctor right away so that you can undergo a few tests and start the right medication. \n\nMore information regarding COVID-19 and nearby care facilities is available here https://life.coronasafe.network'
     }
   },
   triageSpo2: {
@@ -112,7 +112,7 @@ let messages = {
       }
     },
     normalSpo2: {
-      en_IN: 'Your SpO2 is well within the normal range! This is a good sign! :)'
+      en_IN: '*Your SpO2 is well within the normal range! This is a good sign! :) *'
     },
   },
   triageSpo2Walk: {
