@@ -54,7 +54,12 @@ let messages = {
         en_IN: 'How would you like to proceed?'
       },
       options: {
-        list: [ 'addPatient', 'recordVitals', 'downloadReport', 'exitProgram' ],
+        list: [ 
+          'addPatient', 
+          'recordVitals', 
+          // 'downloadReport', 
+          'exitProgram' 
+        ],
         messageBundle: {
           addPatient: {
             en_IN: 'Enroll a new patient into the program'
@@ -62,9 +67,9 @@ let messages = {
           recordVitals: {
             en_IN: 'Enter vitals'
           },
-          downloadReport: {
-            en_IN: 'Download vitals report'
-          },
+          // downloadReport: {
+          //   en_IN: 'Download vitals report'
+          // },
           exitProgram: {
             en_IN: 'Exit self care program'
           }
