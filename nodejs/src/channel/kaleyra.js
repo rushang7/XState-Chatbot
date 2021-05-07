@@ -2,6 +2,9 @@ const fetch = require("node-fetch");
 require('url-search-params-polyfill');
 const config = require('../env-variables');
 var geturl = require("url");
+const fs = require('fs');
+const FormData = require('form-data');   
+const path = require("path");
 
 class KaleyraWhatsAppProvider {
 
@@ -47,31 +50,47 @@ class KaleyraWhatsAppProvider {
       let phone = user.mobileNumber;
 
       let headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
         'api-key': config.kaleyra.apikey
       }
 
-      var urlSearchParams = new URLSearchParams();
+      let form = new FormData();
       
-      urlSearchParams.append("channel", "whatsapp");
-      urlSearchParams.append("from", extraInfo.whatsAppBusinessNumber);
-      urlSearchParams.append("to", '91' + phone);
+      form.append("channel", "whatsapp");
+      form.append("from", extraInfo.whatsAppBusinessNumber);
+      form.append("to", '91' + phone);
 
       if(typeof(message) == 'string') {
-        urlSearchParams.append("type", 'text');
-        urlSearchParams.append("body", message);
+        form.append("type", 'text');
+        form.append("body", message);
+      } else if (message.type == 'media') {
+        let buffer;
+        buffer = fs.readFileSync(path.resolve(__dirname, `../../${message.output}`));
+        form.append("caption", message.caption || '');
+        form.append("type", 'media');
+        form.append("media", buffer, {
+          contentType: 'text/plain',
+          name: 'file',
+          filename: message.output,
+        });
+      } else if(message.type == 'template') {
+        //TODO: Handle media template
+        form.append("type", message.type);
+        form.append("body", message.output);
       } else {
-        urlSearchParams.append("type", message.type);
-        urlSearchParams.append("body", message.output);
+        form.append("type", message.type);
+        form.append("body", message.output);
       }
       
       var request = {
           method: "POST",
           headers: headers,
-          body: urlSearchParams
+          body: form
       }
 
-      await fetch(this.url, request);
+      const response = await fetch(this.url, request).then(res => res.json());
+      if (response && message.type === 'media' && message.output.includes('dynamic-media')) {
+        fs.unlinkSync(path.resolve(__dirname, `../../${message.output}`));
+      }
     }
   }
 

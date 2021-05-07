@@ -7,7 +7,7 @@ class UserService {
     user.userId = sha256.sha256(mobileNumber);
     user.mobileNumber = mobileNumber;
     // user.name = user.userInfo.name;
-    user.locale = 'en_IN';
+    // user.locale = 'en_IN';
     return user;
   }
 

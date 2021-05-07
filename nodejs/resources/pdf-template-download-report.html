@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <mate charest="utf-8" />
+    <title>Vitals</title>
+    <style>
+      .brand-logo {
+        display: flex;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+        padding: 0 30px;
+      }
+      
+      .brand-logo > img {
+        background: black;
+        width: 100px;
+        height: 100px;
+      }
+      
+      li {
+        margin-bottom: 10px;
+      }
+      ul {
+        margin-bottom: 30px;
+      }
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: #dddddd4d;
+      }
+    </style>
+</head>
+
+<body>
+    <!-- <div class="brand-logo">
+      <img src="./swasth-logo.jpeg"/>
+    </div> -->
+    <ul>
+        <li>Patient's Name: {{this.person.first_name}}</li>
+        <li>Age: {{this.person.age}}</li>
+        <li>Gender: 
+        <span style="text-transform: capitalize">{{this.person.gender}}</span>
+        </li>
+        <li>Enrollment Date: {{this.c19_triage.created_date}}</li>
+        <li>Symptoms: {{this.c19_triage.hasSymptoms}}</li>
+        <li>RT PCR result: {{this.c19_triage.rt_pcr_status}}</li>
+        <li>Comorbidities: {{this.c19_triage.hasComorbidities}}</li>
+    </ul>
+    <div>
+        <table>
+            <tr>
+              <th>Date</th>
+              <th>Time of recording</th>
+              <th>SpO2</th>
+              <th>Temperature</th>
+              <th>Pulse</th>
+              <th>Breathing Rate</th>
+            </tr>
+            {{#each this.c19_vitals}}
+            <tr>
+                <td>{{this.created_date}}</td>
+                <td>{{this.created_time}}</td>
+                <td style="text-transform: capitalize">{{this.spo2}}</td>
+                <td style="text-transform: capitalize">{{this.temperature}}</td>
+                <td style="text-transform: capitalize">{{this.pulse}}</td>
+                <td style="text-transform: capitalize">{{this.breathing_rate}}</td>
+            </tr>
+            {{/each}}
+        </table>
+    </div>
+</body>
+
+</html>

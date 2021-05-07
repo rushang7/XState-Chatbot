@@ -99,6 +99,11 @@ class PersonService {
     return subscribedPeople
   }
 
+  async getPeople(mobileNumber) {
+    let people = await this.getPersonsForMobileNumber(mobileNumber)
+    return people;
+  }
+
   async encryptAndHashPerson(person) {
     let objectToEncrypt = {
       first_name: person.first_name,

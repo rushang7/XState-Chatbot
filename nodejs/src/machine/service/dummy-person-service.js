@@ -32,6 +32,10 @@ class PersonService {
     return await this.getPersonsForMobileNumber(mobileNumber);
   }
 
+  async getPeople(mobileNumber) {
+    return await this.getPersonsForMobileNumber(mobileNumber);
+  }
+
 }
 
 

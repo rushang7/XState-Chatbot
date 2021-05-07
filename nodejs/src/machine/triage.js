@@ -1,7 +1,9 @@
 const { assign } = require('xstate');
 const dialog = require('./util/dialog.js');
+const mediaUtil = require('./util/media');
 const { personService, triageService } = require('./service/service-loader');
 const { messages, grammers } = require('./messages/triage');
+const config = require('../../src/env-variables');
 
 const triageFlow = {
   id: 'triageFlow',
@@ -176,6 +178,7 @@ const triageFlow = {
             {
               cond: (context) => context.intention === true,
               actions: assign((context, event) => {
+                  context.slots.triage.symptoms = context.intention
                   let message = dialog.get_message(messages.endFlow.specialSymptomsEnd, context.user.locale);
                   message = message.replace('{{name}}', context.slots.triage.person.first_name);
                   dialog.sendMessage(context, message);
@@ -184,7 +187,7 @@ const triageFlow = {
             },
             {
               cond: (context) => context.intention === false,
-              target: '#symptoms'
+              target: '#triageSpo2'
             }
           ]
         },
@@ -358,16 +361,22 @@ const triageFlow = {
       }),
       always: [
         {
+          cond: (context) => (context.slots.triage.symptoms || context.slots.triage.rtpcr == 'positive'),
+          target: '#subscribe'
+        },
+        {
           cond: (context) => context.slots.triage.conclusion,
           actions: assign((context, event) => {
             let message = dialog.get_message(messages.endFlow[context.slots.triage.conclusion], context.user.locale);
             message = message.replace('{{name}}', context.slots.triage.person.first_name);
             dialog.sendMessage(context, message);
+
+            if (context.slots.triage.conclusion == 'noCovidEnd') {
+              const mediaMessage = mediaUtil.createMediaMessage(`${config.staticMediaPath}/home_isolation_todo`, 'jpeg', context.user.locale);
+              dialog.sendMessage(context, mediaMessage, false);
+            }
           }),
           target: '#upsertTriageDetails'
-        },
-        {
-          target: '#triageSpo2'
         }
       ]
     },
@@ -377,6 +386,9 @@ const triageFlow = {
       states: {
         prompt: {
           onEntry: assign((context, event) => {
+            const mediaMessage = mediaUtil.createMediaMessage(`${config.staticMediaPath}/pulse_oximeter`, 'jpeg', context.user.locale);
+            dialog.sendMessage(context, mediaMessage, false);
+
             let message = dialog.get_message(messages.triageSpo2.prompt.preamble, context.user.locale);
             message = message.replace('{{name}}', context.slots.triage.person.first_name);
             let { prompt, grammer } = dialog.constructListPromptAndGrammer(messages.triageSpo2.prompt.options.list, messages.triageSpo2.prompt.options.messageBundle, context.user.locale);
@@ -401,19 +413,12 @@ const triageFlow = {
               cond: (context) => context.intention == 'above95',
               actions: assign((context, event) => {
                 context.slots.triage.spo2 = context.intention;
-                dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.normalSpo2, context.user.locale), false);
+                // dialog.sendMessage(context, dialog.get_message(messages.triageSpo2.normalSpo2, context.user.locale), false);
               }),
-              target: '#subscribe'
+              target: '#symptoms'
             },
             {
-              cond: (context) => context.intention == '90to94',
-              actions: assign((context, event) => {
-                context.slots.triage.spo2 = context.intention;
-              }),
-              target: '#triageSpo2Walk'
-            },
-            {
-              cond: (context) => context.intention == 'below90',
+              cond: (context) => context.intention == 'below94',
               actions: assign((context, event) => {
                 context.slots.triage.spo2 = context.intention;
                 context.slots.triage.conclusion = 'lowSpo2End'
@@ -509,6 +514,9 @@ const triageFlow = {
             message += prompt;
             context.grammer = grammer;
             dialog.sendMessage(context, message);
+
+            const mediaMessage = mediaUtil.createMediaMessage(`${config.staticMediaPath}/ways_to_use_chat_bot`, 'jpeg', context.user.locale);
+            dialog.sendMessage(context, mediaMessage, false);
           }),
           on: {
             USER_MESSAGE: 'process'
