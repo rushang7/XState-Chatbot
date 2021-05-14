@@ -1,3 +1,5 @@
+const dialog = require('../util/dialog.js');
+
 class PersonService {
 
   async createPerson(person, mobileNumber) {
@@ -34,6 +36,32 @@ class PersonService {
 
   async getPeople(mobileNumber) {
     return await this.getPersonsForMobileNumber(mobileNumber);
+  }
+
+  async validateName(context, event) {
+    let message = dialog.get_input(event, false);
+    if (event.message.type == 'text' && message.length < 100 && /^[ A-Za-z]+$/.test(message.trim())) {
+      const subscribedPeople = this.filterSubscribedPeople(context.persons);
+      const isDuplicate = subscribedPeople.find(person => person.first_name == message);
+      if (isDuplicate) {
+        return 'duplicate';
+      } else {
+        return message;
+      }
+    } else {
+      return 'invalid';
+    }
+  }
+
+  filterSubscribedPeople(people) {
+    const subscribedPeople = [];
+    for (let i = 0; i < people.length; i++) {
+
+      if (people[i].c19_triage && people[i].c19_triage.subscribe) {
+        subscribedPeople.push(people[i])
+      }
+    }
+    return subscribedPeople;
   }
 
 }

@@ -148,8 +148,8 @@ class TriageService {
 
   async exitProgram(person, exitSlots) {
     var query = `
-    mutation update_c19_triage($person_id: uuid!, $subscribe: Boolean!) {
-      update_c19_triage(_set: {subscribe: $subscribe}, where: {person_id: {_eq: $person_id}}) {
+    mutation update_c19_triage($person_id: uuid!, $subscribe: Boolean!, $exit_reason: String, $exit_feedback: String) {
+      update_c19_triage(_set: {subscribe: $subscribe, exit_reason: $exit_reason, exit_feedback: $exit_feedback}, where: {person_id: {_eq: $person_id}}) {
         affected_rows
         returning {
           person_id

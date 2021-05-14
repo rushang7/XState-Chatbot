@@ -19,6 +19,9 @@ const selfCareFlow = {
           onDone: [
             {
               cond: (context, event) => event.data.length == 0,
+              actions: assign((context, event) => {
+                context.persons = event.data;
+              }),
               target: '#noUserFound'
             },
             {
@@ -69,7 +72,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
             }),
             always: [
               {
@@ -112,13 +115,22 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
               context.slots.vitals.spo2 = context.intention
             }),
             always: [
               {
                 cond: (context) => context.intention == dialog.INTENTION_UNKOWN,
                 target: 'error'
+              },
+              {
+                cond: (context) => context.intention == 'bad',
+                actions: assign((context, event) => {
+                  let message = dialog.get_message(messages.vitalsSpo2Bad, context.user.locale);
+                  message = message.replace('{{name}}', context.slots.vitals.person.first_name);
+                  dialog.sendMessage(context, message);
+                }),
+                target: '#addVitals'
               },
               {
                 target: '#vitalsPulse'
@@ -232,7 +244,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
               context.slots.vitals.spo2 = context.intention
             }),
             always: [
@@ -278,7 +290,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
               context.slots.vitals.temperature = context.intention
             }),
             always: [
@@ -331,6 +343,8 @@ const selfCareFlow = {
       reportFetchPersons: {
         invoke: {
           src: (context) => personService.getSubscribedPeople(context.user.mobileNumber),
+          // TODO: Need to update this: do no include people who have not completed traige flow
+          // src: (context) => personService.getPeople(context.user.mobileNumber),
           onDone: [
             {
               cond: (context, event) => event.data.length == 0,
@@ -384,7 +398,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
             }),
             always: [
               {
@@ -495,7 +509,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
             }),
             always: [
               {
@@ -536,7 +550,7 @@ const selfCareFlow = {
           },
           process: {
             onEntry: assign((context, event) => {
-              context.intention = dialog.get_intention(context.grammer, event);
+              context.intention = dialog.get_intention(context.grammer, event, true);
             }),
             always: [
               {
@@ -583,9 +597,7 @@ const selfCareFlow = {
         id: 'unsubscribePerson',
         invoke: {
           src: (context) => {
-            let person = {};
-            if (context.slots.exitProgram.person === undefined)
-              person = context.slots.vitals.person
+            let person = context.slots.exitProgram.person;
             return triageService.exitProgram(person, context.slots.exitProgram)
           },
           onDone: {

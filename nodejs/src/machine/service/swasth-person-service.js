@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const config = require('../../env-variables');
+const dialog = require('../util/dialog.js');
 
 class PersonService {
 
@@ -89,14 +90,19 @@ class PersonService {
 
   async getSubscribedPeople(mobileNumber) {
     let people = await this.getPersonsForMobileNumber(mobileNumber)
-    let subscribedPeople = []
+    const subscribedPeople = this.filterSubscribedPeople(people);
+    return subscribedPeople
+  }
+
+  filterSubscribedPeople(people) {
+    const subscribedPeople = [];
     for (let i = 0; i < people.length; i++) {
 
       if (people[i].c19_triage && people[i].c19_triage.subscribe) {
         subscribedPeople.push(people[i])
       }
     }
-    return subscribedPeople
+    return subscribedPeople;
   }
 
   async getPeople(mobileNumber) {
@@ -178,6 +184,21 @@ class PersonService {
     let body = await response.json();
   
     return body.value;
+  }
+
+  async validateName(context, event) {
+    let message = dialog.get_input(event, false);
+    if (event.message.type == 'text' && message.length < 100 && /^[ A-Za-z]+$/.test(message.trim())) {
+      const subscribedPeople = this.filterSubscribedPeople(context.persons);
+      const isDuplicate = subscribedPeople.find(person => person.first_name == message);
+      if (isDuplicate) {
+        return 'duplicate';
+      } else {
+        return message;
+      }
+    } else {
+      return 'invalid';
+    }
   }
   
 }

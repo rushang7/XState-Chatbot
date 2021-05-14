@@ -13,7 +13,7 @@ router.get('/message', async (req, res) =>  {
     processHttpRequest(req, res);
 });
 
-router.get('/reminder', async (req, res) =>  {
+router.post('/reminder', async (req, res) =>  {
   remindersService.triggerReminders();
 });
 
