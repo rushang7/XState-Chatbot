@@ -5,14 +5,14 @@ const envVariables = {
     ver: process.env.VERSION || '0.0.1',
 
     port: process.env.SERVICE_PORT || 8080,
-    contextPath: process.env.CONTEXT_PATH || '/xstate-chatbot',
+    contextPath: process.env.CONTEXT_PATH || '/covid-chatbot',
 
     staticMediaPath: process.env.STATIC_MEDIA_PATH || 'resources/assets/static-media',
     dynamicMediaPath: process.env.DYNAMIC_MEDIA_PATH || 'resources/assets/dynamic-media',
 
     whatsAppProvider: process.env.WHATSAPP_PROVIDER || 'console',
 
-    serviceProvider: process.env.SERVICE_PROVIDER || 'swasth',
+    serviceProvider: process.env.SERVICE_PROVIDER || 'Dummy',
 
     repoProvider: process.env.REPO_PROVIDER || 'InMemory',
 
@@ -20,7 +20,7 @@ const envVariables = {
 
     rootTenantId: process.env.ROOT_TENANTID || 'in',
 
-    supportedLocales: process.env.SUPPORTED_LOCALES || 'en_IN,hi_IN',
+    supportedLocales: process.env.SUPPORTED_LOCALES || 'en_IN,hi_IN,pa_IN',
 
     dateFormat: process.env.DATEFORMAT || 'DD/MM/YYYY',
     timeZone: process.env.TIMEZONE || 'Asia/Kolkata',
@@ -33,25 +33,9 @@ const envVariables = {
         dbPassword: process.env.DB_PASSWORD || ''
     },
 
-    hasuraAdminSecret: process.env.HASURA_ADMIN_SECRET || '',
-    hasuraUrl: process.env.HASURA_URL || '',
-
-    services: {
-        encryptionServiceHost: process.env.ENCRYPTION_SERVICE_HOST || 'http://localhost:1234',
-        encryptionServiceEncryptUrl: '/egov-enc-service/crypto/v1/_encrypt',
-        encryptionServiceDecryptUrl: '/egov-enc-service/crypto/v1/_decrypt',
-        encryptionServiceHashUrl: '/egov-enc-service/crypto/v1/_hash'
-    },
-
     gupshup: {
         botname: process.env.GUPSHUP_BOT_NAME || 'SwasthAppBot',
         apikey: process.env.GUPSHUP_API_KEY || ''
-    },
-
-    kaleyra: {
-        sendMessageUrl: process.env.KALEYRA_SEND_MESSAGE_URL || 'https://api.kaleyra.io/v1/{{sid}}/messages',
-        sid: process.env.KALEYRA_SID || '',
-        apikey: process.env.KALEYRA_API_KEY || '',
     },
 
     kafka: {
